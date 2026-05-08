@@ -57,6 +57,11 @@ Rails.application.routes.draw do
   # 決済管理
   resources :payment_histories, only: [:index]
 
+  # Stripe Connect
+  post 'stripe_connect', to: 'stripe_connect#create'
+  get 'stripe_connect/refresh', to: 'stripe_connect#refresh', as: :stripe_connect_refresh
+  get 'stripe_connect/callback', to: 'stripe_connect#callback', as: :stripe_connect_callback
+
   # 設定
   resources :settings, only: [:index, :update], path: 'settings', as: 'settings' do
     collection do

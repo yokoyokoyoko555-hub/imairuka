@@ -2,6 +2,7 @@ class SettingsController < ApplicationController
   def index
     # 会社情報の取得
     @company = Company.first_or_initialize
+    sync_stripe_account_status if params[:tab] == "stripe" && @company.stripe_account_id.present? && ENV["STRIPE_SECRET_KEY"].present?
 
     # ステータス情報の取得
     if params[:tab] == 'status'
@@ -34,6 +35,19 @@ class SettingsController < ApplicationController
   end
 
   private
+
+  def sync_stripe_account_status
+    account = Stripe::Account.retrieve(@company.stripe_account_id)
+    @company.update!(
+      stripe_charges_enabled: account.charges_enabled,
+      stripe_payouts_enabled: account.payouts_enabled,
+      stripe_details_submitted: account.details_submitted,
+      stripe_onboarded_at: account.details_submitted ? (@company.stripe_onboarded_at || Time.current) : @company.stripe_onboarded_at
+    )
+  rescue Stripe::StripeError => e
+    Rails.logger.error("Stripe Connect status sync error: #{e.message}")
+    flash.now[:alert] = "Stripe連携状態を取得できませんでした。"
+  end
 
   def company_params
     params.require(:company).permit(:name, :invoice_number, :postal_code, :address, :phone, :email, :representative, :business_type)

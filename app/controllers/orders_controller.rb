@@ -710,8 +710,18 @@ class OrdersController < ApplicationController
       return
     end
 
+    company = Company.first
+    unless ENV["STRIPE_SECRET_KEY"].present?
+      redirect_to show_billing_order_path(@order), alert: "Stripe platform key が未設定です。"
+      return
+    end
+
+    unless company&.stripe_connected?
+      redirect_to settings_path(tab: "stripe"), alert: "決済を開始するには Stripe 連携を完了してください。"
+      return
+    end
+
     begin
-      # Stripeの決済処理をここに追加
       session = Stripe::Checkout::Session.create(
         payment_method_types: ['card'],
         line_items: [{
@@ -726,10 +736,16 @@ class OrdersController < ApplicationController
           quantity: 1
         }],
         mode: 'payment',
-        success_url: success_url,
+        success_url: "#{success_url}?session_id={CHECKOUT_SESSION_ID}",
         cancel_url: cancel_url,
+        payment_intent_data: {
+          transfer_data: {
+            destination: company.stripe_account_id
+          }
+        },
         metadata: {
-          order_id: @order.id
+          order_id: @order.id,
+          company_id: company.id
         }
       )
       redirect_to session.url, allow_other_host: true
@@ -745,7 +761,18 @@ class OrdersController < ApplicationController
   end
 
   def success
+    if params[:session_id].present? && ENV["STRIPE_SECRET_KEY"].present?
+      session = Stripe::Checkout::Session.retrieve(params[:session_id])
+      if session.payment_status == "paid" && session.metadata&.order_id.present?
+        order = Order.find_by(id: session.metadata.order_id)
+        order&.update(payment_date: Date.current)
+      end
+    end
     flash[:notice] = "決済が完了しました。"
+    redirect_to billing_orders_path
+  rescue Stripe::StripeError => e
+    Rails.logger.error("Stripe決済確認エラー: #{e.message}")
+    flash[:notice] = "決済完了画面に戻りました。決済状態はStripe側で確認してください。"
     redirect_to billing_orders_path
   end
 

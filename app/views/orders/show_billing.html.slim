@@ -128,10 +128,15 @@
             | 操作
         .card-body
           .d-grid.gap-2
-            = form_tag checkout_order_path(@order), method: :post, class: 'd-grid', data: { turbo: false } do
-              = button_tag type: 'submit', class: 'btn btn-warning text-white' do
-                i.bi.bi-cash.me-2
-                | 決済
+            - if @company&.stripe_connected?
+              = form_tag checkout_order_path(@order), method: :post, class: 'd-grid', data: { turbo: false } do
+                = button_tag type: 'submit', class: 'btn btn-warning text-white' do
+                  i.bi.bi-cash.me-2
+                  | 決済
+            - else
+              = link_to settings_path(tab: "stripe"), class: "btn btn-outline-warning" do
+                i.bi.bi-credit-card.me-2
+                | Stripe連携が必要
             = link_to '#', class: 'btn btn-outline-danger', data: { delete_action: true, confirm: 'この案件を削除してもよろしいですか？\nこの操作は取り消せません。' } do
               i.bi.bi-trash.me-1
               | 削除

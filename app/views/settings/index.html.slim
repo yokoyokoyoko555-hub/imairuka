@@ -14,6 +14,9 @@
         = link_to settings_path(tab: "status"), class: "list-group-item list-group-item-action #{params[:tab] == 'status' ? 'active' : ''}" do
           i.bi.bi-tag.me-2
           | ステータス設定
+        = link_to settings_path(tab: "stripe"), class: "list-group-item list-group-item-action #{params[:tab] == 'stripe' ? 'active' : ''}" do
+          i.bi.bi-credit-card.me-2
+          | Stripe連携
 
     .col-md-9
       - if params[:tab].blank? || params[:tab] == 'company'
@@ -105,5 +108,60 @@
                       = link_to order_status_path(status), class: "btn btn-sm btn-outline-danger", data: { delete_action: true, confirm: "このステータスを削除してもよろしいですか？\nこの操作は取り消せません。" } do
                         i.bi.bi-trash.me-1
                         | 削除
+
+      - if params[:tab] == 'stripe'
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-credit-card.me-2
+              | Stripe連携
+          .card-body
+            .row.mb-4
+              .col-md-6
+                label.form-label 連携状態
+                p.form-control-plaintext
+                  - if @company.stripe_connected?
+                    span.badge.bg-success = @company.stripe_connect_status
+                  - elsif @company.stripe_account_id.present?
+                    span.badge.bg-warning.text-dark = @company.stripe_connect_status
+                  - else
+                    span.badge.bg-secondary = @company.stripe_connect_status
+              .col-md-6
+                label.form-label StripeアカウントID
+                p.form-control-plaintext = @company.stripe_account_id.presence || "未連携"
+            .row.mb-4
+              .col-md-4
+                label.form-label 決済受付
+                p.form-control-plaintext
+                  - if @company.stripe_charges_enabled?
+                    span.badge.bg-success 有効
+                  - else
+                    span.badge.bg-secondary 無効
+              .col-md-4
+                label.form-label 振込
+                p.form-control-plaintext
+                  - if @company.stripe_payouts_enabled?
+                    span.badge.bg-success 有効
+                  - else
+                    span.badge.bg-secondary 無効
+              .col-md-4
+                label.form-label 本人確認
+                p.form-control-plaintext
+                  - if @company.stripe_details_submitted?
+                    span.badge.bg-success 提出済み
+                  - else
+                    span.badge.bg-secondary 未完了
+
+            - if ENV["STRIPE_SECRET_KEY"].blank?
+              .alert.alert-warning
+                i.bi.bi-exclamation-triangle.me-2
+                | Stripe platform key が未設定です。運営側の Stripe Connect 用キーを Heroku に設定すると連携を開始できます。
+            - else
+              = button_to stripe_connect_path, method: :post, class: "btn btn-primary", form: { data: { turbo: false } } do
+                i.bi.bi-box-arrow-up-right.me-2
+                - if @company.stripe_account_id.present?
+                  | Stripe設定を再開
+                - else
+                  | Stripeと連携
 
 = javascript_include_tag "delete_actions" 
