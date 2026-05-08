@@ -2,7 +2,7 @@
 
 $root = Get-ImairukaRoot
 
-Write-Step "Imairuka を更新しています"
+Write-Step "Updating Imairuka"
 Ensure-Docker
 
 Push-Location $root
@@ -15,5 +15,5 @@ try {
 }
 
 Invoke-Compose up -d --build
-Write-Host "更新完了。Imairuka を開きます。" -ForegroundColor Green
+Write-Host "Update completed. Opening Imairuka." -ForegroundColor Green
 Start-Process "http://localhost:3000"

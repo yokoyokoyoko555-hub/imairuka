@@ -18,7 +18,7 @@ function Get-DockerCliPath {
 
   $candidates = @(
     "$Env:ProgramFiles\Docker\Docker\resources\bin\docker.exe",
-    "${Env:ProgramFiles(x86)}\Docker\Docker\resources\bin\docker.exe"
+    "$([Environment]::GetEnvironmentVariable('ProgramFiles(x86)'))\Docker\Docker\resources\bin\docker.exe"
   )
 
   foreach ($candidate in $candidates) {
@@ -33,7 +33,7 @@ function Get-DockerCliPath {
 function Get-DockerDesktopPath {
   $candidates = @(
     "$Env:ProgramFiles\Docker\Docker\Docker Desktop.exe",
-    "${Env:ProgramFiles(x86)}\Docker\Docker\Docker Desktop.exe",
+    "$([Environment]::GetEnvironmentVariable('ProgramFiles(x86)'))\Docker\Docker\Docker Desktop.exe",
     "$Env:LocalAppData\Docker\Docker Desktop.exe"
   )
 
@@ -46,37 +46,64 @@ function Get-DockerDesktopPath {
   return $null
 }
 
+function Test-DockerReady {
+  if (-not $script:DockerCli) {
+    $script:DockerCli = Get-DockerCliPath
+  }
+
+  $process = New-Object System.Diagnostics.Process
+  $process.StartInfo.FileName = $script:DockerCli
+  $process.StartInfo.Arguments = "info"
+  $process.StartInfo.UseShellExecute = $false
+  $process.StartInfo.RedirectStandardOutput = $true
+  $process.StartInfo.RedirectStandardError = $true
+  $process.StartInfo.CreateNoWindow = $true
+
+  try {
+    $null = $process.Start()
+    if (-not $process.WaitForExit(10000)) {
+      $process.Kill()
+      return $false
+    }
+    return $process.ExitCode -eq 0
+  } finally {
+    $process.Dispose()
+  }
+}
+
 function Ensure-Docker {
   $script:DockerCli = Get-DockerCliPath
   if (-not $script:DockerCli) {
-    Write-Host "Docker Desktop が見つかりません。" -ForegroundColor Yellow
-    Write-Host "Docker Desktop をインストールしてから、もう一度このインストーラーを実行してください。"
-    Write-Host "ダウンロード: https://docs.docker.com/desktop/setup/install/windows-install/"
+    Write-Host "Docker Desktop was not found." -ForegroundColor Yellow
+    Write-Host "Install Docker Desktop, then run this installer again."
+    Write-Host "Download: https://docs.docker.com/desktop/setup/install/windows-install/"
     Start-Process "https://docs.docker.com/desktop/setup/install/windows-install/"
     throw "Docker Desktop is not installed."
   }
 
-  $dockerInfo = & $script:DockerCli info 2>$null
-  if ($LASTEXITCODE -eq 0) {
+  if (Test-DockerReady) {
     return
   }
 
   $dockerDesktop = Get-DockerDesktopPath
   if ($dockerDesktop) {
-    Write-Step "Docker Desktop を起動しています"
+    Write-Step "Starting Docker Desktop"
     Start-Process $dockerDesktop | Out-Null
   }
 
-  Write-Host "Docker Desktop の起動を待っています..."
+  Write-Host "Waiting for Docker Desktop..."
   for ($i = 1; $i -le 60; $i++) {
     Start-Sleep -Seconds 3
-    & $script:DockerCli info 1>$null 2>$null
-    if ($LASTEXITCODE -eq 0) {
+    if (Test-DockerReady) {
       return
     }
   }
 
-  throw "Docker Desktop could not be started. Open Docker Desktop manually and retry."
+  Write-Host ""
+  Write-Host "Docker Desktop is installed, but the Linux engine is not ready." -ForegroundColor Yellow
+  Write-Host "Please open Docker Desktop and finish the first-run setup."
+  Write-Host "If it asks for WSL2 or virtualization, enable it and restart Windows."
+  throw "Docker Desktop engine is not ready."
 }
 
 function Invoke-Compose {

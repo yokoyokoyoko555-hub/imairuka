@@ -7,7 +7,7 @@ New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $backupPath = Join-Path $backupDir "imairuka-$timestamp.sql"
 
-Write-Step "データベースをバックアップしています"
+Write-Step "Backing up database"
 Ensure-Docker
 Push-Location $root
 try {
@@ -22,4 +22,4 @@ try {
   Pop-Location
 }
 
-Write-Host "バックアップ完了: $backupPath" -ForegroundColor Green
+Write-Host "Backup completed: $backupPath" -ForegroundColor Green

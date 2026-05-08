@@ -1,6 +1,6 @@
 . "$PSScriptRoot\common.ps1"
 
-Write-Step "Imairuka を停止しています"
+Write-Step "Stopping Imairuka"
 Ensure-Docker
 Invoke-Compose down
-Write-Host "停止しました。" -ForegroundColor Green
+Write-Host "Stopped." -ForegroundColor Green
