@@ -1,5 +1,5 @@
 class AddPaymentMethodToInvoices < ActiveRecord::Migration[8.0]
   def change
-    add_column :invoices, :payment_method, :string
+    add_column :invoices, :payment_method, :string unless column_exists?(:invoices, :payment_method)
   end
 end
