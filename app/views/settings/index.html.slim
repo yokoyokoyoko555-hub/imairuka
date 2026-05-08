@@ -118,9 +118,25 @@
           .card-body
             .row.mb-4
               .col-md-6
+                label.form-label 決済モード
+                p.form-control-plaintext
+                  span.badge.bg-info.text-dark = StripeSettings.mode_label
+              .col-md-6
+                label.form-label Stripeキー
+                p.form-control-plaintext
+                  - if StripeSettings.configured?
+                    span.badge.bg-success 設定済み
+                  - else
+                    span.badge.bg-secondary 未設定
+            .row.mb-4
+              .col-md-6
                 label.form-label 連携状態
                 p.form-control-plaintext
-                  - if @company.stripe_connected?
+                  - if StripeSettings.direct_mode? && StripeSettings.configured?
+                    span.badge.bg-success 利用可能
+                  - elsif StripeSettings.direct_mode?
+                    span.badge.bg-secondary 未設定
+                  - elsif @company.stripe_connected?
                     span.badge.bg-success = @company.stripe_connect_status
                   - elsif @company.stripe_account_id.present?
                     span.badge.bg-warning.text-dark = @company.stripe_connect_status
@@ -128,31 +144,46 @@
                     span.badge.bg-secondary = @company.stripe_connect_status
               .col-md-6
                 label.form-label StripeアカウントID
-                p.form-control-plaintext = @company.stripe_account_id.presence || "未連携"
+                p.form-control-plaintext = StripeSettings.direct_mode? ? "直接決済モード" : (@company.stripe_account_id.presence || "未連携")
             .row.mb-4
               .col-md-4
                 label.form-label 決済受付
                 p.form-control-plaintext
-                  - if @company.stripe_charges_enabled?
+                  - if StripeSettings.direct_mode? && StripeSettings.configured?
+                    span.badge.bg-success 有効
+                  - elsif @company.stripe_charges_enabled?
                     span.badge.bg-success 有効
                   - else
                     span.badge.bg-secondary 無効
               .col-md-4
                 label.form-label 売上振込
                 p.form-control-plaintext
-                  - if @company.stripe_payouts_enabled?
+                  - if StripeSettings.direct_mode? && StripeSettings.configured?
+                    span.badge.bg-success Stripe側で管理
+                  - elsif @company.stripe_payouts_enabled?
                     span.badge.bg-success 有効
                   - else
                     span.badge.bg-secondary 無効
               .col-md-4
                 label.form-label 本人確認
                 p.form-control-plaintext
-                  - if @company.stripe_details_submitted?
+                  - if StripeSettings.direct_mode? && StripeSettings.configured?
+                    span.badge.bg-success Stripe側で管理
+                  - elsif @company.stripe_details_submitted?
                     span.badge.bg-success 提出済み
                   - else
                     span.badge.bg-secondary 未完了
 
-            - if ENV["STRIPE_SECRET_KEY"].blank?
+            - if StripeSettings.direct_mode?
+              - if StripeSettings.configured?
+                .alert.alert-success
+                  i.bi.bi-check-circle.me-2
+                  | 直接決済モードです。この環境に設定されたStripeキーで決済を受け付けます。
+              - else
+                .alert.alert-warning
+                  i.bi.bi-exclamation-triangle.me-2
+                  | 直接決済モードです。STRIPE_SECRET_KEY と STRIPE_WEBHOOK_SECRET を設定すると決済を開始できます。
+            - elsif ENV["STRIPE_SECRET_KEY"].blank?
               .alert.alert-warning
                 i.bi.bi-exclamation-triangle.me-2
                 | Stripe platform key が未設定です。運営側の Stripe Connect 用キーを Heroku に設定すると連携を開始できます。

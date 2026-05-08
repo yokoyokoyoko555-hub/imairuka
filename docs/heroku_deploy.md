@@ -39,10 +39,13 @@ heroku config:set CLOUDINARY_API_SECRET=<api-secret> --app <app-name>
 Stripe checkout is optional. Set these only when using the checkout flow:
 
 ```bash
+heroku config:set STRIPE_MODE=connect --app <app-name>
 heroku config:set STRIPE_PUBLISHABLE_KEY=<publishable-key> --app <app-name>
 heroku config:set STRIPE_SECRET_KEY=<secret-key> --app <app-name>
 heroku config:set STRIPE_WEBHOOK_SECRET=<webhook-signing-secret> --app <app-name>
 ```
+
+Use `STRIPE_MODE=connect` for the hosted SaaS platform flow. Use `STRIPE_MODE=direct` for an installable single-company deployment where the customer enters that environment's own Stripe keys and no Stripe Connect account is required.
 
 Register the Stripe webhook endpoint as:
 

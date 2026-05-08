@@ -29,6 +29,10 @@
     "SECRET_KEY_BASE": {
       "generator": "secret"
     },
+    "STRIPE_MODE": {
+      "value": "connect",
+      "required": false
+    },
     "STRIPE_WEBHOOK_SECRET": {
       "required": false
     }

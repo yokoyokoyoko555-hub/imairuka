@@ -2,6 +2,11 @@ class StripeConnectController < ApplicationController
   before_action :set_company
 
   def create
+    unless StripeSettings.connect_mode?
+      redirect_to settings_path(tab: "stripe"), alert: "直接決済モードではStripe Connect連携は不要です。"
+      return
+    end
+
     unless stripe_configured?
       redirect_to settings_path(tab: "stripe"), alert: "Stripe platform key is not configured."
       return
@@ -20,6 +25,11 @@ class StripeConnectController < ApplicationController
   end
 
   def refresh
+    unless StripeSettings.connect_mode?
+      redirect_to settings_path(tab: "stripe"), alert: "直接決済モードではStripe Connect連携は不要です。"
+      return
+    end
+
     unless stripe_configured?
       redirect_to settings_path(tab: "stripe"), alert: "Stripe platform key is not configured."
       return
@@ -52,7 +62,7 @@ class StripeConnectController < ApplicationController
   end
 
   def stripe_configured?
-    ENV["STRIPE_SECRET_KEY"].present?
+    StripeSettings.configured?
   end
 
   def stripe_error_message(error, fallback:)

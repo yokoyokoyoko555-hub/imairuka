@@ -128,7 +128,7 @@
             | 操作
         .card-body
           .d-grid.gap-2
-            - if @company&.stripe_connected?
+            - if StripeSettings.checkout_available?(@company)
               = form_tag checkout_order_path(@order), method: :post, class: 'd-grid', data: { turbo: false } do
                 = button_tag type: 'submit', class: 'btn btn-warning text-white' do
                   i.bi.bi-cash.me-2

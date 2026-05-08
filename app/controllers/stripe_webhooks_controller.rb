@@ -45,7 +45,7 @@ class StripeWebhooksController < ApplicationController
 
     payment = order.payment_records.find_or_initialize_by(stripe_checkout_session_id: session.id)
     payment.company ||= Company.find_by(id: session.metadata.company_id)
-    payment.stripe_account_id ||= payment.company&.stripe_account_id
+    payment.stripe_account_id ||= StripeSettings.connect_mode? ? payment.company&.stripe_account_id : nil
     payment.stripe_payment_intent_id = stripe_id(session.payment_intent)
     payment.stripe_event_id = event.id
     payment.status = session.payment_status == "paid" ? "paid" : "pending"

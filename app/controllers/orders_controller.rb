@@ -711,13 +711,13 @@ class OrdersController < ApplicationController
     end
 
     company = Company.first
-    unless ENV["STRIPE_SECRET_KEY"].present?
-      redirect_to show_billing_order_path(@order), alert: "Stripe platform key が未設定です。"
+    unless StripeSettings.configured?
+      redirect_to show_billing_order_path(@order), alert: "Stripe secret key が未設定です。"
       return
     end
 
-    unless company&.stripe_connected?
-      redirect_to settings_path(tab: "stripe"), alert: "決済を開始するには Stripe 連携を完了してください。"
+    unless StripeSettings.checkout_available?(company)
+      redirect_to settings_path(tab: "stripe"), alert: "決済を開始するには Stripe 設定を完了してください。"
       return
     end
 
@@ -738,11 +738,7 @@ class OrdersController < ApplicationController
         mode: 'payment',
         success_url: "#{success_url}?session_id={CHECKOUT_SESSION_ID}",
         cancel_url: cancel_url,
-        payment_intent_data: {
-          transfer_data: {
-            destination: company.stripe_account_id
-          }
-        },
+        payment_intent_data: stripe_payment_intent_data(company),
         metadata: {
           order_id: @order.id,
           company_id: company.id
@@ -751,7 +747,7 @@ class OrdersController < ApplicationController
 
       @order.payment_records.find_or_create_by!(stripe_checkout_session_id: session.id) do |payment|
         payment.company = company
-        payment.stripe_account_id = company.stripe_account_id
+        payment.stripe_account_id = StripeSettings.connect_mode? ? company.stripe_account_id : nil
         payment.status = "pending"
         payment.amount = @order.total_amount
         payment.currency = "jpy"
@@ -771,7 +767,7 @@ class OrdersController < ApplicationController
   end
 
   def success
-    if params[:session_id].present? && ENV["STRIPE_SECRET_KEY"].present?
+    if params[:session_id].present? && StripeSettings.configured?
       session = Stripe::Checkout::Session.retrieve(params[:session_id])
       if session.payment_status == "paid" && session.metadata&.order_id.present?
         order = Order.find_by(id: session.metadata.order_id)
@@ -779,7 +775,7 @@ class OrdersController < ApplicationController
           order.update(payment_date: Date.current)
           order.payment_records.find_or_initialize_by(stripe_checkout_session_id: session.id).tap do |payment|
             payment.company ||= Company.find_by(id: session.metadata.company_id)
-            payment.stripe_account_id ||= payment.company&.stripe_account_id
+            payment.stripe_account_id ||= StripeSettings.connect_mode? ? payment.company&.stripe_account_id : nil
             payment.stripe_payment_intent_id = session.payment_intent
             payment.status = "paid"
             payment.amount = session.amount_total || order.total_amount
@@ -797,6 +793,16 @@ class OrdersController < ApplicationController
     Rails.logger.error("Stripe決済確認エラー: #{e.message}")
     flash[:notice] = "決済完了画面に戻りました。決済状態はStripe側で確認してください。"
     redirect_to billing_orders_path
+  end
+
+  def stripe_payment_intent_data(company)
+    return {} if StripeSettings.direct_mode?
+
+    {
+      transfer_data: {
+        destination: company.stripe_account_id
+      }
+    }
   end
 
   def bulk_delete

@@ -2,7 +2,7 @@ class SettingsController < ApplicationController
   def index
     # 会社情報の取得
     @company = Company.first_or_initialize
-    sync_stripe_account_status if params[:tab] == "stripe" && @company.stripe_account_id.present? && ENV["STRIPE_SECRET_KEY"].present?
+    sync_stripe_account_status if params[:tab] == "stripe" && StripeSettings.connect_mode? && @company.stripe_account_id.present? && StripeSettings.configured?
 
     # ステータス情報の取得
     if params[:tab] == 'status'
