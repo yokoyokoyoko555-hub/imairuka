@@ -61,6 +61,7 @@ Rails.application.routes.draw do
   post 'stripe_connect', to: 'stripe_connect#create'
   get 'stripe_connect/refresh', to: 'stripe_connect#refresh', as: :stripe_connect_refresh
   get 'stripe_connect/callback', to: 'stripe_connect#callback', as: :stripe_connect_callback
+  post 'stripe/webhook', to: 'stripe_webhooks#create'
 
   # 設定
   resources :settings, only: [:index, :update], path: 'settings', as: 'settings' do

@@ -28,6 +28,9 @@
     },
     "SECRET_KEY_BASE": {
       "generator": "secret"
+    },
+    "STRIPE_WEBHOOK_SECRET": {
+      "required": false
     }
   },
   "scripts": {

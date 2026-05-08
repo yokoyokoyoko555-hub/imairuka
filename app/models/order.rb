@@ -11,6 +11,7 @@ class Order < ApplicationRecord
   has_many :order_items, dependent: :destroy
   has_many :products, through: :order_items
   has_many :histories, class_name: 'OrderHistory', dependent: :destroy
+  has_many :payment_records, dependent: :destroy
 
   validates :order_number, uniqueness: { message: 'この案件番号は既に使用されています' }, unless: :draft?
   validates :order_date, presence: { message: '注文日を入力してください' }
@@ -116,4 +117,4 @@ class Order < ApplicationRecord
       staff_name: staff_name
     )
   end
-end 
+end

@@ -748,6 +748,16 @@ class OrdersController < ApplicationController
           company_id: company.id
         }
       )
+
+      @order.payment_records.find_or_create_by!(stripe_checkout_session_id: session.id) do |payment|
+        payment.company = company
+        payment.stripe_account_id = company.stripe_account_id
+        payment.status = "pending"
+        payment.amount = @order.total_amount
+        payment.currency = "jpy"
+        payment.payment_method_type = "card"
+      end
+
       redirect_to session.url, allow_other_host: true
     rescue => e
       Rails.logger.error("Stripe決済エラー: #{e.message}")
@@ -765,7 +775,20 @@ class OrdersController < ApplicationController
       session = Stripe::Checkout::Session.retrieve(params[:session_id])
       if session.payment_status == "paid" && session.metadata&.order_id.present?
         order = Order.find_by(id: session.metadata.order_id)
-        order&.update(payment_date: Date.current)
+        if order
+          order.update(payment_date: Date.current)
+          order.payment_records.find_or_initialize_by(stripe_checkout_session_id: session.id).tap do |payment|
+            payment.company ||= Company.find_by(id: session.metadata.company_id)
+            payment.stripe_account_id ||= payment.company&.stripe_account_id
+            payment.stripe_payment_intent_id = session.payment_intent
+            payment.status = "paid"
+            payment.amount = session.amount_total || order.total_amount
+            payment.currency = session.currency || "jpy"
+            payment.payment_method_type ||= "card"
+            payment.paid_at ||= Time.current
+            payment.save!
+          end
+        end
       end
     end
     flash[:notice] = "決済が完了しました。"

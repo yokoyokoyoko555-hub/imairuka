@@ -41,6 +41,20 @@ Stripe checkout is optional. Set these only when using the checkout flow:
 ```bash
 heroku config:set STRIPE_PUBLISHABLE_KEY=<publishable-key> --app <app-name>
 heroku config:set STRIPE_SECRET_KEY=<secret-key> --app <app-name>
+heroku config:set STRIPE_WEBHOOK_SECRET=<webhook-signing-secret> --app <app-name>
+```
+
+Register the Stripe webhook endpoint as:
+
+```text
+https://<app-name>.herokuapp.com/stripe/webhook
+```
+
+At minimum, subscribe to:
+
+```text
+checkout.session.completed
+checkout.session.expired
 ```
 
 ## Deploy
