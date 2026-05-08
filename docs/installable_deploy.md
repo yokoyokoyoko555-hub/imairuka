@@ -25,6 +25,14 @@ The script checks Docker Desktop, creates `install.env`, starts Imairuka, loads 
 
 If Docker Desktop is not installed, the script opens the Docker Desktop installation page.
 
+If Docker Desktop shows `Virtualization support not detected`, double-click:
+
+```text
+enable_docker_prereqs.bat
+```
+
+Allow the administrator prompt, wait for it to finish, and restart Windows.
+
 ### Manual setup
 
 Copy the sample env file:
