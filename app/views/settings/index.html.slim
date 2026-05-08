@@ -138,7 +138,7 @@
                   - else
                     span.badge.bg-secondary 無効
               .col-md-4
-                label.form-label 振込
+                label.form-label 売上振込
                 p.form-control-plaintext
                   - if @company.stripe_payouts_enabled?
                     span.badge.bg-success 有効
@@ -157,10 +157,15 @@
                 i.bi.bi-exclamation-triangle.me-2
                 | Stripe platform key が未設定です。運営側の Stripe Connect 用キーを Heroku に設定すると連携を開始できます。
             - else
-              .alert.alert-info
-                i.bi.bi-info-circle.me-2
-                | Stripe Connect を使うには、運営側 Stripe アカウントで Connect の利用開始が必要です。
-                = link_to "Stripe Connect設定を開く", "https://dashboard.stripe.com/connect", class: "alert-link ms-1", target: "_blank", rel: "noopener"
+              - if @company.stripe_account_id.blank?
+                .alert.alert-info
+                  i.bi.bi-info-circle.me-2
+                  | Stripe Connect を使うには、運営側 Stripe アカウントで Connect の利用開始が必要です。
+                  = link_to "Stripe Connect設定を開く", "https://dashboard.stripe.com/connect", class: "alert-link ms-1", target: "_blank", rel: "noopener"
+              - elsif @company.stripe_charges_enabled? && !@company.stripe_payouts_enabled?
+                .alert.alert-warning
+                  i.bi.bi-exclamation-triangle.me-2
+                  | 決済受付は有効ですが、売上振込はまだ無効です。Stripe設定を再開して、振込先や確認項目を完了してください。
               = button_to stripe_connect_path, method: :post, class: "btn btn-primary", form: { data: { turbo: false } } do
                 i.bi.bi-box-arrow-up-right.me-2
                 - if @company.stripe_account_id.present?
