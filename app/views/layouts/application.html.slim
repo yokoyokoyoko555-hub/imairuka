@@ -81,6 +81,13 @@ html data-turbo="false"
                 | 請求管理
 
             li.nav-item.mt-3
+              small.text-white-50.ps-3 決済管理
+            li.nav-item
+              = link_to payment_histories_path, class: "nav-link #{controller_name == 'payment_histories' ? 'active' : ''}" do
+                i.bi.bi-credit-card.me-2
+                | 決済履歴
+
+            li.nav-item.mt-3
               small.text-white-50.ps-3 文書管理
             li.nav-item
               = link_to quotations_path, class: "nav-link #{controller_name == 'quotations' ? 'active' : ''}" do

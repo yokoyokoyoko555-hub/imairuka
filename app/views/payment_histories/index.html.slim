@@ -1,0 +1,73 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-credit-card.me-2
+        | 決済履歴
+
+  .card.shadow.mb-4
+    .card-header.py-3
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-search.me-2
+        | 検索条件
+    .card-body
+      = form_with url: payment_histories_path, method: :get, local: true, class: "row g-3" do |f|
+        .col-md-3
+          = f.label :order_number, "案件番号", class: "form-label"
+          = f.text_field :order_number, class: "form-control", value: params[:order_number]
+        .col-md-3
+          = f.label :customer_name, "顧客名", class: "form-label"
+          = f.text_field :customer_name, class: "form-control", value: params[:customer_name]
+        .col-md-2
+          = f.label :payment_status, "決済状態", class: "form-label"
+          = f.select :payment_status, [["すべて", ""], ["入金済み", "paid"], ["未入金", "unpaid"]], { selected: params[:payment_status] }, class: "form-select"
+        .col-md-2
+          = f.label :payment_date_from, "入金日 From", class: "form-label"
+          = f.date_field :payment_date_from, class: "form-control", value: params[:payment_date_from]
+        .col-md-2
+          = f.label :payment_date_to, "入金日 To", class: "form-label"
+          = f.date_field :payment_date_to, class: "form-control", value: params[:payment_date_to]
+        .col-12
+          = f.submit "検索", class: "btn btn-primary me-2"
+          = link_to "リセット", payment_histories_path, class: "btn btn-outline-secondary"
+
+  .card.shadow.mb-4
+    .card-header.py-3.d-flex.justify-content-between.align-items-center
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-list.me-2
+        | 決済履歴一覧
+        span.badge.bg-secondary.ms-2 = @payments.total_count
+    .card-body
+      .table-responsive
+        table.table.table-bordered.table-hover
+          thead.table-light
+            tr
+              th 案件番号
+              th 顧客名
+              th.text-end 決済金額
+              th 支払方法
+              th 支払期限
+              th 入金日
+              th 決済状態
+              th 操作
+          tbody
+            - @payments.each do |payment|
+              tr
+                td = payment.order_number
+                td = payment.customer&.name || "-"
+                td.text-end = number_to_currency(payment.total_amount, unit: "¥", precision: 0)
+                td = payment.payment_method.present? ? Order.payment_method_text(payment.payment_method) : "未設定"
+                td = payment.payment_due_date&.strftime("%Y/%m/%d") || "-"
+                td = payment.payment_date&.strftime("%Y/%m/%d") || "-"
+                td
+                  - if payment.payment_date.present?
+                    span.badge.bg-success 入金済み
+                  - else
+                    span.badge.bg-warning.text-dark 未入金
+                td
+                  = link_to show_billing_order_path(payment), class: "btn btn-sm btn-outline-primary" do
+                    i.bi.bi-eye.me-1
+                    | 詳細
+
+      .d-flex.justify-content-center.mt-4
+        = paginate @payments

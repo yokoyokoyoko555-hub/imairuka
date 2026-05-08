@@ -54,6 +54,9 @@ Rails.application.routes.draw do
   # ヘルスチェック
   get 'health_check', to: 'health_check#index'
 
+  # 決済管理
+  resources :payment_histories, only: [:index]
+
   # 設定
   resources :settings, only: [:index, :update], path: 'settings', as: 'settings' do
     collection do
