@@ -1,0 +1,11 @@
+- unless flash.empty?
+  .container-fluid.my-3
+    - flash.each do |key, value|
+      - if key == 'notice' || key == 'success'
+        .alert.alert-success.mb-4.d-flex.align-items-center style="border-left: 4px solid #198754; background-color: #fff; color: #198754; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+          i.bi.bi-check-circle-fill.me-2 style="font-size: 1.5rem;"
+          = value
+      - elsif key == 'alert' || key == 'danger'
+        .alert.alert-danger.mb-4.d-flex.align-items-center style="border-left: 4px solid #dc3545; background-color: #fff; color: #dc3545; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+          i.bi.bi-exclamation-triangle-fill.me-2 style="font-size: 1.5rem;"
+          = value 

@@ -1,0 +1,75 @@
+doctype html
+html
+  head
+    title = yield(:title) || 'PDF'
+    meta charset="utf-8"
+    meta name="viewport" content="width=device-width, initial-scale=1"
+    = csrf_meta_tags
+    = csp_meta_tag
+    = stylesheet_link_tag "application", "data-turbo-track": "reload"
+    css:
+      @page {
+        size: A4 portrait;
+        margin: 15mm 10mm;
+      }
+      body {
+        font-size: 11pt;
+        line-height: 1.4;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        margin: 0;
+        padding: 0;
+        font-family: 'Noto Sans JP', 'IPAexGothic', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+      }
+      .container-fluid {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
+      .receipt-sheet, .quotation-sheet, .delivery-sheet, .invoice-sheet {
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
+      .table {
+        font-size: 9pt;
+        width: 100% !important;
+      }
+      .table th, .table td {
+        padding: 0.3rem !important;
+        white-space: nowrap;
+      }
+      .table th {
+        background-color: #f8f9fa !important;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+      .card {
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .card-body {
+        padding: 0.5rem 0 !important;
+      }
+      .height-100 {
+        height: 80px;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .text-center {
+        text-align: center !important;
+      }
+      .page-break {
+        page-break-before: avoid;
+        page-break-after: avoid;
+      }
+      .avoid-break {
+        page-break-inside: avoid;
+      }
+
+  body
+    = yield 

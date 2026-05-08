@@ -1,0 +1,106 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-box.me-2
+        | 商品管理
+      .d-flex.justify-content-end
+        = link_to new_product_path, class: 'btn btn-primary' do
+          i.bi.bi-plus.me-1
+          | 新規作成
+
+  / 検索フィルター
+  .card.shadow.mb-4
+    .card-header.py-3
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-search.me-2
+        | 検索条件
+    .card-body
+      = form_with url: products_path, method: :get, class: "row g-3" do |f|
+        .col-md-3
+          = f.label :name, "商品名", class: "form-label"
+          = f.text_field :name, value: params[:name], class: "form-control", placeholder: "商品名を入力..."
+        .col-md-3
+          = f.label :code, "商品コード", class: "form-label"
+          = f.text_field :code, value: params[:code], class: "form-control", placeholder: "商品コードを入力..."
+        .col-md-3
+          = f.label :status, "ステータス", class: "form-label"
+          = f.select :status, [["販売中", "販売中"], ["販売停止", "販売停止"]], { selected: params[:status], include_blank: "選択してください" }, class: "form-select"
+        .col-md-3
+          = f.label :sort, "並び順", class: "form-label"
+          = f.select :sort, [["商品名（昇順）", "name_asc"], ["商品名（降順）", "name_desc"], ["価格（安い順）", "price_asc"], ["価格（高い順）", "price_desc"]], { selected: params[:sort], include_blank: "選択してください" }, class: "form-select"
+        .col-12
+          = f.submit "検索", class: "btn btn-primary me-2"
+          = link_to "リセット", products_path, class: "btn btn-outline-secondary"
+
+  / 商品一覧
+  .card.shadow.mb-4
+    .card-header.py-3.d-flex.justify-content-between.align-items-center
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-list.me-2
+        | 商品一覧
+        span.badge.bg-secondary.ms-2 = @total_count
+      .btn-group
+        button.btn.btn-sm.btn-outline-secondary.dropdown-toggle[type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bulk-actions-target="actionButton" disabled]
+          i.bi.bi-three-dots-vertical.me-1
+          | 一括操作
+        ul.dropdown-menu.dropdown-menu-end
+          li
+            = link_to "#", class: "dropdown-item text-danger", data: { action: "bulkDelete" } do
+              i.bi.bi-trash.me-2
+              | 一括削除
+
+    .card-body
+      .table-responsive
+        table.table.table-bordered.table-hover
+          thead.table-light
+            tr
+              th
+                .form-check
+                  input.form-check-input[type="checkbox" data-bulk-actions-target="selectAll"]
+              th 商品コード
+              th 商品名
+              th 商品説明
+              th.text-end 単価
+              th ステータス
+              th 最終更新日
+              th 操作
+            tbody
+              - @products.each do |product|
+                tr
+                  td
+                    .form-check
+                      input.form-check-input[type="checkbox" name="selected_products[]" value=product.id data-bulk-actions-target="checkbox"]
+                  td = product.code
+                  td = product.name
+                  td style="max-width: 200px; white-space: normal;"
+                    = simple_format(product.description, {}, wrapper_tag: "div")
+                  td.text-end = number_to_currency(product.unit_price, unit: "¥", precision: 0)
+                  td
+                    - if product.draft?
+                      span.badge.bg-warning style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
+                        | 一時保存
+                    - else
+                      span.badge class="bg-#{product.is_active? ? 'success' : 'secondary'}" style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
+                        = product.is_active? ? '販売中' : '販売停止中'
+                  td = product.updated_at.strftime("%Y/%m/%d %H:%M")
+                  td style="white-space: nowrap;"
+                    .btn-group
+                      = link_to product_path(product), class: "btn btn-sm btn-outline-primary" do
+                        i.bi.bi-eye.me-1
+                        | 詳細
+                      = link_to edit_product_path(product), class: "btn btn-sm btn-outline-secondary" do
+                        i.bi.bi-pencil.me-1
+                        | 編集
+                      = link_to product_path(product), \
+                          data: { delete_action: true, confirm: "この商品を削除してもよろしいですか？\nこの操作は取り消せません。" }, \
+                          class: "btn btn-sm btn-outline-danger" do
+                        i.bi.bi-trash.me-1
+                        | 削除
+
+      / ページネーション
+      .d-flex.justify-content-center.mt-4
+        = paginate @products
+
+= javascript_include_tag "bulk_actions"
+= javascript_include_tag "delete_actions" 

@@ -1,0 +1,539 @@
+ja:
+  enums:
+    quotation:
+      status:
+        pending: 送付待ち
+        sent: 送付済み
+        waiting_payment: 入金待ち
+        paid: 入金済み
+    delivery_note:
+      status:
+        pending: 送付待ち
+        sent: 送付済み
+        waiting_payment: 入金待ち
+        paid: 入金済み
+    invoice:
+      status:
+        pending: 送付待ち
+        sent: 送付済み
+        waiting_payment: 入金待ち
+        paid: 入金済み
+    receipt:
+      status:
+        pending: 送付待ち
+        sent: 送付済み
+        waiting_payment: 入金待ち
+        paid: 入金済み
+  activerecord:
+    models:
+      order: 案件
+      order_item: 注文商品
+      product: 商品
+      customer: 顧客
+      company: 会社情報
+      quotation: 見積書
+      quotation_item: 見積商品
+      delivery_note: 納品書
+      delivery_note_item: 納品商品
+      invoice: 請求書
+      invoice_item: 請求商品
+    attributes:
+      order:
+        order_number: 案件番号
+        order_date: 注文日
+        customer_id: 顧客
+        staff_name: 担当者名
+        notes: 備考
+        delivery_date: 納品日
+        delivery_address: 納品先
+        billing_address: 請求先
+        payment_due_date: 支払期限
+        payment_method: 支払方法
+        order_items: 注文商品
+        order_status: ステータス
+        total_amount: 合計金額
+      quotation:
+        quotation_number: 見積番号
+        quotation_date: 見積日
+        customer_name: 顧客名
+        customer_address: 顧客住所
+        subject: 件名
+        staff_name: 担当者名
+        valid_until: 有効期限
+        status: ステータス
+        notes: 備考
+        total_amount: 合計金額
+        quotation_items: 見積商品
+      quotation_item:
+        product_code: 商品コード
+        product_name: 商品名
+        quantity: 数量
+        unit_price: 単価
+        amount: 金額
+      delivery_note:
+        delivery_number: 納品書番号
+        delivery_date: 納品日
+        customer_name: 顧客名
+        customer_address: 顧客住所
+        subject: 件名
+        staff_name: 担当者名
+        valid_until: 有効期限
+        status: ステータス
+        notes: 備考
+        total_amount: 合計金額
+        delivery_note_items: 納品商品
+      delivery_note_item:
+        product_code: 商品コード
+        product_name: 商品名
+        quantity: 数量
+        unit_price: 単価
+        amount: 金額
+      invoice:
+        invoice_number: 請求書番号
+        invoice_date: 請求日
+        customer_name: 顧客名
+        customer_address: 顧客住所
+        subject: 件名
+        staff_name: 担当者名
+        payment_due_date: 支払期限
+        payment_method: 支払方法
+        status: ステータス
+        notes: 備考
+        total_amount: 合計金額
+        invoice_items: 請求商品
+      invoice_item:
+        product_code: 商品コード
+        product_name: 商品名
+        quantity: 数量
+        unit_price: 単価
+        amount: 金額
+      receipt:
+        receipt_number: 領収書番号
+        issue_date: 発行日
+        customer_name: 顧客名
+        customer_address: 顧客住所
+        subject: 件名
+        staff_name: 担当者名
+        valid_until: 有効期限
+        status: ステータス
+        notes: 備考
+        total_amount: 合計金額
+        receipt_items: 領収商品
+      receipt_item:
+        product_code: 商品コード
+        product_name: 商品名
+        quantity: 数量
+        unit_price: 単価
+        amount: 金額
+      company:
+        name: 会社名
+        invoice_number: インボイス登録番号
+        postal_code: 郵便番号
+        address: 住所
+        phone: 電話番号
+        email: メールアドレス
+        representative: 代表者名
+        business_type: 業種
+      order_status:
+        name: ステータス名
+        code: ステータスコード
+        display_order: 表示順
+        color: 表示色
+        description: 説明
+        is_active: 有効フラグ
+      order_item:
+        product: 商品
+        product_id: 商品
+        quantity: 数量
+        unit_price: 単価
+        amount: 金額
+      product:
+        name: 商品名
+        code: 商品コード
+        unit_price: 単価
+        description: 商品説明
+        is_active: 有効/無効
+      customer:
+        name: 顧客名
+        email: メールアドレス
+        phone: 電話番号
+        address: 住所
+        code: 顧客コード
+        company_name: 会社名
+        industry: 業種
+        status: ステータス
+    errors:
+      format: "%{message}"
+      messages:
+        record_invalid: "バリデーションに失敗しました: %{errors}"
+        restrict_dependent_destroy:
+          has_one: レコードが存在しているので削除できません
+          has_many: レコードが存在しているので削除できません
+      template:
+        header:
+          one: "%{model}にエラーが発生しました"
+          other: "%{model}に%{count}個のエラーが発生しました"
+        body: 次の項目を確認してください
+      models:
+        order:
+          attributes:
+            order_number:
+              blank: 案件番号を入力してください
+              taken: この案件番号は既に使用されています
+            order_date:
+              blank: 注文日を入力してください
+            customer_id:
+              blank: 顧客を選択してください
+            staff_name:
+              blank: 担当者名を入力してください
+            order_status:
+              blank: ステータスを選択してください
+            total_amount:
+              blank: 合計金額を入力してください
+              not_a_number: 合計金額は数値で入力してください
+              greater_than_or_equal_to: 合計金額は0以上の数値を入力してください
+            order_items:
+              blank: 商品を選択してください
+        order_item:
+          attributes:
+            product:
+              required: 商品を選択してください
+            product_id:
+              blank: 商品を選択してください
+            quantity:
+              blank: 数量を入力してください
+              not_a_number: 数量は数値で入力してください
+              greater_than: 数量は1以上の数値を入力してください
+            unit_price:
+              blank: 単価を入力してください
+              not_a_number: 単価は数値で入力してください
+              greater_than_or_equal_to: 単価は0以上の数値を入力してください
+            amount:
+              blank: 金額を入力してください
+              not_a_number: 金額は数値で入力してください
+              greater_than_or_equal_to: 金額は0以上の数値を入力してください
+        company:
+          attributes:
+            invoice_number:
+              blank: インボイス登録番号を入力してください
+              format: インボイス登録番号は13桁の数字で、先頭にTを付けてください
+            phone:
+              blank: 電話番号を入力してください
+              format: 電話番号は10桁または11桁の数字で入力してください
+            email:
+              blank: メールアドレスを入力してください
+              format: メールアドレスは正しい形式で入力してください
+            name:
+              blank: 会社名を入力してください
+            postal_code:
+              blank: 郵便番号を入力してください
+            address:
+              blank: 住所を入力してください
+            representative:
+              blank: 代表者名を入力してください
+            business_type:
+              blank: 業種を入力してください
+        order_status:
+          attributes:
+            name:
+              blank: ステータス名を入力してください
+              taken: このステータス名は既に使用されています
+              too_long: ステータス名は50文字以内で入力してください
+            code:
+              blank: ステータスコードを入力してください
+              taken: このステータスコードは既に使用されています
+              format: ステータスコードは半角英数字とアンダースコアのみ使用できます
+              too_long: ステータスコードは20文字以内で入力してください
+            display_order:
+              blank: 表示順を入力してください
+              not_a_number: 表示順は数値で入力してください
+              greater_than_or_equal_to: 表示順は1以上の数値を入力してください
+            color:
+              format: 表示色は16進数のカラーコード（例：#FF0000）で指定してください
+              too_long: 表示色は7文字以内で入力してください
+            description:
+              too_long: 説明は200文字以内で入力してください
+        customer:
+          attributes:
+            name:
+              blank: 顧客名を入力してください
+              too_long: 顧客名は50文字以内で入力してください
+            code:
+              blank: 顧客コードを入力してください
+              taken: この顧客コードは既に使用されています
+              too_long: 顧客コードは20文字以内で入力してください
+            company_name:
+              blank: 会社名を入力してください
+              too_long: 会社名は100文字以内で入力してください
+            industry:
+              blank: 業種を選択してください
+            status:
+              blank: ステータスを選択してください
+              inclusion: ステータスを選択してください
+            representative_name:
+              too_long: 代表者名は50文字以内で入力してください
+            business_description:
+              too_long: 事業内容は500文字以内で入力してください
+            email:
+              format: は正しい形式で入力してください
+              too_long: メールアドレスは100文字以内で入力してください
+            phone:
+              format: は10桁または11桁の数字で入力してください
+              too_long: 電話番号は15文字以内で入力してください
+            address:
+              too_long: 住所は500文字以内で入力してください
+            payment_term:
+              too_long: 支払条件は100文字以内で入力してください
+            invoice_email:
+              format: は正しい形式で入力してください
+              too_long: 請求書メールは100文字以内で入力してください
+            notes:
+              too_long: メモは1000文字以内で入力してください
+        product:
+          attributes:
+            name:
+              blank: 商品名を入力してください
+              too_long: 商品名は100文字以内で入力してください
+            code:
+              blank: 商品コードを入力してください
+              taken: この商品コードは既に使用されています
+              too_long: 商品コードは20文字以内で入力してください
+            unit_price:
+              blank: 単価を入力してください
+              not_a_number: 単価は数値で入力してください
+              greater_than_or_equal_to: 単価は0以上の数値を入力してください
+            description:
+              too_long: 商品説明は1000文字以内で入力してください
+            supplier_name:
+              too_long: 仕入先名は100文字以内で入力してください
+            supplier_contact:
+              too_long: 担当者は50文字以内で入力してください
+            supplier_phone:
+              format: は10桁または11桁の数字で入力してください
+              too_long: 電話番号は15文字以内で入力してください
+            supplier_email:
+              format: は正しい形式で入力してください
+              too_long: メールアドレスは100文字以内で入力してください
+            notes:
+              too_long: メモは1000文字以内で入力してください
+        quotation_item:
+          attributes:
+            product_code:
+              blank: 商品コードを入力してください
+            product_name:
+              blank: 商品名を入力してください
+            quantity:
+              blank: 数量を入力してください
+              not_a_number: 数量は数値で入力してください
+              greater_than: 数量は1以上の数値を入力してください
+            unit_price:
+              blank: 単価を入力してください
+              not_a_number: 単価は数値で入力してください
+              greater_than_or_equal_to: 単価は0以上の数値を入力してください
+            amount:
+              blank: 金額を入力してください
+              not_a_number: 金額は数値で入力してください
+              greater_than_or_equal_to: 金額は0以上の数値を入力してください
+            product_code:
+              too_long: 商品コードは20文字以内で入力してください
+            product_name:
+              too_long: 商品名は100文字以内で入力してください
+        delivery_note:
+          attributes:
+            delivery_number:
+              blank: 納品書番号を入力してください
+              taken: この納品書番号は既に使用されています
+            delivery_date:
+              blank: 納品日を入力してください
+            customer_name:
+              blank: 顧客名を入力してください
+              too_long: 顧客名は100文字以内で入力してください
+            staff_name:
+              blank: 担当者名を入力してください
+              too_long: 担当者名は50文字以内で入力してください
+            subject:
+              too_long: 件名は200文字以内で入力してください
+            status:
+              blank: ステータスを選択してください
+              inclusion: ステータスを選択してください
+            total_amount:
+              blank: 合計金額を入力してください
+              not_a_number: 合計金額は数値で入力してください
+              greater_than_or_equal_to: 合計金額は0以上の数値を入力してください
+            customer_address:
+              too_long: 顧客住所は200文字以内で入力してください
+            notes:
+              too_long: 備考は1000文字以内で入力してください
+        delivery_note_item:
+          attributes:
+            product_code:
+              blank: 商品コードを入力してください
+              too_long: 商品コードは20文字以内で入力してください
+            product_name:
+              blank: 商品名を入力してください
+              too_long: 商品名は100文字以内で入力してください
+            quantity:
+              blank: 数量を入力してください
+              not_a_number: 数量は数値で入力してください
+              greater_than: 数量は1以上の数値を入力してください
+            unit_price:
+              blank: 単価を入力してください
+              not_a_number: 単価は数値で入力してください
+              greater_than_or_equal_to: 単価は0以上の数値を入力してください
+            amount:
+              blank: 金額を入力してください
+              not_a_number: 金額は数値で入力してください
+              greater_than_or_equal_to: 金額は0以上の数値を入力してください
+        quotation:
+          attributes:
+            quotation_number:
+              blank: 見積書番号を入力してください
+              taken: この見積書番号は既に使用されています
+            quotation_date:
+              blank: 見積日を入力してください
+            customer_name:
+              blank: 顧客名を入力してください
+              too_long: 顧客名は100文字以内で入力してください
+            staff_name:
+              blank: 担当者名を入力してください
+              too_long: 担当者名は50文字以内で入力してください
+            subject:
+              too_long: 件名は200文字以内で入力してください
+            status:
+              blank: ステータスを選択してください
+              inclusion: ステータスを選択してください
+            total_amount:
+              blank: 合計金額を入力してください
+              not_a_number: 合計金額は数値で入力してください
+              greater_than_or_equal_to: 合計金額は0以上の数値を入力してください
+            customer_address:
+              too_long: 顧客住所は200文字以内で入力してください
+            notes:
+              too_long: 備考は1000文字以内で入力してください
+        invoice:
+          attributes:
+            invoice_number:
+              blank: 請求書番号を入力してください
+              taken: この請求書番号は既に使用されています
+            invoice_date:
+              blank: 請求日を入力してください
+            customer_name:
+              blank: 顧客名を入力してください
+              too_long: 顧客名は100文字以内で入力してください
+            staff_name:
+              blank: 担当者名を入力してください
+              too_long: 担当者名は50文字以内で入力してください
+            subject:
+              blank: 件名を入力してください
+              too_long: 件名は200文字以内で入力してください
+            customer_address:
+              too_long: 顧客住所は200文字以内で入力してください
+            payment_method:
+              too_long: 支払方法は100文字以内で入力してください
+            notes:
+              too_long: 備考は1000文字以内で入力してください
+            status:
+              blank: ステータスを選択してください
+              inclusion: ステータスを選択してください
+            total_amount:
+              blank: 合計金額を入力してください
+              not_a_number: 合計金額は数値で入力してください
+              greater_than_or_equal_to: 合計金額は0以上の数値を入力してください
+        receipt:
+          attributes:
+            receipt_number:
+              blank: 領収書番号を入力してください
+              taken: この領収書番号は既に使用されています
+            issue_date:
+              blank: 発行日を入力してください
+            customer_name:
+              blank: 顧客名を入力してください
+            staff_name:
+              blank: 担当者名を入力してください
+            subject:
+              too_long: 件名は100文字以内で入力してください
+            status:
+              blank: ステータスを選択してください
+              inclusion: ステータスを選択してください
+            total_amount:
+              blank: 合計金額を入力してください
+              not_a_number: 合計金額は数値で入力してください
+              greater_than_or_equal_to: 合計金額は0以上の数値を入力してください
+        invoice_item:
+          attributes:
+            product_code:
+              blank: 商品コードを入力してください
+              too_long: 商品コードは20文字以内で入力してください
+            product_name:
+              blank: 商品名を入力してください
+              too_long: 商品名は100文字以内で入力してください
+            quantity:
+              blank: 数量を入力してください
+              not_a_number: 数量は数値で入力してください
+              greater_than: 数量は1以上の数値を入力してください
+            unit_price:
+              blank: 単価を入力してください
+              not_a_number: 単価は数値で入力してください
+              greater_than_or_equal_to: 単価は0以上の数値を入力してください
+            amount:
+              blank: 金額を入力してください
+              not_a_number: 金額は数値で入力してください
+              greater_than_or_equal_to: 金額は0以上の数値を入力してください
+        receipt_item:
+          attributes:
+            product_code:
+              blank: 商品コードを入力してください
+            product_name:
+              blank: 商品名を入力してください
+            quantity:
+              blank: 数量を入力してください
+              not_a_number: 数量は数値で入力してください
+              greater_than: 数量は1以上の数値を入力してください
+            unit_price:
+              blank: 単価を入力してください
+              not_a_number: 単価は数値で入力してください
+              greater_than_or_equal_to: 単価は0以上の数値を入力してください
+            amount:
+              blank: 金額を入力してください
+              not_a_number: 金額は数値で入力してください
+              greater_than_or_equal_to: 金額は0以上の数値を入力してください
+        invoice_item:
+          attributes:
+            product_code:
+              blank: 商品コードを入力してください
+            product_name:
+              blank: 商品名を入力してください
+            quantity:
+              blank: 数量を入力してください
+              not_a_number: 数量は数値で入力してください
+              greater_than: 数量は1以上の数値を入力してください
+            unit_price:
+              blank: 単価を入力してください
+              not_a_number: 単価は数値で入力してください
+              greater_than_or_equal_to: 単価は0以上の数値を入力してください
+            amount:
+              blank: 金額を入力してください
+              not_a_number: 金額は数値で入力してください
+              greater_than_or_equal_to: 金額は0以上の数値を入力してください
+  views:
+    pagination:
+      first: "最初"
+      last: "最後"
+      previous: "前"
+      next: "次"
+      truncate: "..."
+  time:
+    formats:
+      default: "%Y/%m/%d %H:%M"
+      short: "%m/%d %H:%M"
+      long: "%Y年%m月%d日 %H時%M分"
+  date:
+    formats:
+      default: "%Y/%m/%d"
+      short: "%m/%d"
+      long: "%Y年%m月%d日"
+  datetime:
+    formats:
+      default: "%Y/%m/%d %H:%M"
+      short: "%m/%d %H:%M"
+      long: "%Y年%m月%d日 %H時%M分"

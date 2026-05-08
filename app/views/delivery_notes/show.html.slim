@@ -1,0 +1,139 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-truck.me-2
+        | 納品書詳細
+      .d-flex.justify-content-end.gap-2
+        = link_to delivery_notes_path, class: 'btn btn-outline-secondary' do
+          i.bi.bi-arrow-left.me-1
+          | 一覧に戻る
+        = link_to edit_delivery_note_path(@delivery_note), class: 'btn btn-outline-primary' do
+          i.bi.bi-pencil.me-1
+          | 編集
+
+  .row
+    .col-lg-8
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-info-circle.me-2
+            | 基本情報
+        .card-body
+          .row.mb-3
+            .col-md-6
+              label.form-label.text-muted 納品書番号
+              p = @delivery_note.delivery_number
+            .col-md-6
+              label.form-label.text-muted 納品日
+              p = format_date(@delivery_note.delivery_date)
+          .row.mb-3
+            .col-md-6
+              label.form-label.text-muted 顧客名
+              p = @delivery_note.customer_name
+            .col-md-6
+              label.form-label.text-muted 担当者
+              p = @delivery_note.staff_name
+          .row.mb-3
+            .col-md-12
+              label.form-label.text-muted 顧客住所
+              p = @delivery_note.customer_address.presence || "未入力"
+          .row.mb-3
+            .col-md-12
+              label.form-label.text-muted 件名
+              p = @delivery_note.subject.presence || "未入力"
+          .row.mb-3
+            .col-md-6
+              label.form-label.text-muted ステータス
+              p
+                span.badge class="bg-#{@delivery_note.status_color}"
+                  = @delivery_note.status_text
+            .col-md-6
+              label.form-label.text-muted 合計金額
+              p = number_to_currency(@delivery_note.total_amount_with_tax, unit: "¥", precision: 0)
+          .row.mb-3
+            .col-md-12
+              label.form-label.text-muted 備考
+              p = @delivery_note.notes.presence || "なし"
+
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-cart.me-2
+            | 納品商品
+        .card-body
+          .table-responsive
+            table.table.table-bordered
+              thead.table-light
+                tr
+                  th 商品コード
+                  th 商品名
+                  th.text-end 単価
+                  th.text-end 数量
+                  th.text-end 金額
+                  th 税率
+              tbody
+                - @delivery_note.delivery_note_items.each do |item|
+                  tr
+                    td = item.product_code
+                    td = item.product_name
+                    td.text-end = number_to_currency(item.unit_price, unit: "¥", precision: 0)
+                    td.text-end = item.quantity
+                    td.text-end = number_to_currency(item.amount, unit: "¥", precision: 0)
+                    td = item.tax_rate_label
+              tfoot
+                tr
+                  td.text-end[colspan="5"] 合計金額
+                  td.text-end = number_to_currency(@delivery_note.total_amount_with_tax, unit: "¥", precision: 0)
+
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-calendar.me-2
+            | 納品情報
+        .card-body
+          .row.mb-3
+            .col-md-6
+              label.form-label.text-muted 有効期限
+              p = format_date(@delivery_note.valid_until) || "未設定"
+            .col-md-6
+              label.form-label.text-muted 最終更新日
+              p = format_datetime(@delivery_note.updated_at)
+
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-clock-history.me-2
+            | 処理履歴
+        .card-body
+          - if @delivery_note.respond_to?(:delivery_note_histories) && @delivery_note.delivery_note_histories.present?
+            .timeline
+              - @delivery_note.delivery_note_histories.order(created_at: :asc).each do |history|
+                .timeline-item.mb-3
+                  .timeline-marker
+                  .timeline-content
+                    .d-flex.justify-content-between
+                      strong = history.description
+                      small.text-muted = history.created_at.strftime('%Y/%m/%d %H:%M')
+          - else
+            p.text-muted まだ履歴はありません
+
+    .col-lg-4
+      .card.shadow
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-gear.me-2
+            | 操作
+        .card-body
+          .d-grid.gap-2
+            = link_to print_delivery_note_path(@delivery_note), class: 'btn btn-outline-info', target: '_blank' do
+              i.bi.bi-printer.me-1
+              | プレビュー
+            = link_to download_pdf_delivery_note_path(@delivery_note), class: 'btn btn-outline-success' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+            = link_to delivery_note_path(@delivery_note), class: 'btn btn-outline-danger', data: { delete_action: true, confirm: 'この納品書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
+              i.bi.bi-trash.me-1
+              | 削除
+
+= javascript_include_tag "delete_actions" 

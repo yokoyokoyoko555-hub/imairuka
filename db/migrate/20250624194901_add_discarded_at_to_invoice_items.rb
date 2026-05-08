@@ -1,0 +1,6 @@
+class AddDiscardedAtToInvoiceItems < ActiveRecord::Migration[8.0]
+  def change
+    add_column :invoice_items, :discarded_at, :datetime
+    add_index :invoice_items, :discarded_at
+  end
+end

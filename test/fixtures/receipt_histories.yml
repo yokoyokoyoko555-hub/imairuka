@@ -1,0 +1,18 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  receipt: one
+  action: 領収書作成
+  user: システム
+  discarded_at: 2025-06-22 01:13:52
+
+two:
+  receipt: one
+  action: 領収書更新
+  user: 田中太郎
+  discarded_at: 2025-06-22 01:13:52
+
+three:
+  receipt: two
+  action: 領収書作成
+  user: システム

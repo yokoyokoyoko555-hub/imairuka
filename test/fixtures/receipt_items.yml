@@ -1,0 +1,28 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  receipt: one
+  product_code: PRD-001
+  product_name: システム開発費
+  unit_price: 5000
+  quantity: 2
+  tax_rate: 1
+  amount: 11000
+
+two:
+  receipt: one
+  product_code: PRD-002
+  product_name: 運用費
+  unit_price: 3000
+  quantity: 1
+  tax_rate: 1
+  amount: 3300
+
+three:
+  receipt: two
+  product_code: PRD-003
+  product_name: 保守費用
+  unit_price: 5000
+  quantity: 1
+  tax_rate: 1
+  amount: 5500

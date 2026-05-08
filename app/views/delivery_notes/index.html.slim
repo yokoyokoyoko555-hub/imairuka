@@ -1,0 +1,93 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-truck.me-2
+        | 納品書管理
+      .d-flex.justify-content-end
+        = link_to new_delivery_note_path, class: 'btn btn-primary' do
+          i.bi.bi-plus.me-1
+          | 新規作成
+
+  / 検索フィルター
+  .card.shadow.mb-4
+    .card-header.py-3
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-search.me-2
+        | 検索条件
+    .card-body
+      = search_form_for @q, url: delivery_notes_path, class: "row g-3" do |f|
+        .col-md-3
+          = f.label :delivery_number_cont, "納品書番号", class: "form-label"
+          = f.text_field :delivery_number_cont, class: "form-control"
+        .col-md-3
+          = f.label :customer_name_cont, "顧客名", class: "form-label"
+          = f.text_field :customer_name_cont, class: "form-control"
+        .col-md-2
+          = f.label :status_eq, "ステータス", class: "form-label"
+          = f.select :status_eq, [["全て", ""], ["送付待ち", "pending"], ["送付済み", "sent"], ["入金待ち", "waiting_payment"], ["入金済み", "paid"]], {}, class: "form-select"
+        .col-md-2
+          = f.label :delivery_date_gteq, "納品日（From）", class: "form-label"
+          = f.date_field :delivery_date_gteq, class: "form-control"
+        .col-md-2
+          = f.label :delivery_date_lteq, "納品日（To）", class: "form-label"
+          = f.date_field :delivery_date_lteq, class: "form-control"
+        .col-12
+          = f.submit "検索", class: "btn btn-primary me-2"
+          = link_to "リセット", delivery_notes_path, class: "btn btn-outline-secondary"
+
+  / 納品書一覧
+  .card.shadow.mb-4
+    .card-header.py-3.d-flex.justify-content-between.align-items-center
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-list.me-2
+        | 納品書一覧
+        span.badge.bg-secondary.ms-2 = @delivery_notes.total_count
+
+    .card-body
+      .table-responsive
+        table.table.table-bordered.table-hover
+          thead.table-light
+            tr
+              th 納品書番号
+              th 納品日
+              th 顧客名
+              th.text-end 金額
+              th 担当者
+              th ステータス
+              th 操作
+          tbody
+            - @delivery_notes.each do |delivery_note|
+              tr
+                td = delivery_note.delivery_number
+                td = format_date(delivery_note.delivery_date)
+                td = delivery_note.customer_name
+                td.text-end = number_to_currency(delivery_note.total_amount_with_tax, unit: "¥", precision: 0)
+                td = delivery_note.staff_name
+                td
+                  - if delivery_note.draft?
+                    span.badge.bg-warning style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
+                      | 一時保存
+                  - else
+                    span.badge class="bg-#{delivery_note.status_color}" style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
+                      = delivery_note.status_text
+                td
+                  .btn-group
+                    = link_to delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-primary' do
+                      i.bi.bi-eye.me-1
+                      | 詳細
+                    = link_to edit_delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-secondary' do
+                      i.bi.bi-pencil.me-1
+                      | 編集
+                    = link_to print_delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-info', target: '_blank' do
+                      i.bi.bi-printer.me-1
+                      | プレビュー
+                    = link_to delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-danger', data: { delete_action: true, confirm: 'この納品書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
+                      i.bi.bi-trash.me-1
+                      | 削除
+
+      / ページネーション
+      .d-flex.justify-content-center.mt-4
+        = paginate @delivery_notes
+
+= javascript_include_tag "delete_actions" 

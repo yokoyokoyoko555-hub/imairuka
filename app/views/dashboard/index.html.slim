@@ -1,0 +1,301 @@
+.container-fluid
+  .row.mb-4
+    .col-12
+      h1.h3.mb-0.text-gray-800 ダッシュボード
+
+  / 売上サマリー
+  .row.mb-4
+    .col-xl-3.col-md-6.mb-4
+      .card.border-left-primary.shadow.h-100.py-2
+        .card-body
+          .row.no-gutters.align-items-center
+            .col.mr-2
+              .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1
+                | 今月の売上
+              .h5.mb-0.font-weight-bold.text-gray-800
+                = number_to_currency(@monthly_sales, unit: "¥", precision: 0)
+              .text-xs.text-muted.mt-1
+                - if @monthly_sales_change >= 0
+                  span.text-success
+                    i.bi.bi-arrow-up
+                    = @monthly_sales_change
+                    | %
+                - else
+                  span.text-danger
+                    i.bi.bi-arrow-down
+                    = @monthly_sales_change.abs
+                    | %
+            .col-auto
+              i.bi.bi-currency-yen.fs-2.text-gray-300
+          .mt-2
+            = link_to invoices_path, class: "btn btn-sm btn-outline-primary" do
+              i.bi.bi-arrow-right.me-1
+              | 請求書一覧
+
+    .col-xl-3.col-md-6.mb-4
+      .card.border-left-success.shadow.h-100.py-2
+        .card-body
+          .row.no-gutters.align-items-center
+            .col.mr-2
+              .text-xs.font-weight-bold.text-success.text-uppercase.mb-1
+                | 年間累計売上
+              .h5.mb-0.font-weight-bold.text-gray-800
+                = number_to_currency(@yearly_sales, unit: "¥", precision: 0)
+            .col-auto
+              i.bi.bi-graph-up.fs-2.text-gray-300
+          .mt-2
+            = link_to invoices_path, class: "btn btn-sm btn-outline-success" do
+              i.bi.bi-arrow-right.me-1
+              | 請求書一覧
+
+    .col-xl-3.col-md-6.mb-4
+      .card.border-left-info.shadow.h-100.py-2
+        .card-body
+          .row.no-gutters.align-items-center
+            .col.mr-2
+              .text-xs.font-weight-bold.text-info.text-uppercase.mb-1
+                | 総顧客数
+              .h5.mb-0.font-weight-bold.text-gray-800
+                = @total_customers
+                | 社
+              .text-xs.text-muted.mt-1
+                | 今月新規 
+                span.text-info
+                  = @new_customers_this_month
+                  | 社
+            .col-auto
+              i.bi.bi-people.fs-2.text-gray-300
+          .mt-2
+            = link_to customers_path, class: "btn btn-sm btn-outline-info" do
+              i.bi.bi-arrow-right.me-1
+              | 顧客一覧
+
+    .col-xl-3.col-md-6.mb-4
+      .card.border-left-warning.shadow.h-100.py-2
+        .card-body
+          .row.no-gutters.align-items-center
+            .col.mr-2
+              .text-xs.font-weight-bold.text-warning.text-uppercase.mb-1
+                | 未払い請求書
+              .h5.mb-0.font-weight-bold.text-gray-800
+                = @pending_invoices
+                | 件
+              .text-xs.text-muted.mt-1
+                | 期限超過 
+                span.text-danger
+                  = @overdue_invoices
+                  | 件
+            .col-auto
+              i.bi.bi-exclamation-triangle.fs-2.text-gray-300
+          .mt-2
+            = link_to invoices_path, class: "btn btn-sm btn-outline-warning" do
+              i.bi.bi-arrow-right.me-1
+              | 請求書一覧
+
+  / グラフと案件状況
+  .row
+    / 売上推移グラフ
+    .col-xl-8.col-lg-7
+      .card.shadow.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+          h6.m-0.font-weight-bold.text-primary 売上推移（過去6ヶ月）
+          = link_to invoices_path, class: "btn btn-sm btn-outline-primary" do
+            i.bi.bi-arrow-right.me-1
+            | 詳細
+        .card-body
+          canvas#salesChart[height="300"]
+
+    / 案件状況
+    .col-xl-4.col-lg-5
+      .card.shadow.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+          h6.m-0.font-weight-bold.text-primary 案件状況
+          = link_to orders_path, class: "btn btn-sm btn-outline-primary" do
+            i.bi.bi-arrow-right.me-1
+            | 詳細
+        .card-body
+          .mb-3
+            .d-flex.justify-content-between.align-items-center.mb-1
+              span 新規案件（今月）
+              span.badge.bg-primary = @new_orders
+            .progress[style="height: 10px;"]
+              .progress-bar.bg-primary[role="progressbar" style="width: #{@new_orders * 10}%"]
+
+          .mb-3
+            .d-flex.justify-content-between.align-items-center.mb-1
+              span 処理中
+              span.badge.bg-warning = @processing_orders
+            .progress[style="height: 10px;"]
+              .progress-bar.bg-warning[role="progressbar" style="width: #{@processing_orders * 5}%"]
+
+          .mb-3
+            .d-flex.justify-content-between.align-items-center.mb-1
+              span 完了
+              span.badge.bg-success = @completed_orders
+            .progress[style="height: 10px;"]
+              .progress-bar.bg-success[role="progressbar" style="width: #{@completed_orders * 5}%"]
+
+  / 業種別顧客数と在庫アラート
+  .row
+    / 業種別顧客数
+    .col-xl-6.col-lg-6
+      .card.shadow.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+          h6.m-0.font-weight-bold.text-primary 業種別顧客数
+          = link_to customers_path, class: "btn btn-sm btn-outline-primary" do
+            i.bi.bi-arrow-right.me-1
+            | 詳細
+        .card-body
+          canvas#industryChart[height="200"]
+
+    / 在庫アラート
+    .col-xl-6.col-lg-6
+      .card.shadow.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+          h6.m-0.font-weight-bold.text-primary 在庫アラート
+          = link_to products_path, class: "btn btn-sm btn-outline-primary" do
+            i.bi.bi-arrow-right.me-1
+            | 詳細
+        .card-body
+          - if @low_stock_products.any?
+            .table-responsive
+              table.table.table-sm
+                thead
+                  tr
+                    th 商品名
+                    th 在庫数
+                    th 閾値
+                    th ステータス
+                tbody
+                  - @low_stock_products.each do |product|
+                    tr
+                      td
+                        = link_to product.name, product_path(product), class: "text-decoration-none"
+                      td = product.stock_quantity
+                      td = product.stock_threshold
+                      td
+                        - if product.stock_quantity <= 0
+                          span.badge.bg-danger 在庫切れ
+                        - else
+                          span.badge.bg-warning 在庫不足
+          - else
+            p.text-muted.mb-0 在庫不足の商品はありません
+
+  / 最近の活動
+  .row
+    / 最近の案件
+    .col-xl-6.col-lg-6
+      .card.shadow.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+          h6.m-0.font-weight-bold.text-primary 最近の案件
+          = link_to orders_path, class: "btn btn-sm btn-outline-primary" do
+            i.bi.bi-arrow-right.me-1
+            | 詳細
+        .card-body
+          - if @recent_orders.any?
+            .list-group.list-group-flush
+              - @recent_orders.each do |order|
+                .list-group-item.d-flex.justify-content-between.align-items-center
+                  .d-flex.flex-column
+                    strong
+                      = link_to order.order_number, order_path(order), class: "text-decoration-none"
+                    small.text-muted
+                      - if order.customer
+                        = link_to order.customer.name, customer_path(order.customer), class: "text-decoration-none text-muted"
+                      - else
+                        | 顧客情報なし
+                  .d-flex.align-items-center
+                    span.badge.me-2[class="bg-#{order.order_status&.color || 'secondary'}"] = order.order_status&.name
+                    small.text-muted = order.order_date&.strftime('%m/%d')
+          - else
+            p.text-muted.mb-0 案件がありません
+
+    / 最近の請求書
+    .col-xl-6.col-lg-6
+      .card.shadow.mb-4
+        .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+          h6.m-0.font-weight-bold.text-primary 最近の請求書
+          = link_to invoices_path, class: "btn btn-sm btn-outline-primary" do
+            i.bi.bi-arrow-right.me-1
+            | 詳細
+        .card-body
+          - if @recent_invoices.any?
+            .list-group.list-group-flush
+              - @recent_invoices.each do |invoice|
+                .list-group-item.d-flex.justify-content-between.align-items-center
+                  .d-flex.flex-column
+                    strong
+                      = link_to invoice.invoice_number, invoice_path(invoice), class: "text-decoration-none"
+                    small.text-muted = invoice.customer_name
+                  .d-flex.align-items-center
+                    span.badge.me-2[class="bg-#{invoice.status == 'paid' ? 'success' : 'warning'}"] = invoice.status
+                    small.text-muted = number_to_currency(invoice.total_amount, unit: "¥", precision: 0)
+          - else
+            p.text-muted.mb-0 請求書がありません
+
+javascript:
+  document.addEventListener('DOMContentLoaded', function() {
+    // 売上推移グラフ
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    new Chart(salesCtx, {
+      type: 'line',
+      data: {
+        labels: #{raw @sales_trend.map { |data| data[:month] }},
+        datasets: [{
+          label: '売上',
+          data: #{raw @sales_trend.map { |data| data[:sales] }},
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.1)',
+          tension: 0.1,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '¥' + value.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // 業種別顧客数グラフ
+    const industryCtx = document.getElementById('industryChart').getContext('2d');
+    new Chart(industryCtx, {
+      type: 'doughnut',
+      data: {
+        labels: #{raw @customers_by_industry.map { |industry, _| industry }},
+        datasets: [{
+          data: #{raw @customers_by_industry.map { |_, count| count }},
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  }); 

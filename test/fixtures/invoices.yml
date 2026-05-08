@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  invoice_number: I000001
+  invoice_date: 2025-06-24
+  customer_name: テスト顧客1
+  customer_address: 東京都渋谷区テスト1-1-1
+  subject: 2025年6月度 システム開発費
+  staff_name: テスト担当者1
+  status: draft
+  notes: テスト備考1
+  total_amount: 100000
+  payment_due_date: 2025-07-24
+  payment_method: 銀行振込
+  discarded_at: 2025-06-24 02:04:45
+
+two:
+  invoice_number: I000002
+  invoice_date: 2025-06-24
+  customer_name: テスト顧客2
+  customer_address: 東京都新宿区テスト2-2-2
+  subject: 2025年6月度 運用費
+  staff_name: テスト担当者2
+  status: sent
+  notes: テスト備考2
+  total_amount: 50000
+  payment_due_date: 2025-07-24
+  payment_method: クレジットカード
+  discarded_at: 2025-06-24 02:04:45

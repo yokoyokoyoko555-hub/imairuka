@@ -1,0 +1,31 @@
+- if model.errors.any?
+  .alert.alert-danger.mb-4.d-flex.align-items-center style="border-left: 4px solid #dc3545; background-color: #fff; color: #dc3545; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+    i.bi.bi-exclamation-circle-fill.me-2 style="font-size: 1.5rem;"
+    ul.mb-0.ps-3
+      - model.errors.full_messages.each do |message|
+        - if message.include?('Order items product')
+          li = '商品を選択してください'
+        - elsif message.include?('注文商品')
+          li = message.gsub(/^注文商品 /, '')
+        - elsif message.include?('顧客コード')
+          li = message.gsub(/^顧客コード /, '')
+        - elsif message.include?('商品コード')
+          li = message.gsub(/^商品コード /, '')
+        - elsif message.include?('単価')
+          li = message.gsub(/^単価 /, '')
+        - elsif message.include?('件名 件名')
+          li = message.gsub(/^件名 件名/, '件名')
+        - elsif message.include?('見積商品')
+          li = message.gsub(/^見積商品/, '')
+        - elsif message.include?('ステータス名')
+          li = message.gsub(/^ステータス名 /, '')
+        - elsif message.include?('ステータスコード')
+          li = message.gsub(/^ステータスコード /, '')
+        - elsif message.include?('表示順')
+          li = message.gsub(/^表示順 /, '')
+        - elsif message.include?('表示色')
+          li = message.gsub(/^表示色 /, '')
+        - elsif message.include?('説明')
+          li = message.gsub(/^説明 /, '')
+        - else
+          li = message 

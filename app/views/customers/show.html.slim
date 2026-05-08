@@ -1,0 +1,173 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-person.me-2
+        | 顧客詳細
+      .d-flex.justify-content-end.gap-2
+        = link_to customers_path, class: 'btn btn-outline-secondary' do
+          i.bi.bi-arrow-left.me-1
+          | 一覧に戻る
+        = link_to edit_customer_path(@customer), class: 'btn btn-outline-primary' do
+          i.bi.bi-pencil.me-1
+          | 編集
+
+  .row
+    / 左カラム
+    .col-md-8
+      / 基本情報
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-info-circle.me-2
+            | 基本情報
+        .card-body
+          .row.mb-3
+            .col-md-3.text-muted 顧客コード
+            .col-md-9 = @customer.code
+          .row.mb-3
+            .col-md-3.text-muted 会社名
+            .col-md-9 = @customer.company_name
+          .row.mb-3
+            .col-md-3.text-muted 業種
+            .col-md-9 = @customer.industry
+          .row.mb-3
+            .col-md-3.text-muted 設立年月日
+            .col-md-9 = @customer.established_date&.strftime("%Y年%m月%d日") || "-"
+          .row.mb-3
+            .col-md-3.text-muted 資本金
+            .col-md-9 = @customer.capital ? "#{number_to_currency(@customer.capital, unit: "¥", precision: 0)}" : "-"
+          .row.mb-3
+            .col-md-3.text-muted 代表者名
+            .col-md-9 = @customer.representative_name || "-"
+          .row.mb-3
+            .col-md-3.text-muted 従業員数
+            .col-md-9 = @customer.employee_count ? "#{@customer.employee_count}名" : "-"
+          .row.mb-3
+            .col-md-3.text-muted 事業内容
+            .col-md-9 = @customer.business_description || "-"
+          .row.mb-3
+            .col-md-3.text-muted ステータス
+            .col-md-9
+              span.badge class="bg-#{@customer.status == 'active' ? 'success' : @customer.status == 'prospect' ? 'warning' : 'secondary'}"
+                = @customer.status_text
+
+      / 連絡先情報
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-telephone.me-2
+            | 連絡先情報
+        .card-body
+          .row.mb-3
+            .col-md-3.text-muted 住所
+            .col-md-9 = @customer.address || "-"
+          .row.mb-3
+            .col-md-3.text-muted 電話番号
+            .col-md-9 = @customer.phone || "-"
+          .row.mb-3
+            .col-md-3.text-muted メールアドレス
+            .col-md-9 = @customer.email || "-"
+
+      / 取引履歴
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-clock-history.me-2
+            | 取引履歴
+        .card-body
+          - if @customer.orders.any?
+            .table-responsive
+              table.table.table-bordered.table-hover
+                thead.table-light
+                  tr
+                    th 案件番号
+                    th 注文日
+                    th 担当者
+                    th.text-end 金額
+                    th ステータス
+                    th 操作
+                tbody
+                  - @customer.orders.order(order_date: :desc).each do |order|
+                    tr
+                      td = order.order_number
+                      td = order.order_date.strftime("%Y/%m/%d")
+                      td = order.staff_name
+                      td.text-end = number_to_currency(order.total_amount, unit: "¥", precision: 0)
+                      td
+                        span.badge class="bg-#{order.order_status&.code == 'paid' ? 'success' : order.order_status&.code == 'billed' ? 'warning' : 'primary'}"
+                          = order.order_status&.name || '不明'
+                      td
+                        = link_to order_path(order), class: "btn btn-sm btn-outline-primary" do
+                          i.bi.bi-eye.me-1
+                          | 詳細
+          - else
+            p.text-muted.text-center.mb-0 取引履歴はありません
+
+    / 右カラム
+    .col-md-4
+      / 請求情報
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-receipt.me-2
+            | 請求情報
+        .card-body
+          .row.mb-3
+            .col-md-4.text-muted 支払条件
+            .col-md-8 = @customer.payment_term || "-"
+          .row.mb-3
+            .col-md-4.text-muted 支払方法
+            .col-md-8 = @customer.payment_method || "-"
+          .row
+            .col-md-4.text-muted 請求書メール
+            .col-md-8 = @customer.invoice_email || "-"
+
+      / 取引サマリー
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-graph-up.me-2
+            | 取引サマリー
+        .card-body
+          .row.mb-3
+            .col-md-6.text-muted 取引回数
+            .col-md-6.text-end
+              strong = @customer.transaction_count
+              | 回
+          .row.mb-3
+            .col-md-6.text-muted 総取引金額
+            .col-md-6.text-end
+              strong = number_to_currency(@customer.total_transaction_amount, unit: "¥", precision: 0)
+          .row
+            .col-md-6.text-muted 最終取引日
+            .col-md-6.text-end
+              strong = @customer.last_transaction_date&.strftime("%Y/%m/%d") || "-"
+
+      / メモ
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-sticky.me-2
+            | メモ
+        .card-body
+          - if @customer.notes.present?
+            p.mb-0 = @customer.notes
+          - else
+            p.text-muted.text-center.mb-0 メモはありません
+
+      / 操作
+      .card.shadow.mt-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-gear.me-2
+            | 操作
+        .card-body
+          .d-grid.gap-2
+            = link_to customer_path(@customer), \
+                data: { delete_action: true, confirm: "この顧客を削除してもよろしいですか？\nこの操作は取り消せません。" }, \
+                class: "btn btn-outline-danger" do
+              i.bi.bi-trash.me-1
+              | 削除
+
+= javascript_include_tag "delete_actions" 

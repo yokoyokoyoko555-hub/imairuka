@@ -1,0 +1,36 @@
+{
+  "name": "Imairuka Order Management",
+  "description": "Rails-based order management system for customers, products, orders, quotations, delivery notes, invoices, and receipts.",
+  "repository": "",
+  "keywords": ["rails", "postgresql", "order-management"],
+  "stack": "heroku-24",
+  "buildpacks": [
+    {
+      "url": "heroku-community/apt"
+    },
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "heroku/ruby"
+    }
+  ],
+  "addons": [
+    "heroku-postgresql:essential-0",
+    "cloudinary"
+  ],
+  "env": {
+    "RAILS_ENV": {
+      "value": "production"
+    },
+    "RAILS_MAX_THREADS": {
+      "value": "5"
+    },
+    "SECRET_KEY_BASE": {
+      "generator": "secret"
+    }
+  },
+  "scripts": {
+    "postdeploy": "bin/rails db:seed"
+  }
+}

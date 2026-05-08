@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  invoice: one
+  product_code: TEST001
+  product_name: テスト商品1
+  unit_price: 50000
+  quantity: 2
+  tax_rate: 1
+  amount: 100000
+
+two:
+  invoice: two
+  product_code: TEST002
+  product_name: テスト商品2
+  unit_price: 25000
+  quantity: 2
+  tax_rate: 2
+  amount: 50000

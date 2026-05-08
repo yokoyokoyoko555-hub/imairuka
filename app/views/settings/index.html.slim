@@ -1,0 +1,109 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-gear.me-2
+        | 設定
+
+  .row
+    .col-md-3
+      .list-group.mb-4
+        = link_to settings_path(tab: "company"), class: "list-group-item list-group-item-action #{params[:tab].blank? || params[:tab] == 'company' ? 'active' : ''}" do
+          i.bi.bi-building.me-2
+          | 会社情報
+        = link_to settings_path(tab: "status"), class: "list-group-item list-group-item-action #{params[:tab] == 'status' ? 'active' : ''}" do
+          i.bi.bi-tag.me-2
+          | ステータス設定
+
+    .col-md-9
+      - if params[:tab].blank? || params[:tab] == 'company'
+        = form_with model: @company, url: settings_path, method: :patch, class: "needs-validation", novalidate: true do |f|
+          - if @company.errors.any?
+            .alert.alert-danger.mb-4.d-flex.align-items-center style="border-left: 4px solid #dc3545; background-color: #fff; color: #dc3545; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              i.bi.bi-exclamation-circle-fill.me-2 style="font-size: 1.5rem;"
+              ul.mb-0.ps-3
+                - @company.errors.full_messages.each do |message|
+                  li = message
+
+          / 基本情報
+          .card.shadow.mb-4
+            .card-header.py-3
+              h6.m-0.font-weight-bold.text-primary
+                i.bi.bi-info-circle.me-2
+                | 基本情報
+            .card-body
+              .row.mb-3
+                .col-md-6
+                  = f.label :name, "会社名", class: "form-label required"
+                  = f.text_field :name, class: "form-control", required: true, maxlength: 100
+                .col-md-6
+                  = f.label :invoice_number, "インボイス登録番号", class: "form-label required"
+                  = f.text_field :invoice_number, class: "form-control", required: true, placeholder: "T1234567890123", maxlength: 20
+              .row.mb-3
+                .col-md-6
+                  = f.label :postal_code, "郵便番号", class: "form-label required"
+                  = f.text_field :postal_code, class: "form-control", required: true, placeholder: "1234567", maxlength: 7, pattern: "[0-9]{7}"
+                .col-md-6
+                  = f.label :address, "住所", class: "form-label required"
+                  = f.text_field :address, class: "form-control", required: true, maxlength: 500
+              .row.mb-3
+                .col-md-6
+                  = f.label :phone, "電話番号", class: "form-label required"
+                  = f.telephone_field :phone, class: "form-control", required: true, placeholder: "0312345678", maxlength: 15, pattern: "[0-9]{10,11}"
+                .col-md-6
+                  = f.label :email, "メールアドレス", class: "form-label required"
+                  = f.email_field :email, class: "form-control", required: true, maxlength: 100
+              .row.mb-3
+                .col-md-6
+                  = f.label :representative, "代表者名", class: "form-label required"
+                  = f.text_field :representative, class: "form-control", required: true, maxlength: 50
+                .col-md-6
+                  = f.label :business_type, "業種", class: "form-label required"
+                  = f.text_field :business_type, class: "form-control", required: true, maxlength: 50
+              .text-end
+                = f.submit "設定を保存", class: "btn btn-primary", data: { disable_with: "送信中..." }
+
+      - if params[:tab] == 'status'
+        .card.shadow.mb-4
+          .card-header.py-3.d-flex.justify-content-between.align-items-center
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-tag.me-2
+              | ステータス設定
+            = link_to new_order_status_path, class: 'btn btn-primary btn-sm' do
+              i.bi.bi-plus.me-1
+              | ステータス登録
+          .card-body
+            / ステータス一覧
+            table.table.table-bordered.table-hover
+              thead.table-light
+                tr
+                  th ステータス名
+                  th ステータスコード
+                  th 表示順
+                  th 表示色
+                  th 説明
+                  th 状態
+                  th
+              tbody
+                - @order_statuses&.each do |status|
+                  tr
+                    td = status.name
+                    td = status.code
+                    td = status.display_order
+                    td
+                      span.badge style="background-color: #{status.color}"
+                        = status.color
+                    td = status.description
+                    td
+                      - if status.is_active
+                        span.badge.bg-success 有効
+                      - else
+                        span.badge.bg-secondary 無効
+                    td.text-end
+                      = link_to edit_order_status_path(status), class: "btn btn-sm btn-outline-primary me-1" do
+                        i.bi.bi-pencil
+                      = link_to order_status_path(status), class: "btn btn-sm btn-outline-danger", data: { delete_action: true, confirm: "このステータスを削除してもよろしいですか？\nこの操作は取り消せません。" } do
+                        i.bi.bi-trash.me-1
+                        | 削除
+
+= javascript_include_tag "delete_actions" 

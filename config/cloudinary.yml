@@ -1,0 +1,22 @@
+<%
+  require "uri"
+  cloudinary_uri = URI.parse(ENV["CLOUDINARY_URL"]) if ENV["CLOUDINARY_URL"].present?
+%>
+
+development:
+  cloud_name: <%= ENV["CLOUDINARY_CLOUD_NAME"].presence || cloudinary_uri&.host %>
+  api_key: <%= ENV["CLOUDINARY_API_KEY"].presence || cloudinary_uri&.user %>
+  api_secret: <%= ENV["CLOUDINARY_API_SECRET"].presence || cloudinary_uri&.password %>
+  secure: true
+
+test:
+  cloud_name: <%= ENV["CLOUDINARY_CLOUD_NAME"].presence || cloudinary_uri&.host %>
+  api_key: <%= ENV["CLOUDINARY_API_KEY"].presence || cloudinary_uri&.user %>
+  api_secret: <%= ENV["CLOUDINARY_API_SECRET"].presence || cloudinary_uri&.password %>
+  secure: true
+
+production:
+  cloud_name: <%= ENV["CLOUDINARY_CLOUD_NAME"].presence || cloudinary_uri&.host %>
+  api_key: <%= ENV["CLOUDINARY_API_KEY"].presence || cloudinary_uri&.user %>
+  api_secret: <%= ENV["CLOUDINARY_API_SECRET"].presence || cloudinary_uri&.password %>
+  secure: true

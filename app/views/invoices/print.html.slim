@@ -1,0 +1,248 @@
+- content_for :title, '請求書'
+.container-fluid.p-4
+  .invoice-sheet
+    .row
+      .col-12.text-center
+        h2.invoice-title 請求書
+    table(style="width: 100%; border-collapse: collapse; margin-bottom: 16px;")
+      tr
+        td(style="width: 60%; vertical-align: top; text-align: left;")
+          .customer-name style="font-size: 13pt; font-weight: bold;"
+            = @invoice.customer_name.presence || ''
+            |　御中
+          .customer-address style="font-size: 10pt; margin-top: 0.5em;"
+            = @invoice.customer_address.presence || ''
+        td(style="width: 40%; vertical-align: top; text-align: right;")
+          .company-info-block(style="font-size: 10pt; text-align: right; line-height: 1.6;")
+            - if @invoice.invoice_date.present?
+              div 請求日: #{format_date(@invoice.invoice_date)}
+            - if @invoice.invoice_number.present?
+              div 請求書番号: #{@invoice.invoice_number}
+            - if @company.invoice_number.present?
+              div 登録番号: #{@company.invoice_number}
+            - if @company.name.present?
+              div(style="margin-top: 6em;")= @company.name
+            - if @company.postal_code.present?
+              div 〒#{@company.postal_code}
+            div= @company.address
+    .row
+      .col-12
+        | 下記の通りご請求申し上げます。
+    .row.mt-2
+      .col-12
+        .subject-row
+          | 件名　#{@invoice.subject.presence || ''}
+    - subtotal = 0
+    - tax_total = 0
+    - @invoice.invoice_items.each do |item|
+      - amount = (item.unit_price || 0) * (item.quantity || 0)
+      - subtotal += amount
+      - case item.tax_rate.to_i
+      - when 1
+        - tax_total += (amount * 0.1).round
+      - when 2, 3
+        - tax_total += (amount * 0.08).round
+      end
+    .row.mt-2
+      .col-12
+        table.amount-table
+          tr
+            th 小計
+            th 消費税
+            th 請求金額
+          tr
+            td = number_to_currency(subtotal, unit: "¥", precision: 0)
+            td = number_to_currency(tax_total, unit: "¥", precision: 0)
+            td.amount-total = number_to_currency(subtotal + tax_total, unit: "¥", precision: 0)
+    .row.mt-4
+      .col-12
+        table.detail-table
+          tr
+            th 摘要
+            th 数量
+            th 単価
+            th 明細金額
+            th 税率
+          - @invoice.invoice_items.each do |item|
+            tr
+              td = item.product_name.presence || ''
+              td = item.quantity.presence || ''
+              td = number_to_currency(item.unit_price || 0, unit: "¥", precision: 0)
+              td = number_to_currency(item.amount || 0, unit: "¥", precision: 0)
+              - if item.respond_to?(:tax_rate)
+                - if item.tax_rate.to_i == 1
+                  - tax_label = '10%'
+                - elsif item.tax_rate.to_i == 2
+                  - tax_label = '8% (軽減税率)'
+                - elsif item.tax_rate.to_i == 3
+                  - tax_label = '8%'
+                - elsif item.tax_rate.to_i == 4
+                  - tax_label = '0%'
+                - else
+                  - tax_label = ''
+              - else
+                - tax_label = ''
+              td = tax_label
+          - (10 - @invoice.invoice_items.size).times do
+            tr
+              td
+              td
+              td
+              td
+              td
+    .row.mt-4
+      .col-12
+        table.payment-table
+          tr
+            th 支払期限
+            th 支払方法
+          tr
+            td = format_date(@invoice.payment_due_date) || ''
+            td = @invoice.payment_method.presence || ''
+    .row.mt-4
+      .col-12
+        table.note-table
+          tr
+            th 備考
+          tr
+            td.height-100 = @invoice.notes.presence || ''
+    .row
+      .col-12.text-center.page-number
+        | 1 / 1
+
+style
+  |
+    .invoice-sheet {
+      width: 210mm;
+      margin: 0 auto;
+      padding: 20mm 15mm 10mm 15mm;
+      background: #fff;
+      font-size: 12pt;
+      box-sizing: border-box;
+      font-family: 'Noto Sans JP', 'IPAexGothic', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+    }
+    .invoice-title {
+      font-size: 22pt;
+      font-weight: bold;
+      margin-bottom: 0.5em;
+    }
+    .company-name {
+      font-size: 13pt;
+      font-weight: bold;
+      margin-bottom: 0.5em;
+    }
+    .company-info {
+      font-size: 10pt;
+      line-height: 1.6;
+    }
+    .info-table th, .info-table td {
+      font-size: 10pt;
+      padding: 0.2em 0.7em 0.2em 0.2em;
+      border: none;
+      text-align: left;
+    }
+    .info-table th {
+      font-weight: normal;
+      color: #333;
+      width: 6em;
+    }
+    .customer-info {
+      font-size: 10pt;
+      text-align: left;
+      margin-top: 0.5em;
+    }
+    .subject-row {
+      font-size: 12pt;
+      font-weight: bold;
+      border-bottom: 1.5px solid #222;
+      padding: 0.5em 0 0.5em 0.5em;
+      margin-bottom: 0.5em;
+    }
+    .amount-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.5em;
+    }
+    .amount-table th, .amount-table td {
+      border: 1.5px solid #222;
+      font-size: 12pt;
+      text-align: center;
+      padding: 0.4em 0.5em;
+    }
+    .amount-total {
+      font-size: 15pt;
+      font-weight: bold;
+    }
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.5em;
+      table-layout: fixed;
+    }
+    .detail-table th, .detail-table td {
+      border: 1.5px solid #222;
+      font-size: 11pt;
+      text-align: left;
+      padding: 0.4em 0.5em;
+      height: 1.2em;
+    }
+    .detail-table th:nth-child(1), .detail-table td:nth-child(1) { width: 48%; }
+    .detail-table th:nth-child(2), .detail-table td:nth-child(2) { width: 12%; }
+    .detail-table th:nth-child(3), .detail-table td:nth-child(3) { width: 16%; }
+    .detail-table th:nth-child(4), .detail-table td:nth-child(4) { width: 16%; }
+    .detail-table th:nth-child(5), .detail-table td:nth-child(5) { width: 8%; }
+    .detail-table th {
+      background: #fafafa;
+      font-weight: normal;
+    }
+    .payment-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.5em;
+    }
+    .payment-table th, .payment-table td {
+      border: 1.5px solid #222;
+      font-size: 11pt;
+      text-align: left;
+      padding: 0.4em 0.5em;
+    }
+    .payment-table th {
+      background: #fafafa;
+      font-weight: normal;
+      width: 15%;
+    }
+    .note-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+    }
+    .note-table th, .note-table td {
+      border: 1.5px solid #222;
+      font-size: 11pt;
+      text-align: left;
+      padding: 0.4em 0.5em;
+    }
+    .note-table th {
+      background: #fafafa;
+      font-weight: normal;
+      width: 15%;
+    }
+    .height-100 {
+      height: 100px;
+      vertical-align: top;
+    }
+    .page-number {
+      font-size: 10pt;
+      color: #666;
+      margin-top: 2em;
+    }
+    @media print {
+      .container-fluid {
+        padding: 0 !important;
+      }
+      .invoice-sheet {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+      }
+    } 

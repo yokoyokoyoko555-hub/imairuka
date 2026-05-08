@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  quotation_number: MyString
+  quotation_date: 2025-06-22
+  customer_name: MyString
+  total_amount: 1
+  status: MyString
+  staff_name: MyString
+  valid_until: 2025-06-22
+  notes: MyText
+
+two:
+  quotation_number: MyString
+  quotation_date: 2025-06-22
+  customer_name: MyString
+  total_amount: 1
+  status: MyString
+  staff_name: MyString
+  valid_until: 2025-06-22
+  notes: MyText

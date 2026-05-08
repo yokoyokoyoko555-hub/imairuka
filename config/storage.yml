@@ -1,0 +1,19 @@
+test:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage") %>
+
+local:
+  service: Disk
+  root: <%= Rails.root.join("storage") %>
+
+<%
+  require "uri"
+  cloudinary_uri = URI.parse(ENV["CLOUDINARY_URL"]) if ENV["CLOUDINARY_URL"].present?
+%>
+
+cloudinary:
+  service: Cloudinary
+  cloud_name: <%= ENV["CLOUDINARY_CLOUD_NAME"].presence || cloudinary_uri&.host %>
+  api_key: <%= ENV["CLOUDINARY_API_KEY"].presence || cloudinary_uri&.user %>
+  api_secret: <%= ENV["CLOUDINARY_API_SECRET"].presence || cloudinary_uri&.password %>
+  secure: true

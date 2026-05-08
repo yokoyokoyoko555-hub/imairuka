@@ -1,0 +1,357 @@
+.container-fluid data-controller="order"
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-cart.me-2
+        | 案件編集
+      .d-flex.justify-content-end
+        = link_to @order, class: 'btn btn-outline-secondary' do
+          i.bi.bi-arrow-left.me-1
+          | 詳細に戻る
+
+  = form_with(model: @order, local: true, class: 'needs-validation', data: { controller: 'order' }) do |f|
+    = render 'shared/error_messages', model: f.object
+
+    .row
+      .col-lg-8
+        / 基本情報
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-info-circle.me-2
+              | 基本情報
+          .card-body
+            .row.mb-3
+              .col-md-6
+                = f.label :order_number, '案件番号', class: 'form-label'
+                = f.text_field :order_number, class: 'form-control', readonly: true
+                small.text-muted 案件番号は変更できません
+              .col-md-6
+                = f.label :order_date, '注文日', class: 'form-label required'
+                = f.date_field :order_date, class: 'form-control', required: true
+            .row.mb-3
+              .col-md-6
+                = f.label :customer_id, '顧客', class: 'form-label required'
+                = f.collection_select :customer_id, @customers, :id, :name, \
+                  { include_blank: '選択してください' }, \
+                  { class: 'form-select', required: true }
+              .col-md-6
+                = f.label :staff_name, '担当者', class: 'form-label required'
+                = f.text_field :staff_name, class: 'form-control', required: true, maxlength: 50
+            .row.mb-3
+              .col-md-6
+                = f.label :order_status_id, 'ステータス', class: 'form-label required'
+                = f.collection_select :order_status_id, OrderStatus.active, :id, :name, \
+                  { include_blank: '選択してください' }, \
+                  { class: 'form-select', required: true }
+              .col-md-6
+                = f.label :payment_due_date, '支払期限', class: 'form-label'
+                = f.date_field :payment_due_date, class: 'form-control'
+            .row.mb-3
+              .col-md-6
+                = f.label :payment_method, '支払方法', class: 'form-label'
+                = f.select :payment_method, Order.payment_methods.keys.map { |k| [Order.payment_method_text(k), k] }, \
+                  { include_blank: '選択してください' }, \
+                  { class: 'form-select'}
+              .col-md-6
+                = f.label :notes, '備考', class: 'form-label'
+                = f.text_area :notes, class: 'form-control', rows: 3, maxlength: 200
+
+        / 注文商品
+        .card.shadow.mb-4
+          .card-header.py-3.d-flex.justify-content-between.align-items-center
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-cart.me-2
+              | 注文商品
+            button.btn.btn-sm.btn-primary type="button" data-action="click->order#addItem"
+              i.bi.bi-plus.me-1
+              | 商品を追加
+          .card-body
+            table#order_items.table.table-bordered.table-hover.mb-4
+              thead.table-light
+                tr
+                  th 商品名
+                  th.text-end 単価
+                  th.text-end 数量
+                  th.text-end 金額
+                  th
+              tbody
+                = f.fields_for :order_items do |item_form|
+                  = render 'order_items_fields', f: item_form
+              tfoot
+                tr
+                  td.text-end colspan="3" 合計
+                  td.text-end
+                    #total_amount data-order-target="totalAmount"
+                      = number_to_currency(@order.order_items.reject(&:marked_for_destruction?).sum { |item| item.amount.to_i }, unit: '¥', precision: 0)
+                  td
+
+            template#order_items_template
+              tr.item-row
+                td
+                  input type="hidden" name="order[order_items_attributes][0][_destroy]" value="0" class="destroy-input"
+                  select name="order[order_items_attributes][0][product_id]" class="form-select product-select" required="true" data-action="change->order#updateProductInfo"
+                    option value="" 商品を選択
+                    - @products.each do |product|
+                      option value=product.id = product.name
+                td.text-end
+                  .unit-price
+                  input type="hidden" name="order[order_items_attributes][0][unit_price]" class="unit-price-input"
+                td.text-end
+                  input type="number" name="order[order_items_attributes][0][quantity]" class="form-control text-end quantity-input" min="1" value="1" required="true" data-action="change->order#calculateAmount"
+                td.text-end
+                  .amount
+                  input type="hidden" name="order[order_items_attributes][0][amount]" class="amount-input"
+                td.text-end
+                  button.btn.btn-danger.btn-sm.delete-item type="button" data-action="order#deleteItem"
+                    i.bi.bi-trash
+                    | 削除
+
+        / 納品情報
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-truck.me-2
+              | 納品情報
+          .card-body
+            .row.mb-3
+              .col-md-6
+                = f.label :delivery_date, '納品日', class: 'form-label'
+                = f.date_field :delivery_date, class: 'form-control'
+              .col-md-6
+                = f.label :delivery_address, '配送先', class: 'form-label'
+                = f.text_area :delivery_address, class: 'form-control', rows: 3, maxlength: 200
+
+      .col-lg-4
+        / 操作ボタン
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-gear.me-2
+              | 操作
+          .card-body
+            .d-grid.gap-2
+              = f.submit '更新', class: 'btn btn-primary', data: { disable_with: '送信中...' }
+              = f.submit '一時保存', class: 'btn btn-outline-info', data: { disable_with: '保存中...' }, name: 'save_draft'
+              = link_to 'キャンセル', @order, class: 'btn btn-outline-secondary'
+
+javascript:
+  document.addEventListener('DOMContentLoaded', function() {
+    // フォーム送信時のバリデーション
+    window.validateForm = function(event) {
+      const form = event.target;
+      const formData = new FormData(form);
+      
+      // デバッグ用：フォームデータの内容を確認
+      console.log('送信されるフォームデータ:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+      
+      // 商品が選択されているか確認
+      const productSelects = form.querySelectorAll('.product-select');
+      let hasSelectedProduct = false;
+      let hasValidProduct = true;
+      
+      productSelects.forEach((select, index) => {
+        const row = select.closest('tr');
+        const destroyInput = row.querySelector('input[name*="_destroy"]');
+        const unitPriceInput = row.querySelector('.unit-price-input');
+        const amountInput = row.querySelector('.amount-input');
+        const quantityInput = row.querySelector('.quantity-input');
+        
+        // 削除されていない行の場合
+        if (!destroyInput || destroyInput.value !== '1') {
+          // 商品が選択されているか
+          if (select.value) {
+            hasSelectedProduct = true;
+            
+            // 必須項目のチェック
+            if (!unitPriceInput.value || !amountInput.value || !quantityInput.value) {
+              console.error('必須項目が未入力:', {
+                index,
+                productId: select.value,
+                unitPrice: unitPriceInput.value,
+                amount: amountInput.value,
+                quantity: quantityInput.value
+              });
+              hasValidProduct = false;
+            }
+          }
+        }
+      });
+      
+      if (!hasSelectedProduct) {
+        event.preventDefault();
+        alert('商品を選択してください');
+        return false;
+      }
+      
+      if (!hasValidProduct) {
+        event.preventDefault();
+        alert('商品情報が正しく入力されていません。ページを更新して再度お試しください。');
+        return false;
+      }
+      
+      return true;
+    };
+
+    // 商品選択時の処理
+    function updateProductInfo(select) {
+      const row = select.closest('tr');
+      const productId = select.value;
+      const unitPriceInput = row.querySelector('.unit-price-input');
+      const amountInput = row.querySelector('.amount-input');
+      const quantityInput = row.querySelector('.quantity-input');
+      
+      // デバッグ用：商品選択時の値を確認
+      console.log('商品選択:', {
+        productId,
+        unitPrice: unitPriceInput?.value,
+        amount: amountInput?.value,
+        quantity: quantityInput?.value
+      });
+      
+      if (productId) {
+        fetch(`/products/${productId}/info`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('商品情報の取得に失敗しました');
+            }
+            return response.json();
+          })
+          .then(data => {
+            const unitPriceDiv = row.querySelector('.unit-price');
+            const amountDiv = row.querySelector('.amount');
+            
+            if (unitPriceDiv && amountDiv && unitPriceInput && amountInput && quantityInput) {
+              const unitPrice = data.unit_price;
+              const quantity = parseInt(quantityInput.value) || 1;
+              const amount = unitPrice * quantity;
+              
+              // フォームの値を更新
+              unitPriceInput.value = unitPrice;
+              amountInput.value = amount;
+              
+              // 表示を更新
+              unitPriceDiv.textContent = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', minimumFractionDigits: 0 }).format(unitPrice);
+              amountDiv.textContent = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', minimumFractionDigits: 0 }).format(amount);
+              
+              // 数量が未設定の場合は1を設定
+              if (!quantityInput.value) {
+                quantityInput.value = 1;
+              }
+              
+              // デバッグ用：更新後の値を確認
+              console.log('商品情報更新後:', {
+                productId,
+                unitPrice,
+                amount,
+                quantity: quantityInput.value
+              });
+              
+              calculateTotal();
+            }
+          })
+          .catch(error => {
+            console.error('商品情報の取得に失敗しました:', error);
+            // エラー時は値をクリア
+            if (unitPriceInput && amountInput) {
+              unitPriceInput.value = '';
+              amountInput.value = '';
+            }
+            if (unitPriceDiv && amountDiv) {
+              unitPriceDiv.textContent = '';
+              amountDiv.textContent = '';
+            }
+          });
+      } else {
+        // 商品が選択されていない場合は値をクリア
+        if (unitPriceInput && amountInput) {
+          unitPriceInput.value = '';
+          amountInput.value = '';
+        }
+        if (unitPriceDiv && amountDiv) {
+          unitPriceDiv.textContent = '';
+          amountDiv.textContent = '';
+        }
+        if (quantityInput) {
+          quantityInput.value = '';
+        }
+        calculateTotal();
+      }
+    }
+
+    // 数量変更時の処理
+    function calculateAmount(input) {
+      const row = input.closest('tr');
+      const unitPriceInput = row.querySelector('.unit-price-input');
+      const amountInput = row.querySelector('.amount-input');
+      const amountDiv = row.querySelector('.amount');
+      
+      if (unitPriceInput && amountInput && amountDiv) {
+        const unitPrice = parseFloat(unitPriceInput.value) || 0;
+        const quantity = parseInt(input.value) || 0;
+        const amount = unitPrice * quantity;
+        
+        // フォームの値を更新
+        amountInput.value = amount;
+        
+        // 表示を更新
+        amountDiv.textContent = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', minimumFractionDigits: 0 }).format(amount);
+        
+        calculateTotal();
+      }
+    }
+
+    // 合計金額の計算
+    function calculateTotal() {
+      const amountInputs = document.querySelectorAll('.amount-input');
+      const total = Array.from(amountInputs).reduce((sum, input) => {
+        const row = input.closest('tr');
+        const destroyInput = row.querySelector('input[name*="_destroy"]');
+        const productSelect = row.querySelector('.product-select');
+        
+        // 削除された商品または商品が選択されていない場合は除外
+        if ((destroyInput && destroyInput.value === '1') || !productSelect.value) {
+          return sum;
+        }
+        return sum + (parseFloat(input.value) || 0);
+      }, 0);
+      
+      const totalAmountElement = document.querySelector('[data-order-target="totalAmount"]');
+      if (totalAmountElement) {
+        totalAmountElement.textContent = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', minimumFractionDigits: 0 }).format(total);
+      }
+    }
+
+    // イベントリスナーの設定
+    function setupEventListeners() {
+      document.querySelectorAll('.product-select').forEach(select => {
+        select.addEventListener('change', function() {
+          updateProductInfo(this);
+        });
+      });
+      
+      document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+          calculateAmount(this);
+        });
+      });
+    }
+
+    // 初期化
+    setupEventListeners();
+    calculateTotal();
+
+    // 一時保存ボタンがクリックされた時にrequired属性を削除
+    const saveDraftButton = document.querySelector('input[name="save_draft"]');
+    if (saveDraftButton) {
+      saveDraftButton.addEventListener('click', function() {
+        // 一時保存時はrequired属性を削除
+        document.querySelectorAll('[required]').forEach(function(field) {
+          field.removeAttribute('required');
+        });
+      });
+    }
+  });

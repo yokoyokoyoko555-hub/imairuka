@@ -1,0 +1,141 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-box.me-2
+        | 商品詳細
+      .d-flex.justify-content-end.gap-2
+        = link_to products_path, class: 'btn btn-outline-secondary' do
+          i.bi.bi-arrow-left.me-1
+          | 一覧に戻る
+        = link_to edit_product_path(@product), class: 'btn btn-outline-primary' do
+          i.bi.bi-pencil.me-1
+          | 編集
+
+  .row
+    / 基本情報
+    .col-lg-8
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-info-circle.me-2
+            | 基本情報
+        .card-body
+          .row.mb-3
+            .col-md-3.text-muted 商品コード
+            .col-md-9 = @product.code
+          .row.mb-3
+            .col-md-3.text-muted 商品名
+            .col-md-9 = @product.name
+          .row.mb-3
+            .col-md-3.text-muted ステータス
+            .col-md-9
+              span.badge class="bg-#{@product.is_active? ? 'success' : 'secondary'}"
+                = @product.is_active? ? '販売中' : '販売停止中'
+          .row.mb-3
+            .col-md-3.text-muted 登録日
+            .col-md-9 = l(@product.created_at, format: :long)
+          .row.mb-3
+            .col-md-3.text-muted 最終更新日
+            .col-md-9 = l(@product.updated_at, format: :long)
+
+      / 商品説明
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-card-text.me-2
+            | 商品説明
+        .card-body
+          - if @product.description.present?
+            - description = @product.description.gsub('\n', "\n")
+            = simple_format(description)
+          - else
+            p.text-muted.mb-0 商品説明はありません
+
+      / 価格・在庫情報
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-cash-stack.me-2
+            | 価格・在庫情報
+        .card-body
+          .row.mb-3
+            .col-md-3.text-muted 単価
+            .col-md-3 = number_to_currency(@product.unit_price, unit: "¥", precision: 0)
+            .col-md-3.text-muted 仕入価格
+            .col-md-3 = @product.cost_price.present? ? number_to_currency(@product.cost_price, unit: "¥", precision: 0) : content_tag(:span, '未設定', class: 'text-muted')
+          .row.mb-3
+            .col-md-3.text-muted 税率
+            .col-md-3 = @product.tax_rate.present? ? {1 => '10%', 2 => '8% (軽減税率)', 3 => '8%', 4 => '0%'}[@product.tax_rate] : content_tag(:span, '未設定', class: 'text-muted')
+            .col-md-3.text-muted 在庫数
+            .col-md-3 = @product.stock_quantity.present? ? @product.stock_quantity : content_tag(:span, '未設定', class: 'text-muted')
+          .row.mb-3
+            .col-md-3.text-muted 在庫閾値
+            .col-md-3 = @product.stock_threshold.present? ? @product.stock_threshold : content_tag(:span, '未設定', class: 'text-muted')
+
+      / 仕入先情報
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-building.me-2
+            | 仕入先情報
+        .card-body
+          .row.mb-3
+            .col-md-3.text-muted 仕入先名
+            .col-md-9 = @product.supplier_name.presence || content_tag(:span, '未設定', class: 'text-muted')
+          .row.mb-3
+            .col-md-3.text-muted 担当者
+            .col-md-9 = @product.supplier_contact.presence || content_tag(:span, '未設定', class: 'text-muted')
+          .row.mb-3
+            .col-md-3.text-muted 電話番号
+            .col-md-9 = @product.supplier_phone.presence || content_tag(:span, '未設定', class: 'text-muted')
+          .row.mb-3
+            .col-md-3.text-muted メールアドレス
+            .col-md-9 = @product.supplier_email.presence || content_tag(:span, '未設定', class: 'text-muted')
+
+    / 右カラム
+    .col-lg-4
+      / 商品画像
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-image.me-2
+            | 商品画像
+        .card-body.text-center
+          - if @product.image.attached?
+            = image_tag @product.image_url(:large), class: "img-fluid rounded mb-3", style: "max-height: 300px;"
+            .mt-2
+              = link_to @product.image_url, target: "_blank", class: "btn btn-sm btn-outline-primary" do
+                i.bi.bi-zoom-in.me-1
+                | 拡大表示
+          - else
+            .text-muted.py-5
+              i.bi.bi-image.fs-1
+              p.mt-2 画像がありません
+
+      / 関連情報
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-sticky.me-2
+            | メモ
+        .card-body
+          - if @product.notes.present?
+            = simple_format(@product.notes)
+          - else
+            p.text-muted.mb-0 メモはありません
+
+      .card.shadow.mb-4
+        .card-header.py-3
+          h6.m-0.font-weight-bold.text-primary
+            i.bi.bi-gear.me-2
+            | 操作
+        .card-body
+          .d-grid.gap-2
+            = link_to product_path(@product), \
+                data: { delete_action: true, confirm: "この商品を削除してもよろしいですか？\nこの操作は取り消せません。" }, \
+                class: "btn btn-outline-danger" do
+              i.bi.bi-trash.me-1
+              | 削除
+
+= javascript_include_tag "delete_actions" 

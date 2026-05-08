@@ -1,0 +1,141 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-person-plus.me-2
+        | 顧客登録
+      .d-flex.justify-content-end
+        = link_to customers_path, class: 'btn btn-outline-secondary' do
+          i.bi.bi-arrow-left.me-1
+          | 一覧に戻る
+
+  = form_with model: @customer, class: "needs-validation", novalidate: true do |f|
+    = render 'shared/error_messages', model: @customer
+
+    .row
+      .col-lg-8
+        / 基本情報
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-info-circle.me-2
+              | 基本情報
+          .card-body
+            .row.mb-3
+              .col-md-6
+                = f.label :code, "顧客コード", class: "form-label required"
+                = f.text_field :code, class: "form-control", required: true, maxlength: 20
+              .col-md-6
+                = f.label :company_name, "会社名", class: "form-label required"
+                = f.text_field :company_name, class: "form-control", required: true, maxlength: 100
+            .row.mb-3
+              .col-md-6
+                = f.label :industry, "業種", class: "form-label required"
+                = f.select :industry, [["IT", "IT"], ["製造業", "製造業"], ["サービス業", "サービス業"], ["小売業", "小売業"], ["その他", "その他"]], { include_blank: "選択してください" }, { class: "form-select", required: true }
+              .col-md-6
+                = f.label :status, "ステータス", class: "form-label required"
+                = f.select :status, [["見込み", "prospect"], ["取引中", "active"], ["取引終了", "inactive"]], { prompt: "選択してください" }, { class: "form-select", required: true }
+            .row.mb-3
+              .col-md-6
+                = f.label :established_date, "設立年月日", class: "form-label"
+                = f.date_field :established_date, class: "form-control"
+              .col-md-6
+                = f.label :capital, "資本金", class: "form-label"
+                .input-group
+                  = f.number_field :capital, class: "form-control", min: 0
+                  span.input-group-text 円
+            .row.mb-3
+              .col-md-6
+                = f.label :representative_name, "代表者名", class: "form-label"
+                = f.text_field :representative_name, class: "form-control", maxlength: 50
+              .col-md-6
+                = f.label :employee_count, "従業員数", class: "form-label"
+                .input-group
+                  = f.number_field :employee_count, class: "form-control", min: 0
+                  span.input-group-text 名
+            .row.mb-3
+              .col-12
+                = f.label :business_description, "事業内容", class: "form-label"
+                = f.text_area :business_description, class: "form-control", rows: 3, maxlength: 500
+
+        / 連絡先情報
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-telephone.me-2
+              | 連絡先情報
+          .card-body
+            .row.mb-3
+              .col-md-6
+                = f.label :name, "顧客名", class: "form-label required"
+                = f.text_field :name, class: "form-control", required: true, maxlength: 50
+              .col-md-6
+                = f.label :email, "メールアドレス", class: "form-label"
+                = f.email_field :email, class: "form-control", maxlength: 100
+            .row.mb-3
+              .col-md-6
+                = f.label :phone, "電話番号", class: "form-label"
+                = f.telephone_field :phone, class: "form-control", maxlength: 15
+              .col-md-6
+                = f.label :is_active, "有効フラグ", class: "form-label"
+                = f.select :is_active, [["有効", true], ["無効", false]], {}, { class: "form-select" }
+            .row.mb-3
+              .col-12
+                = f.label :address, "住所", class: "form-label"
+                = f.text_area :address, class: "form-control", rows: 2, maxlength: 500
+
+      .col-lg-4
+        / 請求情報
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-receipt.me-2
+              | 請求情報
+          .card-body
+            .mb-3
+              = f.label :payment_term, "支払条件", class: "form-label"
+              = f.text_field :payment_term, class: "form-control", maxlength: 100
+            .mb-3
+              = f.label :payment_method, "支払方法", class: "form-label"
+              = f.select :payment_method, [["銀行振込", "銀行振込"], ["クレジットカード", "クレジットカード"], ["現金", "現金"]], { include_blank: "選択してください" }, { class: "form-select" }
+            .mb-3
+              = f.label :invoice_email, "請求書メール", class: "form-label"
+              = f.email_field :invoice_email, class: "form-control", maxlength: 100
+
+        / メモ
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-sticky.me-2
+              | メモ
+          .card-body
+            = f.text_area :notes, class: "form-control", rows: 4, maxlength: 1000
+
+        / 操作
+        .card.shadow
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-gear.me-2
+              | 操作
+          .card-body
+            .d-grid.gap-2
+              = f.submit "登録", class: 'btn btn-primary' do
+                i.bi.bi-check.me-1
+                | 登録
+              = f.submit "一時保存", class: "btn btn-outline-info", name: "save_draft"
+              = link_to customers_path, class: 'btn btn-outline-secondary' do
+                | キャンセル
+
+javascript:
+  document.addEventListener('DOMContentLoaded', function() {
+    // 一時保存ボタンがクリックされた時にrequired属性を削除
+    const saveDraftButton = document.querySelector('input[name="save_draft"]');
+    if (saveDraftButton) {
+      saveDraftButton.addEventListener('click', function() {
+        // 一時保存時はrequired属性を削除
+        document.querySelectorAll('[required]').forEach(function(field) {
+          field.removeAttribute('required');
+        });
+      });
+    }
+  }); 

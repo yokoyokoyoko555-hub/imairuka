@@ -1,0 +1,152 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-receipt.me-2
+        | 領収書登録
+      .d-flex.justify-content-end.gap-2
+        = link_to receipts_path, class: 'btn btn-outline-secondary' do
+          i.bi.bi-arrow-left.me-1
+          | 一覧に戻る
+
+  = form_with model: @receipt, class: 'needs-validation' do |f|
+    = render 'shared/error_messages', model: f.object
+    .row
+      .col-lg-8
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-info-circle.me-2
+              | 基本情報
+          .card-body
+            .row.mb-3
+              .col-md-6
+                = f.label :receipt_number, "領収書番号", class: 'form-label'
+                small.text-muted 領収書番号は自動で採番されます
+                = f.text_field :receipt_number, value: @receipt.receipt_number, class: 'form-control', placeholder: '自動採番', readonly: true
+              .col-md-6
+                = f.label :issue_date, "発行日", class: 'form-label'
+                = f.date_field :issue_date, value: Time.current.to_date, class: 'form-control', required: true
+            .row.mb-3
+              .col-md-12
+                = f.label :subject, "件名", class: 'form-label'
+                = f.text_field :subject, class: 'form-control', required: true, maxlength: 200
+            .row.mb-3
+              .col-md-6
+                = f.label :customer_name, "顧客名", class: 'form-label'
+                = f.text_field :customer_name, class: 'form-control', required: true, maxlength: 100
+              .col-md-6
+                = f.label :staff_name, "担当者名", class: 'form-label'
+                = f.text_field :staff_name, class: 'form-control', required: true, maxlength: 50
+            .row.mb-3
+              .col-md-12
+                = f.label :customer_address, "顧客住所", class: 'form-label'
+                = f.text_field :customer_address, class: 'form-control', maxlength: 200
+            .row.mb-3
+              .col-md-6
+                = f.label :valid_until, "有効期限", class: 'form-label'
+                = f.date_field :valid_until, value: 1.month.from_now.to_date, class: 'form-control', required: true
+              .col-md-6
+                = f.label :status, "ステータス", class: 'form-label'
+                = f.select :status, Receipt.statuses.keys.map { |s| [t("enums.receipt.status.#{s}"), s] }, { selected: 'pending' }, class: 'form-select'
+            .row.mb-3
+              .col-md-12
+                = f.label :notes, "備考", class: 'form-label'
+                = f.text_area :notes, class: 'form-control', rows: 3, maxlength: 1000
+
+        .card.shadow.mb-4
+          .card-header.py-3.d-flex.justify-content-between.align-items-center
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-cart.me-2
+              | 領収商品
+            button.btn.btn-sm.btn-primary[type="button" data-bs-toggle="modal" data-bs-target="#addItemModal"]
+              i.bi.bi-plus.me-1
+              | 商品を追加
+          .card-body
+            .table-responsive
+              table.table.table-bordered
+                thead.table-light
+                  tr
+                    th 商品コード
+                    th 商品名
+                    th.text-end 単価
+                    th.text-end 数量
+                    th.text-end 金額
+                    th 税率
+                    th 操作
+                tbody#receipt-items
+                  / エラー時に既存の商品データを表示
+                  - if @receipt.receipt_items.any?
+                    - @receipt.receipt_items.each_with_index do |item, index|
+                      - unless item.marked_for_destruction?
+                        tr.item-row
+                          = f.fields_for :receipt_items, item do |item_form|
+                            td
+                              = item_form.text_field :product_code, class: 'form-control', required: true, maxlength: 20
+                            td
+                              = item_form.text_field :product_name, class: 'form-control', required: true, maxlength: 100
+                            td.text-end
+                              = item_form.number_field :unit_price, class: 'form-control text-end', min: 0, step: 1, required: true
+                            td.text-end
+                              = item_form.number_field :quantity, class: 'form-control text-end', min: 1, step: 1, required: true
+                            td.text-end
+                              span.item-amount = number_to_currency((item.unit_price || 0) * (item.quantity || 0), unit: '¥', precision: 0)
+                            td
+                              = item_form.select :tax_rate, [['選択してください', ''], ['10%', 1], ['8% (軽減税率)', 2], ['8%', 3], ['0%', 4]], {}, class: 'form-select'
+                            td
+                              button.btn.btn-sm.btn-outline-danger.remove-item type="button"
+                                i.bi.bi-trash
+                  - else
+                    / 商品がない場合のメッセージ
+                    tr#no-items-message
+                      td.text-center[colspan="7"] 
+                        .text-muted
+                          i.bi.bi-cart.me-2
+                          | 商品を追加してください
+                tfoot
+                  tr
+                    td[colspan="4"]
+                    td.text-end 合計金額
+                    td.text-end#total-amount = number_to_currency(@receipt.total_amount_with_tax || 0, unit: "¥", precision: 0)
+                    td
+
+      .col-lg-4
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-gear.me-2
+              | 操作
+          .card-body
+            .d-grid.gap-2
+              = f.submit '登録', class: 'btn btn-primary'
+              = f.submit "一時保存", class: "btn btn-outline-info", name: "save_draft"
+              button.btn.btn-outline-info[type="button" id="preview-btn"]
+                i.bi.bi-printer.me-1
+                | プレビュー
+              = link_to 'キャンセル', receipts_path, class: 'btn btn-outline-secondary'
+
+/ 商品追加モーダル
+#addItemModal.modal.fade[tabindex="-1"]
+  .modal-dialog.modal-lg
+    .modal-content
+      .modal-header
+        h5.modal-title 商品を追加
+        button.btn-close[type="button" data-bs-dismiss="modal"]
+      .modal-body
+        .mb-3
+          input.form-control[type="text" id="productSearch" placeholder="商品コードまたは商品名で検索"]
+        .table-responsive
+          table.table.table-hover
+            thead
+              tr
+                th 商品コード
+                th 商品名
+                th.text-end 単価
+                th 操作
+            tbody#productList
+              tr
+                td.text-center[colspan="4"] 商品を検索してください
+      .modal-footer
+        button.btn.btn-secondary[type="button" data-bs-dismiss="modal"] 閉じる
+
+= javascript_include_tag "receipt_form" 

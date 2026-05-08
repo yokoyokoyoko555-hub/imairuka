@@ -1,0 +1,156 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-box-seam.me-2
+        | 商品登録
+      .d-flex.justify-content-end
+        = link_to products_path, class: 'btn btn-outline-secondary' do
+          i.bi.bi-arrow-left.me-1
+          | 一覧に戻る
+
+  / エラーメッセージ
+  = render 'shared/error_messages', model: @product if @product.errors.any?
+
+  = form_with model: @product, class: "needs-validation" do |f|
+    .row
+      / 左カラム
+      .col-lg-8
+        / 基本情報
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-info-circle.me-2
+              | 基本情報
+          .card-body
+            .mb-3
+              = f.label :code, "商品コード", class: "form-label"
+              = f.text_field :code, class: "form-control", required: true, maxlength: 20
+            .mb-3
+              = f.label :name, "商品名", class: "form-label"
+              = f.text_field :name, class: "form-control", required: true, maxlength: 100
+            .mb-3
+              = f.label :category, "カテゴリー", class: "form-label"
+              = f.select :category, [["サービス", "サービス"], ["ソフトウェア", "ソフトウェア"], ["ハードウェア", "ハードウェア"]], { include_blank: "選択してください" }, class: "form-select"
+            .mb-3
+              .form-check
+                = f.check_box :is_active, class: "form-check-input", checked: false
+                = f.label :is_active, "販売中", class: "form-check-label"
+
+        / 商品説明
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-card-text.me-2
+              | 商品説明
+          .card-body
+            .mb-3
+              = f.label :description, "商品説明", class: "form-label"
+              = f.text_area :description, class: "form-control", rows: 5, maxlength: 1000
+
+        / 価格・在庫情報
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-cash-stack.me-2
+              | 価格・在庫情報
+          .card-body
+            .row.mb-3
+              .col-md-6
+                = f.label :unit_price, "単価", class: "form-label"
+                .input-group
+                  span.input-group-text ¥
+                  = f.number_field :unit_price, class: "form-control", min: 0
+              .col-md-6
+                = f.label :cost_price, "仕入価格", class: "form-label"
+                .input-group
+                  span.input-group-text ¥
+                  = f.number_field :cost_price, class: "form-control", min: 0
+            .row.mb-3
+              .col-md-6
+                = f.label :tax_rate, "税率", class: "form-label"
+                = f.select :tax_rate, [["10%", 1], ["8% (軽減税率)", 2], ["8%", 3], ["0%", 4]], { include_blank: "選択してください" }, class: "form-select"
+              .col-md-6
+                = f.label :stock_quantity, "在庫数", class: "form-label"
+                = f.number_field :stock_quantity, class: "form-control", min: 0
+            .row.mb-3
+              .col-md-6
+                = f.label :stock_threshold, "在庫閾値", class: "form-label"
+                = f.number_field :stock_threshold, class: "form-control", min: 0
+
+        / 仕入先情報
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-building.me-2
+              | 仕入先情報
+          .card-body
+            .row.mb-3
+              .col-md-6
+                = f.label :supplier_name, "仕入先名", class: "form-label"
+                = f.text_field :supplier_name, class: "form-control", maxlength: 100
+              .col-md-6
+                = f.label :supplier_contact, "担当者", class: "form-label"
+                = f.text_field :supplier_contact, class: "form-control", maxlength: 50
+            .row.mb-3
+              .col-md-6
+                = f.label :supplier_phone, "電話番号", class: "form-label"
+                = f.telephone_field :supplier_phone, class: "form-control", maxlength: 15
+              .col-md-6
+                = f.label :supplier_email, "メールアドレス", class: "form-label"
+                = f.email_field :supplier_email, class: "form-control", maxlength: 100
+
+      / 右カラム
+      .col-lg-4
+        / 商品画像
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-image.me-2
+              | 商品画像
+          .card-body[data-controller="image-preview"]
+            .mb-3
+              = f.label :image, "画像ファイル", class: "form-label"
+              = f.file_field :image, class: "form-control", accept: "image/*", data: { image_preview_target: "input", action: "change->image-preview#preview" }
+              .form-text 対応形式: PNG、JPEG、GIF（5MB以下）
+            .mt-3[data-image-preview-target="container" style="display: none;"]
+              .d-flex.align-items-center.mb-2
+                h6.mb-0.me-3 プレビュー
+                button.btn.btn-sm.btn-outline-danger[type="button" data-action="click->image-preview#remove"]
+                  i.bi.bi-trash.me-1
+                  | 削除
+              = image_tag "", class: "img-thumbnail", style: "max-height: 200px;", data: { image_preview_target: "preview" }
+        / メモ
+        .card.shadow.mb-4
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-sticky.me-2
+              | メモ
+          .card-body
+            = f.text_area :notes, class: "form-control", rows: 4, maxlength: 1000
+
+        / 操作
+        .card.shadow
+          .card-header.py-3
+            h6.m-0.font-weight-bold.text-primary
+              i.bi.bi-gear.me-2
+              | 操作
+          .card-body
+            .d-grid.gap-2
+              = f.submit "登録", class: "btn btn-primary"
+              = f.submit "一時保存", class: "btn btn-outline-info", name: "save_draft"
+              = link_to "キャンセル", products_path, class: "btn btn-outline-secondary"
+
+javascript:
+  document.addEventListener('DOMContentLoaded', function() {
+    // 一時保存ボタンがクリックされた時にrequired属性を削除
+    const saveDraftButton = document.querySelector('input[name="save_draft"]');
+    if (saveDraftButton) {
+      saveDraftButton.addEventListener('click', function() {
+        // 一時保存時はrequired属性を削除
+        document.querySelectorAll('[required]').forEach(function(field) {
+          field.removeAttribute('required');
+        });
+      });
+    }
+  });

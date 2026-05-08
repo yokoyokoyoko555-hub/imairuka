@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  invoice: one
+  action: 請求書作成
+  user: テスト担当者1
+
+two:
+  invoice: two
+  action: 請求書更新
+  user: テスト担当者2

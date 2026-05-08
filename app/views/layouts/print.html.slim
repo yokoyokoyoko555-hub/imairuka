@@ -1,0 +1,195 @@
+doctype html
+html
+  head
+    title = yield(:title) || '帳票'
+    meta charset="utf-8"
+    meta name="viewport" content="width=device-width, initial-scale=1"
+    = csrf_meta_tags
+    = csp_meta_tag
+    link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"
+    = stylesheet_link_tag "application", "data-turbo-track": "reload"
+    = javascript_include_tag "application", "data-turbo-track": "reload", defer: true
+    css:
+      @media print {
+        @page {
+          size: A4 portrait;
+          margin: 15mm 10mm;
+        }
+        body {
+          font-size: 11pt;
+          line-height: 1.4;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .container-fluid {
+          padding: 0 !important;
+          margin: 0 !important;
+          width: 100% !important;
+        }
+        .quotation-paper {
+          box-shadow: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          width: 100% !important;
+        }
+        .table {
+          font-size: 9pt;
+          width: 100% !important;
+        }
+        .table th, .table td {
+          padding: 0.3rem !important;
+          white-space: nowrap;
+        }
+        .table th {
+          background-color: #f8f9fa !important;
+        }
+        h1, h2, h3, h4, h5, h6 {
+          margin-top: 0.5rem !important;
+          margin-bottom: 0.5rem !important;
+        }
+        .card {
+          border: none !important;
+          box-shadow: none !important;
+        }
+        .card-body {
+          padding: 0.5rem 0 !important;
+        }
+      }
+
+      body {
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container-fluid {
+        padding: 1rem;
+      }
+
+      .quotation-paper {
+        background-color: white;
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 15mm;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+      }
+
+      .print-header {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        margin: -1rem -1rem 1rem -1rem;
+        text-align: right;
+        z-index: 1000;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .print-header .btn {
+        margin-left: 0.5rem;
+      }
+
+      @media screen {
+        .quotation-paper {
+          margin: 2rem auto;
+        }
+      }
+
+      / 見積書固有のスタイル
+      .company-info, .customer-info {
+        margin-bottom: 2rem;
+      }
+
+      .table-bordered {
+        border: 1px solid #dee2e6;
+      }
+
+      .table-bordered th, .table-bordered td {
+        border: 1px solid #dee2e6;
+      }
+
+      .stamp-area {
+        margin-top: 3rem;
+        text-align: right;
+      }
+
+      .stamp-placeholder {
+        display: inline-block;
+        width: 80px;
+        height: 80px;
+        border: 1px dashed #ccc;
+        margin-top: 1rem;
+      }
+
+  body
+    .container-fluid
+      .print-header.no-print
+        - if defined?(@quotation) && @quotation
+          - if @quotation.respond_to?(:id) && @quotation.id.present?
+            = link_to quotation_path(@quotation.id), class: 'btn btn-outline-secondary' do
+              i.bi.bi-arrow-left.me-1
+              | 詳細に戻る
+            = link_to download_pdf_quotation_path(@quotation.id), class: 'btn btn-outline-primary' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+          - else
+            = link_to quotations_path, class: 'btn btn-outline-secondary' do
+              i.bi.bi-arrow-left.me-1
+              | 一覧に戻る
+            = link_to download_pdf_quotations_path(quotation_data: params[:quotation_data]), class: 'btn btn-outline-primary' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+        - elsif defined?(@delivery_note) && @delivery_note
+          - if @delivery_note.respond_to?(:id) && @delivery_note.id.present?
+            = link_to delivery_note_path(@delivery_note.id), class: 'btn btn-outline-secondary' do
+              i.bi.bi-arrow-left.me-1
+              | 詳細に戻る
+            = link_to download_pdf_delivery_note_path(@delivery_note.id), class: 'btn btn-outline-primary' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+          - else
+            = link_to delivery_notes_path, class: 'btn btn-outline-secondary' do
+              i.bi.bi-arrow-left.me-1
+              | 一覧に戻る
+            = link_to download_pdf_delivery_notes_path(delivery_note_data: params[:delivery_note_data]), class: 'btn btn-outline-primary' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+        - elsif defined?(@invoice) && @invoice
+          - if @invoice.respond_to?(:id) && @invoice.id.present?
+            = link_to invoice_path(@invoice.id), class: 'btn btn-outline-secondary' do
+              i.bi.bi-arrow-left.me-1
+              | 詳細に戻る
+            = link_to download_pdf_invoice_path(@invoice.id), class: 'btn btn-outline-primary' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+          - else
+            = link_to invoices_path, class: 'btn btn-outline-secondary' do
+              i.bi.bi-arrow-left.me-1
+              | 一覧に戻る
+            = link_to download_pdf_invoices_path(invoice_data: params[:invoice_data]), class: 'btn btn-outline-primary' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+        - elsif defined?(@receipt) && @receipt
+          - if @receipt.respond_to?(:id) && @receipt.id.present?
+            = link_to receipt_path(@receipt.id), class: 'btn btn-outline-secondary' do
+              i.bi.bi-arrow-left.me-1
+              | 詳細に戻る
+            = link_to download_pdf_receipt_path(@receipt.id), class: 'btn btn-outline-primary' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+          - else
+            = link_to receipts_path, class: 'btn btn-outline-secondary' do
+              i.bi.bi-arrow-left.me-1
+              | 一覧に戻る
+            = link_to download_pdf_receipts_path(receipt_data: params[:receipt_data]), class: 'btn btn-outline-primary' do
+              i.bi.bi-download.me-1
+              | PDFダウンロード
+        = link_to '#', class: 'btn btn-primary', onclick: 'window.print(); return false;' do
+          i.bi.bi-printer.me-1
+          | 印刷
+      = yield 

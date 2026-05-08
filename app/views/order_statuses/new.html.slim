@@ -1,0 +1,14 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-tag.me-2
+        | ステータス登録
+      .d-flex.justify-content-end
+        = link_to order_statuses_path, class: 'btn btn-outline-secondary' do
+          i.bi.bi-arrow-left.me-1
+          | 一覧に戻る
+
+  .card.shadow.mb-4
+    .card-body
+      = render 'form', order_status: @order_status 

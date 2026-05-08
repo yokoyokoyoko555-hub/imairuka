@@ -1,0 +1,50 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-gear.me-2
+        | ステータス設定
+      .d-flex.justify-content-end
+        = link_to new_order_status_path, class: 'btn btn-primary' do
+          i.bi.bi-plus.me-1
+          | 新規登録
+
+  .card.shadow.mb-4
+    .card-body
+      table.table.table-bordered
+        thead.table-light
+          tr
+            th 表示順
+            th ステータス名
+            th ステータスコード
+            th 表示色
+            th 説明
+            th 状態
+            th 操作
+        tbody
+          - @order_statuses.each do |status|
+            tr
+              td.text-end = status.display_order
+              td = status.name
+              td = status.code
+              td
+                - if status.color.present?
+                  span.badge style="background-color: #{status.color}"
+                    = status.color
+              td = status.description
+              td
+                - if status.is_active
+                  span.badge.bg-success 有効
+                - else
+                  span.badge.bg-secondary 無効
+              td
+                .btn-group
+                  = link_to edit_order_status_path(status), class: 'btn btn-sm btn-outline-primary' do
+                    i.bi.bi-pencil.me-1
+                    | 編集
+                  - unless status.orders.exists?
+                    = link_to order_status_path(status), class: "btn btn-sm btn-outline-danger", data: { delete_action: true, confirm: "このステータスを削除してもよろしいですか？\nこの操作は取り消せません。" } do
+                      i.bi.bi-trash.me-1
+                      | 削除
+
+= javascript_include_tag "delete_actions" 
