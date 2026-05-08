@@ -9,6 +9,24 @@ This mode runs Imairuka as a single-company installation. It does not require St
 
 ## 1. Prepare environment
 
+### Easy Windows installer beta
+
+Double-click:
+
+```text
+install_imairuka.bat
+```
+
+The script checks Docker Desktop, creates `install.env`, starts Imairuka, loads sample data, and creates desktop shortcuts:
+
+- Imairuka 起動
+- Imairuka 停止
+- Imairuka バックアップ
+
+If Docker Desktop is not installed, the script opens the Docker Desktop installation page.
+
+### Manual setup
+
 Copy the sample env file:
 
 ```powershell

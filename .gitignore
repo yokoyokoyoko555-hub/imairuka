@@ -11,6 +11,7 @@
 /.env*
 !/.env.example
 /install.env
+/backups/
 
 # Ignore all logfiles and tempfiles.
 /log/*

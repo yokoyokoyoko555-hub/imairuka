@@ -5,7 +5,7 @@ application up and running.
 
 ## セットアップ手順
 
-インストール型としてDockerで試す場合は [docs/installable_deploy.md](docs/installable_deploy.md) を参照してください。
+インストール型としてWindows PCで試す場合は、まず `install_imairuka.bat` をダブルクリックしてください。詳しい手順は [docs/installable_deploy.md](docs/installable_deploy.md) を参照してください。
 
 ### 1. 依存関係のインストール
 
