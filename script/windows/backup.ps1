@@ -11,7 +11,10 @@ Write-Step "データベースをバックアップしています"
 Ensure-Docker
 Push-Location $root
 try {
-  & docker compose -f docker-compose.install.yml exec -T db pg_dump -U imairuka imairuka_production | Out-File -FilePath $backupPath -Encoding utf8
+  if (-not $script:DockerCli) {
+    $script:DockerCli = Get-DockerCliPath
+  }
+  & $script:DockerCli compose -f docker-compose.install.yml exec -T db pg_dump -U imairuka imairuka_production | Out-File -FilePath $backupPath -Encoding utf8
   if ($LASTEXITCODE -ne 0) {
     throw "Database backup failed."
   }

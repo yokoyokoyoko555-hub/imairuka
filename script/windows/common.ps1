@@ -10,8 +10,24 @@ function Write-Step {
   Write-Host "==> $Message" -ForegroundColor Cyan
 }
 
-function Test-DockerCli {
-  return $null -ne (Get-Command docker -ErrorAction SilentlyContinue)
+function Get-DockerCliPath {
+  $command = Get-Command docker -ErrorAction SilentlyContinue
+  if ($command) {
+    return $command.Source
+  }
+
+  $candidates = @(
+    "$Env:ProgramFiles\Docker\Docker\resources\bin\docker.exe",
+    "${Env:ProgramFiles(x86)}\Docker\Docker\resources\bin\docker.exe"
+  )
+
+  foreach ($candidate in $candidates) {
+    if ($candidate -and (Test-Path $candidate)) {
+      return $candidate
+    }
+  }
+
+  return $null
 }
 
 function Get-DockerDesktopPath {
@@ -31,7 +47,8 @@ function Get-DockerDesktopPath {
 }
 
 function Ensure-Docker {
-  if (-not (Test-DockerCli)) {
+  $script:DockerCli = Get-DockerCliPath
+  if (-not $script:DockerCli) {
     Write-Host "Docker Desktop が見つかりません。" -ForegroundColor Yellow
     Write-Host "Docker Desktop をインストールしてから、もう一度このインストーラーを実行してください。"
     Write-Host "ダウンロード: https://docs.docker.com/desktop/setup/install/windows-install/"
@@ -39,7 +56,7 @@ function Ensure-Docker {
     throw "Docker Desktop is not installed."
   }
 
-  $dockerInfo = & docker info 2>$null
+  $dockerInfo = & $script:DockerCli info 2>$null
   if ($LASTEXITCODE -eq 0) {
     return
   }
@@ -53,7 +70,7 @@ function Ensure-Docker {
   Write-Host "Docker Desktop の起動を待っています..."
   for ($i = 1; $i -le 60; $i++) {
     Start-Sleep -Seconds 3
-    & docker info 1>$null 2>$null
+    & $script:DockerCli info 1>$null 2>$null
     if ($LASTEXITCODE -eq 0) {
       return
     }
@@ -71,7 +88,10 @@ function Invoke-Compose {
   $root = Get-ImairukaRoot
   Push-Location $root
   try {
-    & docker compose -f docker-compose.install.yml @Arguments
+    if (-not $script:DockerCli) {
+      $script:DockerCli = Get-DockerCliPath
+    }
+    & $script:DockerCli compose -f docker-compose.install.yml @Arguments
     if ($LASTEXITCODE -ne 0) {
       throw "docker compose failed: $($Arguments -join ' ')"
     }
