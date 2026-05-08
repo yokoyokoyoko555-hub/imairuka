@@ -21,14 +21,14 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :cloudinary
+  # Store uploaded files on the configured service.
+  config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "cloudinary").to_sym
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  config.assume_ssl = true
+  config.assume_ssl = ActiveModel::Type::Boolean.new.cast(ENV.fetch("ASSUME_SSL", "true"))
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  config.force_ssl = ActiveModel::Type::Boolean.new.cast(ENV.fetch("FORCE_SSL", "true"))
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
@@ -83,8 +83,10 @@ Rails.application.configure do
     "www.imairuka.com",     # メインドメイン
     "imairuka.com",         # ルートドメイン（リダイレクト用）
     /.*\.imairuka\.com/,    # サブドメイン
-    /.*\.herokuapp\.com/    # Herokuのアプリケーションドメイン
-  ]
+    /.*\.herokuapp\.com/,   # Herokuのアプリケーションドメイン
+    "localhost",
+    "127.0.0.1"
+  ] + ENV.fetch("APP_HOSTS", "").split(",").map(&:strip).reject(&:blank?)
 
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
