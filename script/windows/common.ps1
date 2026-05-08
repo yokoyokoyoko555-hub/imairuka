@@ -61,7 +61,7 @@ function Test-DockerReady {
 
   try {
     $null = $process.Start()
-    if (-not $process.WaitForExit(10000)) {
+    if (-not $process.WaitForExit(3000)) {
       $process.Kill()
       return $false
     }
@@ -92,7 +92,7 @@ function Ensure-Docker {
   }
 
   Write-Host "Waiting for Docker Desktop..."
-  for ($i = 1; $i -le 60; $i++) {
+  for ($i = 1; $i -le 10; $i++) {
     Start-Sleep -Seconds 3
     if (Test-DockerReady) {
       return
