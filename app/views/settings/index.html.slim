@@ -157,6 +157,10 @@
                 i.bi.bi-exclamation-triangle.me-2
                 | Stripe platform key が未設定です。運営側の Stripe Connect 用キーを Heroku に設定すると連携を開始できます。
             - else
+              .alert.alert-info
+                i.bi.bi-info-circle.me-2
+                | Stripe Connect を使うには、運営側 Stripe アカウントで Connect の利用開始が必要です。
+                = link_to "Stripe Connect設定を開く", "https://dashboard.stripe.com/connect", class: "alert-link ms-1", target: "_blank", rel: "noopener"
               = button_to stripe_connect_path, method: :post, class: "btn btn-primary", form: { data: { turbo: false } } do
                 i.bi.bi-box-arrow-up-right.me-2
                 - if @company.stripe_account_id.present?

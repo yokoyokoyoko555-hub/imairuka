@@ -16,7 +16,7 @@ class StripeConnectController < ApplicationController
     redirect_to onboarding_url, allow_other_host: true
   rescue Stripe::StripeError => e
     Rails.logger.error("Stripe Connect onboarding error: #{e.message}")
-    redirect_to settings_path(tab: "stripe"), alert: "Stripe連携の開始に失敗しました。"
+    redirect_to settings_path(tab: "stripe"), alert: stripe_error_message(e, fallback: "Stripe連携の開始に失敗しました。")
   end
 
   def refresh
@@ -34,7 +34,7 @@ class StripeConnectController < ApplicationController
     redirect_to onboarding_url, allow_other_host: true
   rescue Stripe::StripeError => e
     Rails.logger.error("Stripe Connect refresh error: #{e.message}")
-    redirect_to settings_path(tab: "stripe"), alert: "Stripe連携リンクの再作成に失敗しました。"
+    redirect_to settings_path(tab: "stripe"), alert: stripe_error_message(e, fallback: "Stripe連携リンクの再作成に失敗しました。")
   end
 
   def callback
@@ -53,6 +53,14 @@ class StripeConnectController < ApplicationController
 
   def stripe_configured?
     ENV["STRIPE_SECRET_KEY"].present?
+  end
+
+  def stripe_error_message(error, fallback:)
+    if error.message.include?("signed up for Connect")
+      "運営側のStripeアカウントでConnectの利用開始が完了していません。StripeダッシュボードのConnect設定を完了してから、もう一度連携してください。"
+    else
+      fallback
+    end
   end
 
   def ensure_connected_account!
