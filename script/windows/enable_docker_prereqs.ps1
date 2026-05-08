@@ -14,14 +14,22 @@ if (-not (Test-Admin)) {
 
 Write-Host "Enabling Windows features required by Docker Desktop..." -ForegroundColor Cyan
 
+function Assert-DismSuccess {
+  param([string]$Message)
+
+  if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010) {
+    throw $Message
+  }
+}
+
 dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-if ($LASTEXITCODE -ne 0) { throw "Failed to enable WSL feature." }
+Assert-DismSuccess "Failed to enable WSL feature."
 
 dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-if ($LASTEXITCODE -ne 0) { throw "Failed to enable VirtualMachinePlatform feature." }
+Assert-DismSuccess "Failed to enable VirtualMachinePlatform feature."
 
 dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V-All /all /norestart
-if ($LASTEXITCODE -ne 0) { throw "Failed to enable Hyper-V feature." }
+Assert-DismSuccess "Failed to enable Hyper-V feature."
 
 bcdedit /set hypervisorlaunchtype auto
 if ($LASTEXITCODE -ne 0) { throw "Failed to set hypervisorlaunchtype." }
