@@ -58,7 +58,7 @@ Rails.application.routes.draw do
   resources :payment_histories, only: [:index]
 
   namespace :admin do
-    resources :companies, only: [:index, :show]
+    resources :companies, only: [:index, :show, :new, :create]
   end
 
   # Stripe Connect

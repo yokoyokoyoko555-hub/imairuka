@@ -1,0 +1,89 @@
+.container-fluid
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h1.h3.mb-1 新規契約を追加
+      .text-muted 契約企業と初期オーナーアカウントを作成します
+    = link_to "一覧へ戻る", admin_companies_path, class: "btn btn-outline-secondary"
+
+  = form_with model: @company, url: admin_companies_path, local: true do |f|
+    - if @company.errors.any? || @owner.errors.any?
+      .alert.alert-danger
+        ul.mb-0
+          - @company.errors.full_messages.each do |message|
+            li = message
+          - @owner.errors.full_messages.each do |message|
+            li = message
+
+    .row.g-3
+      .col-lg-6
+        .card.shadow-sm
+          .card-header
+            strong 契約企業
+          .card-body
+            .mb-3
+              = f.label :name, "会社名", class: "form-label"
+              = f.text_field :name, class: "form-control", required: true
+            .mb-3
+              = f.label :tenant_slug, "テナントID", class: "form-label"
+              = f.text_field :tenant_slug, class: "form-control", placeholder: "未入力なら自動生成"
+            .mb-3
+              = f.label :invoice_number, "登録番号", class: "form-label"
+              = f.text_field :invoice_number, class: "form-control", placeholder: "T1234567890123", required: true
+            .row
+              .col-md-6.mb-3
+                = f.label :postal_code, "郵便番号", class: "form-label"
+                = f.text_field :postal_code, class: "form-control", placeholder: "1000000", required: true
+              .col-md-6.mb-3
+                = f.label :phone, "電話番号", class: "form-label"
+                = f.text_field :phone, class: "form-control", placeholder: "0312345678", required: true
+            .mb-3
+              = f.label :address, "住所", class: "form-label"
+              = f.text_area :address, class: "form-control", rows: 3, required: true
+            .mb-3
+              = f.label :email, "会社メール", class: "form-label"
+              = f.email_field :email, class: "form-control", required: true
+            .row
+              .col-md-6.mb-3
+                = f.label :representative, "代表者", class: "form-label"
+                = f.text_field :representative, class: "form-control", required: true
+              .col-md-6.mb-3
+                = f.label :business_type, "業種", class: "form-label"
+                = f.text_field :business_type, class: "form-control", required: true
+
+      .col-lg-6
+        .card.shadow-sm.mb-3
+          .card-header
+            strong 契約
+          .card-body
+            .row
+              .col-md-6.mb-3
+                = f.label :contract_status, "契約状態", class: "form-label"
+                = f.select :contract_status, Company.contract_statuses.keys.map { |status| [status, status] }, {}, class: "form-select"
+              .col-md-6.mb-3
+                = f.label :plan_name, "プラン", class: "form-label"
+                = f.select :plan_name, [["standard", "standard"], ["professional", "professional"], ["enterprise", "enterprise"]], {}, class: "form-select"
+            .mb-3
+              = f.label :trial_ends_at, "トライアル終了日時", class: "form-label"
+              = f.datetime_field :trial_ends_at, class: "form-control"
+
+        .card.shadow-sm
+          .card-header
+            strong 初期オーナー
+          .card-body
+            = fields_for :owner, @owner do |owner_fields|
+              .mb-3
+                = owner_fields.label :name, "氏名", class: "form-label"
+                = owner_fields.text_field :name, class: "form-control"
+              .mb-3
+                = owner_fields.label :email, "メール", class: "form-label"
+                = owner_fields.email_field :email, class: "form-control", required: true
+              .mb-3
+                = owner_fields.label :password, "初期パスワード", class: "form-label"
+                = owner_fields.password_field :password, class: "form-control", required: true, minlength: 6
+              .mb-3
+                = owner_fields.label :password_confirmation, "初期パスワード確認", class: "form-label"
+                = owner_fields.password_field :password_confirmation, class: "form-control", required: true, minlength: 6
+
+    .mt-4
+      = f.submit "契約を追加", class: "btn btn-primary"
+      = link_to "キャンセル", admin_companies_path, class: "btn btn-outline-secondary ms-2"
