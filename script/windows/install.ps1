@@ -9,7 +9,7 @@ Write-Step "Preparing install.env"
 Ensure-InstallEnv
 
 Write-Step "Building and starting containers"
-Invoke-Compose up -d --build
+Invoke-Compose up --detach --build
 
 Write-Step "Loading sample data"
 Invoke-Compose exec -T web ./bin/rails db:seed

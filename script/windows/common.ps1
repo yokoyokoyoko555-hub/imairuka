@@ -51,23 +51,11 @@ function Test-DockerReady {
     $script:DockerCli = Get-DockerCliPath
   }
 
-  $process = New-Object System.Diagnostics.Process
-  $process.StartInfo.FileName = $script:DockerCli
-  $process.StartInfo.Arguments = "info"
-  $process.StartInfo.UseShellExecute = $false
-  $process.StartInfo.RedirectStandardOutput = $true
-  $process.StartInfo.RedirectStandardError = $true
-  $process.StartInfo.CreateNoWindow = $true
-
   try {
-    $null = $process.Start()
-    if (-not $process.WaitForExit(15000)) {
-      $process.Kill()
-      return $false
-    }
-    return $process.ExitCode -eq 0
-  } finally {
-    $process.Dispose()
+    $output = & $script:DockerCli version --format "{{.Server.Version}}" 2>$null
+    return ($LASTEXITCODE -eq 0) -and -not [string]::IsNullOrWhiteSpace($output)
+  } catch {
+    return $false
   }
 }
 
