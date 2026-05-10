@@ -1,4 +1,5 @@
 class Invoice < ApplicationRecord
+  include TenantScoped
   include Discard::Model
   default_scope -> { kept }
 
@@ -7,6 +8,7 @@ class Invoice < ApplicationRecord
   attribute :payment_method, :string
   attribute :payment_due_date, :date
 
+  belongs_to :company
   has_many :invoice_items, -> { kept }, dependent: :destroy
   has_many :invoice_histories, dependent: :destroy
   belongs_to :quotation, optional: true

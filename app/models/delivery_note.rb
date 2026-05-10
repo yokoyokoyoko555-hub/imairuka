@@ -1,10 +1,12 @@
 class DeliveryNote < ApplicationRecord
+  include TenantScoped
   include Discard::Model
   default_scope -> { kept }
 
   # 属性の明示的な定義
   attribute :draft, :boolean, default: false
 
+  belongs_to :company
   has_many :delivery_note_items, dependent: :destroy
   has_many :delivery_note_histories, dependent: :destroy
 

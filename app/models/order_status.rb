@@ -1,4 +1,6 @@
 class OrderStatus < ApplicationRecord
+  include TenantScoped
+  belongs_to :company
   has_many :orders, dependent: :restrict_with_error
 
   validates :name, presence: true, uniqueness: true, length: { maximum: 50, message: 'ステータス名は50文字以内で入力してください' }

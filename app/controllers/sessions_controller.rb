@@ -17,9 +17,10 @@ class SessionsController < ApplicationController
       redirect_to root_path
       return
     end
-    user = User.find_by(email: params[:email])
+    user = User.active.find_by(email: params[:email])
     if user&.authenticate(params[:password])
       session[:user_id] = user.id
+      user.update!(last_login_at: Time.current)
       if params[:remember_me] == '1'
         user.remember
         cookies.permanent.signed[:user_id] = {

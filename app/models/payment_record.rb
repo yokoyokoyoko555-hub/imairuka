@@ -1,4 +1,5 @@
 class PaymentRecord < ApplicationRecord
+  include TenantScoped
   belongs_to :order
   belongs_to :company, optional: true
 

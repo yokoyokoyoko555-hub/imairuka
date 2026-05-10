@@ -1,0 +1,58 @@
+.container-fluid
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h1.h3.mb-1 = @company.name
+      .text-muted 契約企業詳細
+    = link_to "一覧へ戻る", admin_companies_path, class: "btn btn-outline-secondary"
+
+  .row.g-3
+    .col-md-6
+      .card.shadow-sm
+        .card-header
+          strong 契約情報
+        .card-body
+          dl.row.mb-0
+            dt.col-sm-5 契約状態
+            dd.col-sm-7 = @company.contract_status
+            dt.col-sm-5 プラン
+            dd.col-sm-7 = @company.plan_name
+            dt.col-sm-5 トライアル終了
+            dd.col-sm-7 = @company.trial_ends_at ? l(@company.trial_ends_at, format: :short) : "-"
+            dt.col-sm-5 Stripe Customer
+            dd.col-sm-7 = @company.stripe_customer_id.presence || "-"
+            dt.col-sm-5 Stripe Subscription
+            dd.col-sm-7 = @company.stripe_subscription_id.presence || "-"
+
+    .col-md-6
+      .card.shadow-sm
+        .card-header
+          strong 利用状況
+        .card-body
+          dl.row.mb-0
+            dt.col-sm-5 ユーザー数
+            dd.col-sm-7 = @users.size
+            dt.col-sm-5 案件数
+            dd.col-sm-7 = @orders_count
+            dt.col-sm-5 決済履歴数
+            dd.col-sm-7 = @payments_count
+
+  .card.shadow-sm.mt-3
+    .card-header
+      strong ユーザー
+    .card-body.p-0
+      table.table.table-hover.mb-0
+        thead.table-light
+          tr
+            th メール
+            th 名前
+            th 権限
+            th 状態
+            th 最終ログイン
+        tbody
+          - @users.each do |user|
+            tr
+              td = user.email
+              td = user.name.presence || "-"
+              td = user.role
+              td = user.active? ? "有効" : "停止"
+              td = user.last_login_at ? l(user.last_login_at, format: :short) : "-"

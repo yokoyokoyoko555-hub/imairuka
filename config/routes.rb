@@ -57,6 +57,10 @@ Rails.application.routes.draw do
   # 決済管理
   resources :payment_histories, only: [:index]
 
+  namespace :admin do
+    resources :companies, only: [:index, :show]
+  end
+
   # Stripe Connect
   post 'stripe_connect', to: 'stripe_connect#create'
   get 'stripe_connect/refresh', to: 'stripe_connect#refresh', as: :stripe_connect_refresh

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_11_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -58,6 +58,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.string "postal_code", comment: "郵便番号"
     t.string "representative", comment: "代表者名"
     t.string "business_type", comment: "業種"
+    t.string "stripe_account_id"
+    t.boolean "stripe_charges_enabled", default: false, null: false
+    t.boolean "stripe_payouts_enabled", default: false, null: false
+    t.boolean "stripe_details_submitted", default: false, null: false
+    t.datetime "stripe_onboarded_at"
+    t.string "tenant_slug"
+    t.string "contract_status", default: "trialing", null: false
+    t.string "plan_name", default: "standard", null: false
+    t.datetime "trial_ends_at"
+    t.datetime "suspended_at"
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.string "stripe_subscription_status"
+    t.datetime "stripe_current_period_end"
+    t.index ["stripe_account_id"], name: "index_companies_on_stripe_account_id", unique: true
+    t.index ["stripe_customer_id"], name: "index_companies_on_stripe_customer_id"
+    t.index ["stripe_subscription_id"], name: "index_companies_on_stripe_subscription_id"
+    t.index ["tenant_slug"], name: "index_companies_on_tenant_slug", unique: true
   end
 
   create_table "customer_attachments", comment: "顧客添付ファイル", force: :cascade do |t|
@@ -117,7 +135,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.string "invoice_email", comment: "請求書送付先メールアドレス"
     t.datetime "discarded_at"
     t.boolean "draft", default: false, null: false
-    t.index ["code", "discarded_at"], name: "index_customers_on_code_and_discarded_at", unique: true
+    t.bigint "company_id", null: false
+    t.index ["company_id", "code", "discarded_at"], name: "index_customers_on_company_code_discarded_at", unique: true
+    t.index ["company_id"], name: "index_customers_on_company_id"
     t.index ["company_name"], name: "index_customers_on_company_name"
     t.index ["discarded_at"], name: "index_customers_on_discarded_at"
     t.index ["draft"], name: "index_customers_on_draft"
@@ -165,7 +185,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.text "customer_address"
     t.string "subject"
     t.boolean "draft", default: false, null: false
-    t.index ["delivery_number"], name: "index_delivery_notes_on_delivery_number", unique: true, where: "(discarded_at IS NULL)"
+    t.bigint "company_id", null: false
+    t.index ["company_id", "delivery_number"], name: "index_delivery_notes_on_company_delivery_number", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["company_id"], name: "index_delivery_notes_on_company_id"
     t.index ["discarded_at"], name: "index_delivery_notes_on_discarded_at"
     t.index ["draft"], name: "index_delivery_notes_on_draft"
   end
@@ -213,11 +235,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.datetime "updated_at", null: false
     t.string "payment_method"
     t.boolean "draft", default: false, null: false
+    t.bigint "company_id", null: false
+    t.index ["company_id", "invoice_number"], name: "index_invoices_on_company_invoice_number", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["company_id"], name: "index_invoices_on_company_id"
     t.index ["customer_name"], name: "index_invoices_on_customer_name"
     t.index ["discarded_at"], name: "index_invoices_on_discarded_at"
     t.index ["draft"], name: "index_invoices_on_draft"
     t.index ["invoice_date"], name: "index_invoices_on_invoice_date"
-    t.index ["invoice_number"], name: "index_invoices_on_invoice_number", unique: true, where: "(discarded_at IS NULL)"
     t.index ["status"], name: "index_invoices_on_status"
   end
 
@@ -255,7 +279,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.boolean "is_active", default: true, null: false, comment: "有効フラグ"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["code"], name: "index_order_statuses_on_code", unique: true
+    t.bigint "company_id", null: false
+    t.index ["company_id", "code"], name: "index_order_statuses_on_company_code", unique: true
+    t.index ["company_id"], name: "index_order_statuses_on_company_id"
     t.index ["display_order"], name: "index_order_statuses_on_display_order"
     t.index ["is_active"], name: "index_order_statuses_on_is_active"
   end
@@ -279,12 +305,38 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.bigint "order_status_id"
     t.datetime "discarded_at"
     t.boolean "draft", default: false, null: false
+    t.bigint "company_id", null: false
+    t.index ["company_id", "order_number"], name: "index_orders_on_company_order_number", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["company_id"], name: "index_orders_on_company_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["discarded_at"], name: "index_orders_on_discarded_at"
     t.index ["draft"], name: "index_orders_on_draft"
     t.index ["order_date"], name: "index_orders_on_order_date"
-    t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["order_status_id"], name: "index_orders_on_order_status_id"
+  end
+
+  create_table "payment_records", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "company_id"
+    t.string "stripe_account_id"
+    t.string "stripe_checkout_session_id"
+    t.string "stripe_payment_intent_id"
+    t.string "stripe_charge_id"
+    t.string "stripe_event_id"
+    t.string "status", default: "pending", null: false
+    t.integer "amount", default: 0, null: false
+    t.string "currency", default: "jpy", null: false
+    t.string "payment_method_type"
+    t.datetime "paid_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_payment_records_on_company_id"
+    t.index ["order_id"], name: "index_payment_records_on_order_id"
+    t.index ["paid_at"], name: "index_payment_records_on_paid_at"
+    t.index ["status"], name: "index_payment_records_on_status"
+    t.index ["stripe_checkout_session_id"], name: "index_payment_records_on_stripe_checkout_session_id", unique: true
+    t.index ["stripe_event_id"], name: "index_payment_records_on_stripe_event_id"
+    t.index ["stripe_payment_intent_id"], name: "index_payment_records_on_stripe_payment_intent_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -306,7 +358,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.integer "stock_quantity"
     t.integer "stock_threshold"
     t.boolean "draft"
-    t.index ["code", "discarded_at"], name: "index_products_on_code_and_discarded_at", unique: true
+    t.bigint "company_id", null: false
+    t.index ["company_id", "code", "discarded_at"], name: "index_products_on_company_code_discarded_at", unique: true
+    t.index ["company_id"], name: "index_products_on_company_id"
     t.index ["discarded_at"], name: "index_products_on_discarded_at"
     t.index ["name"], name: "index_products_on_name"
   end
@@ -353,11 +407,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.text "customer_address"
     t.string "subject"
     t.boolean "draft", default: false, null: false
+    t.bigint "company_id", null: false
+    t.index ["company_id", "quotation_number"], name: "index_quotations_on_company_quotation_number", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["company_id"], name: "index_quotations_on_company_id"
     t.index ["customer_name"], name: "index_quotations_on_customer_name"
     t.index ["discarded_at"], name: "index_quotations_on_discarded_at"
     t.index ["draft"], name: "index_quotations_on_draft"
     t.index ["quotation_date"], name: "index_quotations_on_quotation_date"
-    t.index ["quotation_number"], name: "index_quotations_on_quotation_number", unique: true, where: "(discarded_at IS NULL)"
     t.index ["status"], name: "index_quotations_on_status"
   end
 
@@ -401,9 +457,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.string "customer_address"
     t.string "subject"
     t.boolean "draft", default: false, null: false
+    t.bigint "company_id", null: false
+    t.index ["company_id", "receipt_number"], name: "index_receipts_on_company_receipt_number", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["company_id"], name: "index_receipts_on_company_id"
     t.index ["discarded_at"], name: "index_receipts_on_discarded_at"
     t.index ["draft"], name: "index_receipts_on_draft"
-    t.index ["receipt_number"], name: "index_receipts_on_receipt_number", unique: true, where: "(discarded_at IS NULL)"
   end
 
   create_table "users", force: :cascade do |t|
@@ -412,6 +470,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "remember_digest"
+    t.bigint "company_id", null: false
+    t.string "name"
+    t.string "role", default: "owner", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "last_login_at"
+    t.index ["company_id", "role"], name: "index_users_on_company_id_and_role"
+    t.index ["company_id"], name: "index_users_on_company_id"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -420,17 +485,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_204944) do
   add_foreign_key "customer_attachments", "customers"
   add_foreign_key "customer_contacts", "customers"
   add_foreign_key "customer_notes", "customers"
+  add_foreign_key "customers", "companies"
   add_foreign_key "delivery_note_histories", "delivery_notes"
   add_foreign_key "delivery_note_items", "delivery_notes"
+  add_foreign_key "delivery_notes", "companies"
   add_foreign_key "invoice_histories", "invoices"
   add_foreign_key "invoice_items", "invoices"
+  add_foreign_key "invoices", "companies"
   add_foreign_key "order_histories", "orders"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
+  add_foreign_key "order_statuses", "companies"
+  add_foreign_key "orders", "companies"
   add_foreign_key "orders", "customers"
   add_foreign_key "orders", "order_statuses"
+  add_foreign_key "payment_records", "companies"
+  add_foreign_key "payment_records", "orders"
+  add_foreign_key "products", "companies"
   add_foreign_key "quotation_histories", "quotations"
   add_foreign_key "quotation_items", "quotations"
+  add_foreign_key "quotations", "companies"
   add_foreign_key "receipt_histories", "receipts"
   add_foreign_key "receipt_items", "receipts"
+  add_foreign_key "receipts", "companies"
+  add_foreign_key "users", "companies"
 end

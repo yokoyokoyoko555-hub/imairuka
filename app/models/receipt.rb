@@ -1,10 +1,12 @@
 class Receipt < ApplicationRecord
+  include TenantScoped
   include Discard::Model
   default_scope -> { kept }  # 論理削除されていないレコードのみを取得
   
   # 属性の明示的な定義
   attribute :draft, :boolean, default: false
   
+  belongs_to :company
   has_many :receipt_items, dependent: :destroy
   has_many :receipt_histories, dependent: :destroy
   belongs_to :invoice, optional: true

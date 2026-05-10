@@ -1,4 +1,5 @@
 class Order < ApplicationRecord
+  include TenantScoped
   include Discard::Model
   default_scope -> { kept }  # 論理削除されていないレコードのみを取得
 
@@ -6,6 +7,7 @@ class Order < ApplicationRecord
   attribute :draft, :boolean, default: false
   attribute :payment_method, :string
 
+  belongs_to :company
   belongs_to :customer
   belongs_to :order_status
   has_many :order_items, dependent: :destroy
