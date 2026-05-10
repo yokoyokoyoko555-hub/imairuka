@@ -61,7 +61,7 @@ function Test-DockerReady {
 
   try {
     $null = $process.Start()
-    if (-not $process.WaitForExit(3000)) {
+    if (-not $process.WaitForExit(15000)) {
       $process.Kill()
       return $false
     }
@@ -129,8 +129,13 @@ function Invoke-Compose {
 
 function New-SecretKeyBase {
   $bytes = New-Object byte[] 64
-  [System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
-  return [Convert]::ToBase64String($bytes)
+  $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+  try {
+    $rng.GetBytes($bytes)
+    return [Convert]::ToBase64String($bytes)
+  } finally {
+    $rng.Dispose()
+  }
 }
 
 function Ensure-InstallEnv {
@@ -138,14 +143,22 @@ function Ensure-InstallEnv {
   $envPath = Join-Path $root "install.env"
   $examplePath = Join-Path $root "install.env.example"
 
+  $placeholder = "replace-this-with-a-long-random-secret-before-production-use"
+
   if (Test-Path $envPath) {
+    $existing = Get-Content $envPath -Raw
+    if ($existing -match [regex]::Escape($placeholder)) {
+      $secret = New-SecretKeyBase
+      $existing = $existing -replace [regex]::Escape($placeholder), $secret
+      Set-Content -Path $envPath -Value $existing -Encoding UTF8
+    }
     return
   }
 
   Copy-Item $examplePath $envPath
   $secret = New-SecretKeyBase
   $content = Get-Content $envPath -Raw
-  $content = $content -replace "replace-this-with-a-long-random-secret-before-production-use", $secret
+  $content = $content -replace [regex]::Escape($placeholder), $secret
   Set-Content -Path $envPath -Value $content -Encoding UTF8
 }
 
