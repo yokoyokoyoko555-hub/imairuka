@@ -14,8 +14,14 @@ class Order < ApplicationRecord
   has_many :products, through: :order_items
   has_many :histories, class_name: 'OrderHistory', dependent: :destroy
   has_many :payment_records, dependent: :destroy
+  has_many :project_tasks, class_name: "OrderProjectTask", dependent: :destroy
+  has_many :project_issues, class_name: "OrderProjectIssue", dependent: :destroy
+  has_many :assignments, class_name: "OrderAssignment", dependent: :destroy
+  has_many :assigned_users, through: :assignments, source: :user
 
   validates :order_number, uniqueness: { message: 'この案件番号は既に使用されています' }, unless: :draft?
+  validates :project_name, length: { maximum: 120 }
+  validates :project_summary, length: { maximum: 4000 }
   validates :order_date, presence: { message: '注文日を入力してください' }
   validates :staff_name, presence: { message: '担当者名を入力してください' }, length: { maximum: 50, message: '担当者名は50文字以内で入力してください' }, unless: :draft?
   validates :order_status, presence: { message: 'ステータスを選択してください' }, unless: :draft?

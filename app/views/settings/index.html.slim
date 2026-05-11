@@ -17,23 +17,19 @@
         = link_to settings_path(tab: "stripe"), class: "list-group-item list-group-item-action #{params[:tab] == 'stripe' ? 'active' : ''}" do
           i.bi.bi-credit-card.me-2
           | Stripe連携
+        = link_to settings_path(tab: "ai"), class: "list-group-item list-group-item-action #{params[:tab] == 'ai' ? 'active' : ''}" do
+          i.bi.bi-cpu.me-2
+          | AI設定
 
     .col-md-9
-      - if params[:tab].blank? || params[:tab] == 'company'
-        = form_with model: @company, url: settings_path, method: :patch, class: "needs-validation", novalidate: true do |f|
-          - if @company.errors.any?
-            .alert.alert-danger.mb-4.d-flex.align-items-center style="border-left: 4px solid #dc3545; background-color: #fff; color: #dc3545; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
-              i.bi.bi-exclamation-circle-fill.me-2 style="font-size: 1.5rem;"
-              ul.mb-0.ps-3
-                - @company.errors.full_messages.each do |message|
-                  li = message
-
-          / 基本情報
+      - if params[:tab].blank? || params[:tab] == "company"
+        = form_with model: @company, url: settings_path(tab: "company"), method: :patch, class: "needs-validation", novalidate: true do |f|
+          = render "shared/error_messages", model: @company
           .card.shadow.mb-4
             .card-header.py-3
               h6.m-0.font-weight-bold.text-primary
                 i.bi.bi-info-circle.me-2
-                | 基本情報
+                | 会社情報
             .card-body
               .row.mb-3
                 .col-md-6
@@ -45,14 +41,14 @@
               .row.mb-3
                 .col-md-6
                   = f.label :postal_code, "郵便番号", class: "form-label required"
-                  = f.text_field :postal_code, class: "form-control", required: true, placeholder: "1234567", maxlength: 7, pattern: "[0-9]{7}"
+                  = f.text_field :postal_code, class: "form-control", required: true, placeholder: "1234567", maxlength: 7
                 .col-md-6
                   = f.label :address, "住所", class: "form-label required"
                   = f.text_field :address, class: "form-control", required: true, maxlength: 500
               .row.mb-3
                 .col-md-6
                   = f.label :phone, "電話番号", class: "form-label required"
-                  = f.telephone_field :phone, class: "form-control", required: true, placeholder: "0312345678", maxlength: 15, pattern: "[0-9]{10,11}"
+                  = f.telephone_field :phone, class: "form-control", required: true, placeholder: "0312345678", maxlength: 15
                 .col-md-6
                   = f.label :email, "メールアドレス", class: "form-label required"
                   = f.email_field :email, class: "form-control", required: true, maxlength: 100
@@ -64,27 +60,25 @@
                   = f.label :business_type, "業種", class: "form-label required"
                   = f.text_field :business_type, class: "form-control", required: true, maxlength: 50
               .text-end
-                = f.submit "設定を保存", class: "btn btn-primary", data: { disable_with: "送信中..." }
+                = f.submit "設定を保存", class: "btn btn-primary", data: { disable_with: "保存中..." }
 
-      - if params[:tab] == 'status'
+      - if params[:tab] == "status"
         .card.shadow.mb-4
           .card-header.py-3.d-flex.justify-content-between.align-items-center
             h6.m-0.font-weight-bold.text-primary
               i.bi.bi-tag.me-2
               | ステータス設定
-            = link_to new_order_status_path, class: 'btn btn-primary btn-sm' do
+            = link_to new_order_status_path, class: "btn btn-primary btn-sm" do
               i.bi.bi-plus.me-1
               | ステータス登録
           .card-body
-            / ステータス一覧
             table.table.table-bordered.table-hover
               thead.table-light
                 tr
                   th ステータス名
-                  th ステータスコード
+                  th コード
                   th 表示順
-                  th 表示色
-                  th 説明
+                  th 色
                   th 状態
                   th
               tbody
@@ -96,7 +90,6 @@
                     td
                       span.badge style="background-color: #{status.color}"
                         = status.color
-                    td = status.description
                     td
                       - if status.is_active
                         span.badge.bg-success 有効
@@ -105,11 +98,11 @@
                     td.text-end
                       = link_to edit_order_status_path(status), class: "btn btn-sm btn-outline-primary me-1" do
                         i.bi.bi-pencil
-                      = link_to order_status_path(status), class: "btn btn-sm btn-outline-danger", data: { delete_action: true, confirm: "このステータスを削除してもよろしいですか？\nこの操作は取り消せません。" } do
+                      = link_to order_status_path(status), class: "btn btn-sm btn-outline-danger", data: { delete_action: true, confirm: "このステータスを削除しますか？" } do
                         i.bi.bi-trash.me-1
                         | 削除
 
-      - if params[:tab] == 'stripe'
+      - if params[:tab] == "stripe"
         .card.shadow.mb-4
           .card-header.py-3
             h6.m-0.font-weight-bold.text-primary
@@ -145,63 +138,55 @@
               .col-md-6
                 label.form-label StripeアカウントID
                 p.form-control-plaintext = StripeSettings.direct_mode? ? "直接決済モード" : (@company.stripe_account_id.presence || "未連携")
-            .row.mb-4
-              .col-md-4
-                label.form-label 決済受付
-                p.form-control-plaintext
-                  - if StripeSettings.direct_mode? && StripeSettings.configured?
-                    span.badge.bg-success 有効
-                  - elsif @company.stripe_charges_enabled?
-                    span.badge.bg-success 有効
-                  - else
-                    span.badge.bg-secondary 無効
-              .col-md-4
-                label.form-label 売上振込
-                p.form-control-plaintext
-                  - if StripeSettings.direct_mode? && StripeSettings.configured?
-                    span.badge.bg-success Stripe側で管理
-                  - elsif @company.stripe_payouts_enabled?
-                    span.badge.bg-success 有効
-                  - else
-                    span.badge.bg-secondary 無効
-              .col-md-4
-                label.form-label 本人確認
-                p.form-control-plaintext
-                  - if StripeSettings.direct_mode? && StripeSettings.configured?
-                    span.badge.bg-success Stripe側で管理
-                  - elsif @company.stripe_details_submitted?
-                    span.badge.bg-success 提出済み
-                  - else
-                    span.badge.bg-secondary 未完了
-
             - if StripeSettings.direct_mode?
-              - if StripeSettings.configured?
-                .alert.alert-success
-                  i.bi.bi-check-circle.me-2
-                  | 直接決済モードです。この環境に設定されたStripeキーで決済を受け付けます。
-              - else
-                .alert.alert-warning
-                  i.bi.bi-exclamation-triangle.me-2
-                  | 直接決済モードです。STRIPE_SECRET_KEY と STRIPE_WEBHOOK_SECRET を設定すると決済を開始できます。
+              .alert class=(StripeSettings.configured? ? "alert-success" : "alert-warning")
+                i.bi.bi-info-circle.me-2
+                = StripeSettings.configured? ? "直接決済モードで利用できます。" : "STRIPE_SECRET_KEY と STRIPE_WEBHOOK_SECRET を設定してください。"
             - elsif ENV["STRIPE_SECRET_KEY"].blank?
               .alert.alert-warning
                 i.bi.bi-exclamation-triangle.me-2
-                | Stripe platform key が未設定です。運営側の Stripe Connect 用キーを Heroku に設定すると連携を開始できます。
+                | 運営側 Stripe Connect 用キーが未設定です。
             - else
-              - if @company.stripe_account_id.blank?
-                .alert.alert-info
-                  i.bi.bi-info-circle.me-2
-                  | Stripe Connect を使うには、運営側 Stripe アカウントで Connect の利用開始が必要です。
-                  = link_to "Stripe Connect設定を開く", "https://dashboard.stripe.com/connect", class: "alert-link ms-1", target: "_blank", rel: "noopener"
-              - elsif @company.stripe_charges_enabled? && !@company.stripe_payouts_enabled?
-                .alert.alert-warning
-                  i.bi.bi-exclamation-triangle.me-2
-                  | 決済受付は有効ですが、売上振込はまだ無効です。Stripe設定を再開して、振込先や確認項目を完了してください。
               = button_to stripe_connect_path, method: :post, class: "btn btn-primary", form: { data: { turbo: false } } do
                 i.bi.bi-box-arrow-up-right.me-2
-                - if @company.stripe_account_id.present?
-                  | Stripe設定を再開
-                - else
-                  | Stripeと連携
+                = @company.stripe_account_id.present? ? "Stripe設定を再開" : "Stripeと連携"
 
-= javascript_include_tag "delete_actions" 
+      - if params[:tab] == "ai"
+        = form_with model: @company, url: settings_path(tab: "ai"), method: :patch, local: true do |f|
+          = render "shared/error_messages", model: @company
+          .card.shadow.mb-4
+            .card-header.py-3
+              h6.m-0.font-weight-bold.text-primary
+                i.bi.bi-cpu.me-2
+                | AI設定
+            .card-body
+              .alert.alert-info
+                i.bi.bi-info-circle.me-2
+                | この設定は各社ごとに保存されます。案件概要からガントチャート下書きを作成するとき、この会社のAPIキーを使用します。
+              .row.mb-3
+                .col-md-6
+                  = f.label :ai_provider, "AIプロバイダー", class: "form-label"
+                  = f.select :ai_provider, [["OpenAI", "openai"]], {}, class: "form-select"
+                .col-md-6
+                  = f.label :ai_model, "モデル", class: "form-label"
+                  = f.text_field :ai_model, class: "form-control", placeholder: "gpt-5"
+                  .form-text 例: gpt-5 / gpt-5-mini など
+              .mb-3
+                label.form-label APIキー状態
+                p.form-control-plaintext
+                  - if @company.ai_configured?
+                    span.badge.bg-success 設定済み
+                  - else
+                    span.badge.bg-secondary 未設定
+              .mb-3
+                = f.label :ai_api_key, "OpenAI APIキー", class: "form-label"
+                = f.password_field :ai_api_key, class: "form-control", autocomplete: "new-password", placeholder: @company.ai_configured? ? "変更する場合のみ入力" : "sk-..."
+                .form-text APIキーは暗号化して保存します。画面上に再表示されません。
+              - if @company.ai_configured?
+                .form-check.mb-3
+                  = f.check_box :clear_ai_api_key, class: "form-check-input"
+                  = f.label :clear_ai_api_key, "保存済みAPIキーを削除する", class: "form-check-label"
+              .text-end
+                = f.submit "AI設定を保存", class: "btn btn-primary", data: { disable_with: "保存中..." }
+
+= javascript_include_tag "delete_actions"

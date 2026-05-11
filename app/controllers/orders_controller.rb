@@ -1,6 +1,6 @@
 class OrdersController < ApplicationController
   require 'stripe'
-  before_action :set_order, only: [:show, :edit, :destroy]
+  before_action :set_order, only: [:show, :edit, :destroy, :generate_project_plan]
   before_action :set_customers_and_statuses, only: %i[ new edit create update ]
 
   # クラス変数として案件データを保持
@@ -36,6 +36,7 @@ class OrdersController < ApplicationController
 
   def show
     @order = Order.with_discarded.includes(:customer).find(params[:id])
+    load_project_management
   end
 
   def new
@@ -205,6 +206,16 @@ class OrdersController < ApplicationController
   def destroy
     @order.discard
     redirect_to orders_path, notice: '案件を削除しました'
+  end
+
+  def generate_project_plan
+    OrderProjectPlanGenerator.new(@order).generate.each do |attrs|
+      @order.project_tasks.create!(attrs.merge(company: current_company))
+    end
+    redirect_to @order, notice: "ガントチャート下書きを作成しました"
+  rescue => e
+    Rails.logger.error("Project plan generation failed: #{e.class} #{e.message}")
+    redirect_to @order, alert: "ガントチャート下書きの作成に失敗しました"
   end
 
   def export
@@ -831,6 +842,16 @@ class OrdersController < ApplicationController
     @order = Order.with_discarded.includes(:customer, :order_items).find(params[:id])
   end
 
+  def load_project_management
+    @project_tasks = @order.project_tasks.includes(:assignee).ordered
+    @project_issues = @order.project_issues.includes(:assignee).ordered
+    @assignments = @order.assignments.includes(:user).order(:role, :id)
+    @company_users = current_company.users.active.order(:name, :email)
+    @new_project_task = @order.project_tasks.build(start_date: Date.current, due_date: Date.current + 7.days)
+    @new_project_issue = @order.project_issues.build
+    @new_assignment = @order.assignments.build
+  end
+
   def set_customers_and_statuses
     @customers = Customer.where("draft = ? AND is_active = ?", false, true).order(:company_name)
     @order_statuses = OrderStatus.where(is_active: true)
@@ -866,6 +887,8 @@ class OrdersController < ApplicationController
       :order_date,
       :payment_due_date,
       :payment_method,
+      :project_name,
+      :project_summary,
       :notes,
       :delivery_date,
       :delivery_address,
@@ -888,6 +911,8 @@ class OrdersController < ApplicationController
       :order_date,
       :payment_due_date,
       :payment_method,
+      :project_name,
+      :project_summary,
       :notes,
       :delivery_date,
       :delivery_address,

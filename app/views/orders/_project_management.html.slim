@@ -1,0 +1,133 @@
+.card.shadow.mb-4
+  .card-header.py-3.d-flex.justify-content-between.align-items-center
+    h6.m-0.font-weight-bold.text-primary
+      i.bi.bi-kanban.me-2
+      | プロジェクト管理
+    = button_to "AIでガント下書き作成", generate_project_plan_order_path(@order), method: :post, class: "btn btn-sm btn-primary", form: { data: { turbo: false } }
+  .card-body
+    .row.mb-4
+      .col-md-6
+        label.form-label 案件名
+        p.form-control-plaintext = @order.project_name.presence || "-"
+      .col-md-6
+        label.form-label AI設定
+        p.form-control-plaintext
+          - if current_company.ai_configured?
+            span.badge.bg-success 自社APIキー設定済み
+          - else
+            span.badge.bg-secondary 未設定
+            = link_to "AI設定へ", settings_path(tab: "ai"), class: "ms-2"
+      .col-12
+        label.form-label 案件概要
+        p.form-control-plaintext = simple_format(@order.project_summary.presence || "-")
+
+    h6.text-primary.mt-3
+      i.bi.bi-bar-chart-steps.me-2
+      | ガントチャート
+    - if @project_tasks.any?
+      - min_date = @project_tasks.map(&:start_date).compact.min || Date.current
+      - max_date = @project_tasks.map { |task| task.due_date || task.start_date }.compact.max || min_date
+      - total_days = [(max_date - min_date).to_i + 1, 1].max
+      .table-responsive.mb-4
+        table.table.table-sm.align-middle
+          tbody
+            - @project_tasks.each do |task|
+              - start_offset = task.start_date ? [(task.start_date - min_date).to_i, 0].max : 0
+              - duration = task.due_date && task.start_date ? [(task.due_date - task.start_date).to_i + 1, 1].max : 1
+              - left = (start_offset.to_f / total_days * 100).round(2)
+              - width = (duration.to_f / total_days * 100).round(2)
+              tr
+                td style="width: 220px;"
+                  strong = task.title
+                  .small.text-muted = "#{task.start_date || '-'} 〜 #{task.due_date || '-'}"
+                td
+                  .position-relative.bg-light.rounded style="height: 28px;"
+                    .position-absolute.rounded.bg-primary.text-white.small.px-2 style="left: #{left}%; width: #{[width, 5].max}%; height: 28px; line-height: 28px; overflow: hidden; white-space: nowrap;"
+                      = task.status_label
+    - else
+      .alert.alert-light.border タスクを追加するか、AIでガントチャート下書きを作成してください。
+
+    .row.g-4
+      .col-lg-12
+        h6.text-primary
+          i.bi.bi-list-check.me-2
+          | タスク管理表
+        .table-responsive
+          table.table.table-bordered.table-hover.align-middle
+            thead.table-light
+              tr
+                th タスク
+                th 担当
+                th 期間
+                th 状態
+                th 優先度
+                th
+            tbody
+              - @project_tasks.each do |task|
+                tr
+                  td
+                    strong = task.title
+                    .small.text-muted = task.description
+                  td = task.assignee&.display_name || "-"
+                  td = "#{task.start_date || '-'} 〜 #{task.due_date || '-'}"
+                  td
+                    = form_with model: [@order, task], local: true, class: "d-flex gap-2" do |f|
+                      = f.select :status, OrderProjectTask.statuses.keys.map { |s| [OrderProjectTask.new(status: s).status_label, s] }, {}, class: "form-select form-select-sm"
+                      = f.submit "更新", class: "btn btn-sm btn-outline-primary"
+                  td = task.priority_label
+                  td = button_to "削除", order_order_project_task_path(@order, task), method: :delete, class: "btn btn-sm btn-outline-danger"
+        = form_with model: [@order, @new_project_task], local: true, class: "row g-2 mt-2" do |f|
+          .col-md-3 = f.text_field :title, class: "form-control", placeholder: "タスク名", required: true
+          .col-md-2 = f.date_field :start_date, class: "form-control"
+          .col-md-2 = f.date_field :due_date, class: "form-control"
+          .col-md-2 = f.collection_select :assignee_id, @company_users, :id, :display_name, { include_blank: "担当なし" }, class: "form-select"
+          .col-md-2 = f.select :priority, OrderProjectTask.priorities.keys.map { |p| [OrderProjectTask.new(priority: p).priority_label, p] }, {}, class: "form-select"
+          .col-md-1 = f.submit "追加", class: "btn btn-primary w-100"
+          .col-12 = f.text_area :description, class: "form-control", rows: 2, placeholder: "説明"
+
+      .col-lg-6
+        h6.text-primary
+          i.bi.bi-exclamation-triangle.me-2
+          | 課題管理表
+        table.table.table-bordered.table-hover.align-middle
+          thead.table-light
+            tr
+              th 課題
+              th 状態
+              th 担当
+              th
+          tbody
+            - @project_issues.each do |issue|
+              tr
+                td
+                  strong = issue.title
+                  .small.text-muted = issue.description
+                td = issue.status_label
+                td = issue.assignee&.display_name || "-"
+                td = button_to "削除", order_order_project_issue_path(@order, issue), method: :delete, class: "btn btn-sm btn-outline-danger"
+        = form_with model: [@order, @new_project_issue], local: true, class: "row g-2" do |f|
+          .col-md-6 = f.text_field :title, class: "form-control", placeholder: "課題名", required: true
+          .col-md-6 = f.collection_select :assignee_id, @company_users, :id, :display_name, { include_blank: "担当なし" }, class: "form-select"
+          .col-12 = f.text_area :description, class: "form-control", rows: 2, placeholder: "内容"
+          .col-12 = f.submit "課題を追加", class: "btn btn-primary"
+
+      .col-lg-6
+        h6.text-primary
+          i.bi.bi-people.me-2
+          | アサイン管理
+        table.table.table-bordered.table-hover.align-middle
+          thead.table-light
+            tr
+              th ユーザー
+              th 役割
+              th
+          tbody
+            - @assignments.each do |assignment|
+              tr
+                td = assignment.user.display_name
+                td = assignment.role_label
+                td = button_to "削除", order_order_assignment_path(@order, assignment), method: :delete, class: "btn btn-sm btn-outline-danger"
+        = form_with model: [@order, @new_assignment], local: true, class: "row g-2" do |f|
+          .col-md-6 = f.collection_select :user_id, @company_users, :id, :display_name, { include_blank: "ユーザー選択" }, class: "form-select", required: true
+          .col-md-4 = f.select :role, OrderAssignment.roles.keys.map { |r| [OrderAssignment.new(role: r).role_label, r] }, {}, class: "form-select"
+          .col-md-2 = f.submit "追加", class: "btn btn-primary w-100"

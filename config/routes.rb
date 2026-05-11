@@ -30,7 +30,11 @@ Rails.application.routes.draw do
       get :print_delivery
       get :print_receipt
       post :checkout
+      post :generate_project_plan
     end
+    resources :order_project_tasks, path: :tasks, only: [:create, :update, :destroy]
+    resources :order_project_issues, path: :issues, only: [:create, :update, :destroy]
+    resources :order_assignments, path: :assignments, only: [:create, :update, :destroy]
   end
 
   # 顧客管理

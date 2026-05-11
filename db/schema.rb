@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_11_100000) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_11_110500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -72,6 +72,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_100000) do
     t.string "stripe_subscription_id"
     t.string "stripe_subscription_status"
     t.datetime "stripe_current_period_end"
+    t.string "ai_provider", default: "openai", null: false
+    t.string "ai_model", default: "gpt-5", null: false
+    t.text "ai_api_key_ciphertext"
     t.index ["stripe_account_id"], name: "index_companies_on_stripe_account_id", unique: true
     t.index ["stripe_customer_id"], name: "index_companies_on_stripe_customer_id"
     t.index ["stripe_subscription_id"], name: "index_companies_on_stripe_subscription_id"
@@ -306,6 +309,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_100000) do
     t.datetime "discarded_at"
     t.boolean "draft", default: false, null: false
     t.bigint "company_id", null: false
+    t.string "project_name"
+    t.text "project_summary"
     t.index ["company_id", "order_number"], name: "index_orders_on_company_order_number", unique: true, where: "(discarded_at IS NULL)"
     t.index ["company_id"], name: "index_orders_on_company_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
@@ -313,6 +318,59 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_100000) do
     t.index ["draft"], name: "index_orders_on_draft"
     t.index ["order_date"], name: "index_orders_on_order_date"
     t.index ["order_status_id"], name: "index_orders_on_order_status_id"
+  end
+
+  create_table "order_assignments", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "user_id", null: false
+    t.string "role", default: "member", null: false
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_order_assignments_on_company_id"
+    t.index ["order_id", "user_id"], name: "index_order_assignments_on_order_id_and_user_id", unique: true
+    t.index ["order_id"], name: "index_order_assignments_on_order_id"
+    t.index ["user_id"], name: "index_order_assignments_on_user_id"
+  end
+
+  create_table "order_project_issues", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "assignee_id"
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "open", null: false
+    t.string "priority", default: "normal", null: false
+    t.date "due_date"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assignee_id"], name: "index_order_project_issues_on_assignee_id"
+    t.index ["company_id", "order_id"], name: "index_order_project_issues_on_company_id_and_order_id"
+    t.index ["company_id"], name: "index_order_project_issues_on_company_id"
+    t.index ["order_id"], name: "index_order_project_issues_on_order_id"
+  end
+
+  create_table "order_project_tasks", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "assignee_id"
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "not_started", null: false
+    t.string "priority", default: "normal", null: false
+    t.date "start_date"
+    t.date "due_date"
+    t.date "completed_on"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assignee_id"], name: "index_order_project_tasks_on_assignee_id"
+    t.index ["company_id", "order_id"], name: "index_order_project_tasks_on_company_id_and_order_id"
+    t.index ["company_id"], name: "index_order_project_tasks_on_company_id"
+    t.index ["order_id", "position"], name: "index_order_project_tasks_on_order_id_and_position"
+    t.index ["order_id"], name: "index_order_project_tasks_on_order_id"
   end
 
   create_table "payment_records", force: :cascade do |t|
@@ -513,6 +571,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_100000) do
   add_foreign_key "order_histories", "orders"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
+  add_foreign_key "order_assignments", "companies"
+  add_foreign_key "order_assignments", "orders"
+  add_foreign_key "order_assignments", "users"
+  add_foreign_key "order_project_issues", "companies"
+  add_foreign_key "order_project_issues", "orders"
+  add_foreign_key "order_project_issues", "users", column: "assignee_id"
+  add_foreign_key "order_project_tasks", "companies"
+  add_foreign_key "order_project_tasks", "orders"
+  add_foreign_key "order_project_tasks", "users", column: "assignee_id"
   add_foreign_key "order_statuses", "companies"
   add_foreign_key "orders", "companies"
   add_foreign_key "orders", "customers"

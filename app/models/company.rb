@@ -1,4 +1,6 @@
 class Company < ApplicationRecord
+  attr_accessor :ai_api_key, :clear_ai_api_key
+
   has_many :users, dependent: :restrict_with_error
   has_many :user_invitations, dependent: :destroy
   has_many :customers, dependent: :restrict_with_error
@@ -30,6 +32,7 @@ class Company < ApplicationRecord
   validates :tenant_slug, presence: true, uniqueness: true
 
   before_validation :set_tenant_slug, :normalize_postal_code, :normalize_phone
+  before_save :apply_ai_api_key_change
 
   USER_LIMITS = {
     "starter" => 1,
@@ -91,6 +94,22 @@ class Company < ApplicationRecord
     stripe_account_id.present? && stripe_charges_enabled?
   end
 
+  def ai_configured?
+    ai_api_key_ciphertext.present?
+  end
+
+  def decrypted_ai_api_key
+    return nil if ai_api_key_ciphertext.blank?
+
+    ai_encryptor.decrypt_and_verify(ai_api_key_ciphertext)
+  rescue ActiveSupport::MessageEncryptor::InvalidMessage
+    nil
+  end
+
+  def masked_ai_api_key
+    ai_configured? ? "設定済み" : "未設定"
+  end
+
   def stripe_connect_status
     return "未連携" if stripe_account_id.blank?
     return "利用可能" if stripe_charges_enabled?
@@ -127,5 +146,21 @@ class Company < ApplicationRecord
     end
 
     self.phone = phone.gsub(/[^\d]/, "")
+  end
+
+  def apply_ai_api_key_change
+    if ActiveModel::Type::Boolean.new.cast(clear_ai_api_key)
+      self.ai_api_key_ciphertext = nil
+      return
+    end
+
+    return if ai_api_key.blank?
+
+    self.ai_api_key_ciphertext = ai_encryptor.encrypt_and_sign(ai_api_key.strip)
+  end
+
+  def ai_encryptor
+    key = ActiveSupport::KeyGenerator.new(Rails.application.secret_key_base).generate_key("company-ai-api-key", 32)
+    ActiveSupport::MessageEncryptor.new(key)
   end
 end

@@ -56,6 +56,13 @@
               .col-md-6
                 = f.label :notes, '備考', class: 'form-label'
                 = f.text_area :notes, class: 'form-control', rows: 3, maxlength: 200
+            .row.mb-3
+              .col-md-6
+                = f.label :project_name, '案件名', class: 'form-label'
+                = f.text_field :project_name, class: 'form-control', maxlength: 120, placeholder: '例: ECサイト改修プロジェクト'
+              .col-md-6
+                = f.label :project_summary, '案件概要', class: 'form-label'
+                = f.text_area :project_summary, class: 'form-control', rows: 3, maxlength: 4000, placeholder: '目的、成果物、制約、希望納期など'
 
         / 注文商品
         .card.shadow.mb-4
