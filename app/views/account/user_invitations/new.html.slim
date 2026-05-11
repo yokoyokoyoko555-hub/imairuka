@@ -5,24 +5,42 @@
       .text-muted = "#{current_company.name} に新しいアカウントを追加"
     = link_to "戻る", account_users_path, class: "btn btn-outline-secondary"
 
-  .card.shadow-sm
-    .card-header
-      strong 招待内容
-    .card-body
-      = render "shared/error_messages", model: @invitation
+  .row.g-3
+    .col-lg-4
+      .card.shadow-sm
+        .card-header
+          strong ユーザー枠
+        .card-body
+          dl.row.mb-0
+            dt.col-5 契約
+            dd.col-7 = current_company.contract_status
+            dt.col-5 プラン
+            dd.col-7 = current_company.plan_name
+            dt.col-5 使用中
+            dd.col-7 = "#{current_company.user_slots_used} / #{current_company.user_limit_label}"
+            dt.col-5 追加可能
+            dd.col-7 = current_company.remaining_user_slots.nil? ? "無制限" : "#{current_company.remaining_user_slots} 名"
+          .alert.alert-success.mt-3.mb-0 = current_company.user_limit_message
 
-      = form_with model: [:account, @invitation], local: true do |f|
-        .row.g-3
-          .col-md-6
-            = f.label :email, "メールアドレス", class: "form-label"
-            = f.email_field :email, class: "form-control", required: true
-          .col-md-6
-            = f.label :name, "名前", class: "form-label"
-            = f.text_field :name, class: "form-control"
-          .col-md-6
-            = f.label :role, "権限", class: "form-label"
-            = f.select :role, UserInvitation::INVITABLE_ROLES.map { |role| [role, role] }, {}, class: "form-select"
+    .col-lg-8
+      .card.shadow-sm
+        .card-header
+          strong 招待内容
+        .card-body
+          = render "shared/error_messages", model: @invitation
 
-        .mt-4
-          = f.submit "招待URLを作成", class: "btn btn-primary"
-          = link_to "キャンセル", account_users_path, class: "btn btn-outline-secondary ms-2"
+          = form_with model: [:account, @invitation], local: true do |f|
+            .row.g-3
+              .col-md-6
+                = f.label :email, "メールアドレス", class: "form-label"
+                = f.email_field :email, class: "form-control", required: true
+              .col-md-6
+                = f.label :name, "名前", class: "form-label"
+                = f.text_field :name, class: "form-control"
+              .col-md-6
+                = f.label :role, "権限", class: "form-label"
+                = f.select :role, UserInvitation::ROLE_LABELS.map { |role, label| [label, role] }, {}, class: "form-select"
+
+            .mt-4
+              = f.submit "招待URLを作成", class: "btn btn-primary"
+              = link_to "キャンセル", account_users_path, class: "btn btn-outline-secondary ms-2"

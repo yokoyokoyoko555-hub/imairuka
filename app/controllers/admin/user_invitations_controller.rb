@@ -4,6 +4,7 @@ module Admin
 
     before_action -> { require_role!(:platform_admin) }
     before_action :set_company
+    before_action :ensure_invitable!, only: [:new, :create]
 
     def new
       @invitation = @company.user_invitations.build(role: "member")
@@ -24,6 +25,12 @@ module Admin
 
     def set_company
       @company = Company.find(params[:company_id])
+    end
+
+    def ensure_invitable!
+      return if @company.can_invite_user?
+
+      redirect_to admin_company_path(@company), alert: @company.user_limit_message
     end
 
     def invitation_params

@@ -3,20 +3,47 @@
     div
       h1.h3.mb-1 ユーザー管理
       .text-muted = "#{current_company.name} のアカウント"
-    = link_to "ユーザーを招待", new_account_user_invitation_path, class: "btn btn-primary"
+    - if @can_invite_user
+      = link_to "ユーザーを招待", new_account_user_invitation_path, class: "btn btn-primary"
+    - else
+      button.btn.btn-secondary type="button" disabled="disabled" ユーザーを招待
+
+  .row.g-3.mb-3
+    .col-md-8
+      .card.shadow-sm.h-100
+        .card-header
+          strong 月額契約とユーザー枠
+        .card-body
+          .row.g-3
+            .col-sm-3
+              .text-muted.small 契約状態
+              .fs-5 = current_company.contract_status
+            .col-sm-3
+              .text-muted.small プラン
+              .fs-5 = current_company.plan_name
+            .col-sm-3
+              .text-muted.small 使用中
+              .fs-5 = "#{current_company.user_slots_used} / #{current_company.user_limit_label}"
+            .col-sm-3
+              .text-muted.small 追加可能
+              .fs-5 = current_company.remaining_user_slots.nil? ? "無制限" : "#{current_company.remaining_user_slots} 名"
+          .alert class=(@can_invite_user ? "alert-success" : "alert-warning") class="mt-3 mb-0"
+            = current_company.user_limit_message
 
   - if flash[:invitation_url].present?
     .alert.alert-info
       .fw-bold.mb-2 招待URL
-      input.form-control.mb-2 type="text" readonly="readonly" value=flash[:invitation_url]
-      .small.text-muted このURLを招待相手に共有してください。メール送信はSMTP設定後に追加できます。
+      .input-group
+        input#invitation-url.form-control type="text" readonly="readonly" value=flash[:invitation_url]
+        button.btn.btn-outline-primary type="button" onclick="navigator.clipboard.writeText(document.getElementById('invitation-url').value); this.textContent='コピー済み';" コピー
+      .small.text-muted.mt-2 URLは再表示できません。必要な場合は未承諾の招待から再発行してください。
 
   .card.shadow-sm.mb-3
     .card-header
       strong 登録済みユーザー
       span.badge.bg-secondary.ms-2 = @users.size
     .card-body.p-0
-      table.table.table-hover.mb-0
+      table.table.table-hover.align-middle.mb-0
         thead.table-light
           tr
             th メール
@@ -24,21 +51,41 @@
             th 権限
             th 状態
             th 最終ログイン
+            th 操作
         tbody
           - @users.each do |user|
             tr
               td = user.email
-              td = user.name.presence || "-"
-              td = user.role
-              td = user.active? ? "有効" : "停止"
+              td style="min-width: 180px;"
+                = form_with model: [:account, user], local: true, class: "d-flex gap-2 align-items-center" do |f|
+                  = f.text_field :name, value: user.name, class: "form-control form-control-sm", placeholder: "名前"
+                  = f.hidden_field :role, value: user.role
+                  = f.submit "保存", class: "btn btn-sm btn-outline-primary"
+              td style="min-width: 170px;"
+                = form_with model: [:account, user], local: true, class: "d-flex gap-2 align-items-center" do |f|
+                  = f.hidden_field :name, value: user.name
+                  = f.select :role, User::ROLE_LABELS.slice(*UserInvitation::INVITABLE_ROLES).map { |role, label| [label, role] }, {}, class: "form-select form-select-sm", disabled: (user == current_user)
+                  = f.submit "変更", class: "btn btn-sm btn-outline-primary", disabled: (user == current_user)
+              td
+                - if user.active?
+                  span.badge.bg-success 有効
+                - else
+                  span.badge.bg-secondary 停止
               td = user.last_login_at ? l(user.last_login_at, format: :short) : "-"
+              td
+                - if user == current_user
+                  span.text-muted.small 操作不可
+                - elsif user.active?
+                  = button_to "停止", suspend_account_user_path(user), method: :patch, class: "btn btn-sm btn-outline-danger", form: { data: { turbo: false } }
+                - else
+                  = button_to "再開", activate_account_user_path(user), method: :patch, class: "btn btn-sm btn-outline-success", form: { data: { turbo: false } }
 
   .card.shadow-sm
     .card-header
       strong 未承諾の招待
       span.badge.bg-secondary.ms-2 = @pending_invitations.size
     .card-body.p-0
-      table.table.table-hover.mb-0
+      table.table.table-hover.align-middle.mb-0
         thead.table-light
           tr
             th メール
@@ -46,15 +93,20 @@
             th 権限
             th 期限
             th 招待者
+            th 操作
         tbody
           - if @pending_invitations.any?
             - @pending_invitations.each do |invitation|
               tr
                 td = invitation.email
                 td = invitation.name.presence || "-"
-                td = invitation.role
+                td = invitation.role_label
                 td = l(invitation.expires_at, format: :short)
                 td = invitation.invited_by&.display_name || "-"
+                td
+                  .d-flex.gap-2
+                    = button_to "再発行", reissue_account_user_invitation_path(invitation), method: :patch, class: "btn btn-sm btn-outline-primary", form: { data: { turbo: false } }
+                    = button_to "取消", account_user_invitation_path(invitation), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo: false } }
           - else
             tr
-              td.text-muted colspan="5" 未承諾の招待はありません
+              td.text-muted colspan="6" 未承諾の招待はありません

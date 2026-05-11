@@ -18,6 +18,15 @@ class User < ApplicationRecord
 
   scope :active, -> { where(active: true) }
 
+  ROLE_LABELS = {
+    "platform_admin" => "運営管理者",
+    "owner" => "オーナー",
+    "admin" => "管理者",
+    "accounting" => "経理",
+    "member" => "一般",
+    "viewer" => "閲覧のみ"
+  }.freeze
+
   attr_accessor :remember_token
 
   def self.new_token
@@ -26,6 +35,10 @@ class User < ApplicationRecord
 
   def display_name
     name.presence || email
+  end
+
+  def role_label
+    ROLE_LABELS.fetch(role, role)
   end
 
   def can_manage_contract?

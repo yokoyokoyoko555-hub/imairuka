@@ -64,8 +64,17 @@ Rails.application.routes.draw do
   end
 
   namespace :account do
-    resources :users, only: [:index]
-    resources :user_invitations, path: :invitations, only: [:new, :create]
+    resources :users, only: [:index, :update] do
+      member do
+        patch :activate
+        patch :suspend
+      end
+    end
+    resources :user_invitations, path: :invitations, only: [:new, :create, :destroy] do
+      member do
+        patch :reissue
+      end
+    end
   end
 
   get 'invitations/:token', to: 'invitation_acceptances#show', as: :invitation

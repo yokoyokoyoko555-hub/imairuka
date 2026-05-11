@@ -1,5 +1,6 @@
 class UserInvitation < ApplicationRecord
   INVITABLE_ROLES = %w[owner admin accounting member viewer].freeze
+  ROLE_LABELS = User::ROLE_LABELS.slice(*INVITABLE_ROLES).freeze
 
   belongs_to :company
   belongs_to :invited_by, class_name: "User", optional: true
@@ -14,6 +15,8 @@ class UserInvitation < ApplicationRecord
   validates :role, presence: true, inclusion: { in: INVITABLE_ROLES }
   validates :token_digest, presence: true, uniqueness: true
   validate :email_not_already_registered, on: :create
+  validate :email_not_already_invited, on: :create
+  validate :company_can_invite_user, on: :create
 
   scope :pending, -> { where(accepted_at: nil).where("expires_at > ?", Time.current) }
   scope :recent, -> { order(created_at: :desc) }
@@ -38,6 +41,15 @@ class UserInvitation < ApplicationRecord
     !accepted? && !expired?
   end
 
+  def role_label
+    ROLE_LABELS.fetch(role, role)
+  end
+
+  def reset_token!
+    self.raw_token = SecureRandom.urlsafe_base64(32)
+    update!(token_digest: self.class.digest(raw_token), expires_at: 7.days.from_now)
+  end
+
   private
 
   def normalize_email
@@ -58,5 +70,18 @@ class UserInvitation < ApplicationRecord
     return unless User.exists?(email: email)
 
     errors.add(:email, "は既に登録されています")
+  end
+
+  def email_not_already_invited
+    return if email.blank? || company.blank?
+    return unless company.user_invitations.pending.exists?(email: email)
+
+    errors.add(:email, "は既に招待中です")
+  end
+
+  def company_can_invite_user
+    return if company.blank? || company.can_invite_user?
+
+    errors.add(:base, company.user_limit_message)
   end
 end

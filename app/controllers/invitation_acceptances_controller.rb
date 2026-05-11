@@ -41,9 +41,9 @@ class InvitationAcceptancesController < ApplicationController
   end
 
   def ensure_available_invitation
-    return if @invitation&.available?
+    return if @invitation&.available? && @invitation.company.account_invitation_unlocked?
 
-    redirect_to login_path, alert: "招待リンクが無効、または期限切れです。"
+    redirect_to login_path, alert: "招待リンクが無効、期限切れ、または契約状態により利用できません。"
   end
 
   def user_params

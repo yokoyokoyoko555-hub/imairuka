@@ -31,8 +31,60 @@ class Company < ApplicationRecord
 
   before_validation :set_tenant_slug, :normalize_postal_code, :normalize_phone
 
+  USER_LIMITS = {
+    "starter" => 1,
+    "standard" => 3,
+    "pro" => 10,
+    "enterprise" => nil
+  }.freeze
+
   def contract_active?
     trialing? || active?
+  end
+
+  def account_invitation_unlocked?
+    active?
+  end
+
+  def user_limit
+    USER_LIMITS.fetch(plan_name.to_s, USER_LIMITS["standard"])
+  end
+
+  def user_limit_label
+    user_limit || "無制限"
+  end
+
+  def active_users_count
+    users.where(active: true).count
+  end
+
+  def pending_invitations_count
+    user_invitations.pending.count
+  end
+
+  def user_slots_used
+    active_users_count + pending_invitations_count
+  end
+
+  def remaining_user_slots
+    return nil if user_limit.nil?
+
+    [user_limit - user_slots_used, 0].max
+  end
+
+  def can_invite_user?
+    return false unless account_invitation_unlocked?
+    return true if user_limit.nil?
+
+    user_slots_used < user_limit
+  end
+
+  def user_limit_message
+    return "アカウント追加は月額契約が有効になると利用できます。" unless account_invitation_unlocked?
+    return "このプランではユーザーを無制限に招待できます。" if user_limit.nil?
+    return "招待可能です。残り#{remaining_user_slots}名まで追加できます。" if can_invite_user?
+
+    "現在のプラン上限に達しています。プラン変更または追加課金が必要です。"
   end
 
   def stripe_connected?

@@ -30,6 +30,7 @@ module Admin
       @company = Company.find(params[:id])
       @users = User.where(company: @company).order(:email)
       @pending_invitations = @company.user_invitations.pending.recent
+      @can_invite_user = @company.can_invite_user?
       @orders_count = Order.unscoped.where(company: @company).count
       @payments_count = PaymentRecord.unscoped.where(company: @company).count
     end

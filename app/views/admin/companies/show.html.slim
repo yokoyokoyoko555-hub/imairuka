@@ -8,8 +8,9 @@
   - if flash[:invitation_url].present?
     .alert.alert-info
       .fw-bold.mb-2 招待URL
-      input.form-control.mb-2 type="text" readonly="readonly" value=flash[:invitation_url]
-      .small.text-muted このURLを招待相手に共有してください。
+      .input-group
+        input#invitation-url.form-control type="text" readonly="readonly" value=flash[:invitation_url]
+        button.btn.btn-outline-primary type="button" onclick="navigator.clipboard.writeText(document.getElementById('invitation-url').value); this.textContent='コピー済み';" コピー
 
   .row.g-3
     .col-md-6
@@ -35,17 +36,24 @@
           strong 利用状況
         .card-body
           dl.row.mb-0
-            dt.col-sm-5 ユーザー数
-            dd.col-sm-7 = @users.size
+            dt.col-sm-5 ユーザー枠
+            dd.col-sm-7 = "#{@company.user_slots_used} / #{@company.user_limit_label}"
+            dt.col-sm-5 追加可能
+            dd.col-sm-7 = @company.remaining_user_slots.nil? ? "無制限" : "#{@company.remaining_user_slots} 名"
             dt.col-sm-5 案件数
             dd.col-sm-7 = @orders_count
             dt.col-sm-5 決済履歴数
             dd.col-sm-7 = @payments_count
+          .alert class=(@can_invite_user ? "alert-success" : "alert-warning") class="mt-3 mb-0"
+            = @company.user_limit_message
 
   .card.shadow-sm.mt-3
     .card-header.d-flex.justify-content-between.align-items-center
       strong ユーザー
-      = link_to "ユーザーを招待", new_admin_company_user_invitation_path(@company), class: "btn btn-sm btn-primary"
+      - if @can_invite_user
+        = link_to "ユーザーを招待", new_admin_company_user_invitation_path(@company), class: "btn btn-sm btn-primary"
+      - else
+        button.btn.btn-sm.btn-secondary type="button" disabled="disabled" ユーザーを招待
     .card-body.p-0
       table.table.table-hover.mb-0
         thead.table-light
@@ -60,7 +68,7 @@
             tr
               td = user.email
               td = user.name.presence || "-"
-              td = user.role
+              td = user.role_label
               td = user.active? ? "有効" : "停止"
               td = user.last_login_at ? l(user.last_login_at, format: :short) : "-"
 
@@ -83,7 +91,7 @@
               tr
                 td = invitation.email
                 td = invitation.name.presence || "-"
-                td = invitation.role
+                td = invitation.role_label
                 td = l(invitation.expires_at, format: :short)
                 td = invitation.invited_by&.display_name || "-"
           - else
