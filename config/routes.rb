@@ -58,8 +58,18 @@ Rails.application.routes.draw do
   resources :payment_histories, only: [:index]
 
   namespace :admin do
-    resources :companies, only: [:index, :show, :new, :create]
+    resources :companies, only: [:index, :show, :new, :create] do
+      resources :user_invitations, path: :invitations, only: [:new, :create]
+    end
   end
+
+  namespace :account do
+    resources :users, only: [:index]
+    resources :user_invitations, path: :invitations, only: [:new, :create]
+  end
+
+  get 'invitations/:token', to: 'invitation_acceptances#show', as: :invitation
+  post 'invitations/:token/accept', to: 'invitation_acceptances#accept', as: :accept_invitation
 
   # Stripe Connect
   post 'stripe_connect', to: 'stripe_connect#create'

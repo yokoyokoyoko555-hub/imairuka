@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_11_090000) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_11_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -464,6 +464,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_090000) do
     t.index ["draft"], name: "index_receipts_on_draft"
   end
 
+  create_table "user_invitations", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "invited_by_id"
+    t.string "email", null: false
+    t.string "name"
+    t.string "role", default: "member", null: false
+    t.string "token_digest", null: false
+    t.datetime "accepted_at"
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_at"], name: "index_user_invitations_on_accepted_at"
+    t.index ["company_id", "email"], name: "index_user_invitations_on_company_id_and_email"
+    t.index ["company_id"], name: "index_user_invitations_on_company_id"
+    t.index ["invited_by_id"], name: "index_user_invitations_on_invited_by_id"
+    t.index ["token_digest"], name: "index_user_invitations_on_token_digest", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "password_digest", null: false
@@ -508,5 +526,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_090000) do
   add_foreign_key "receipt_histories", "receipts"
   add_foreign_key "receipt_items", "receipts"
   add_foreign_key "receipts", "companies"
+  add_foreign_key "user_invitations", "companies"
+  add_foreign_key "user_invitations", "users", column: "invited_by_id"
   add_foreign_key "users", "companies"
 end

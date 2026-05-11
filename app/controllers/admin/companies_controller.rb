@@ -29,6 +29,7 @@ module Admin
     def show
       @company = Company.find(params[:id])
       @users = User.where(company: @company).order(:email)
+      @pending_invitations = @company.user_invitations.pending.recent
       @orders_count = Order.unscoped.where(company: @company).count
       @payments_count = PaymentRecord.unscoped.where(company: @company).count
     end

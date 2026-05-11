@@ -1,5 +1,6 @@
 class Company < ApplicationRecord
   has_many :users, dependent: :restrict_with_error
+  has_many :user_invitations, dependent: :destroy
   has_many :customers, dependent: :restrict_with_error
   has_many :products, dependent: :restrict_with_error
   has_many :order_statuses, dependent: :restrict_with_error

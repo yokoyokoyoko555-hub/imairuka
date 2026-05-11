@@ -1,0 +1,26 @@
+.container
+  .row.justify-content-center
+    .col-md-6
+      .card.shadow-sm.mt-5
+        .card-header.bg-primary.text-white
+          strong Imairuka アカウント招待
+        .card-body
+          h1.h4.mb-3 = "#{@invitation.company.name} へ参加"
+          p.text-muted 招待されたメールアドレスでアカウントを作成します。
+
+          = render "shared/error_messages", model: @user
+
+          dl.row
+            dt.col-sm-4 メール
+            dd.col-sm-8 = @invitation.email
+            dt.col-sm-4 権限
+            dd.col-sm-8 = @invitation.role
+
+          = form_with model: @user, url: accept_invitation_path(@token), local: true do |f|
+            .mb-3
+              = f.label :password, "パスワード", class: "form-label"
+              = f.password_field :password, class: "form-control", required: true, minlength: 6
+            .mb-3
+              = f.label :password_confirmation, "パスワード確認", class: "form-label"
+              = f.password_field :password_confirmation, class: "form-control", required: true, minlength: 6
+            = f.submit "参加する", class: "btn btn-primary w-100"

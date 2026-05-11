@@ -1,0 +1,28 @@
+.container-fluid
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h1.h3.mb-1 ユーザー招待
+      .text-muted = "#{current_company.name} に新しいアカウントを追加"
+    = link_to "戻る", account_users_path, class: "btn btn-outline-secondary"
+
+  .card.shadow-sm
+    .card-header
+      strong 招待内容
+    .card-body
+      = render "shared/error_messages", model: @invitation
+
+      = form_with model: [:account, @invitation], local: true do |f|
+        .row.g-3
+          .col-md-6
+            = f.label :email, "メールアドレス", class: "form-label"
+            = f.email_field :email, class: "form-control", required: true
+          .col-md-6
+            = f.label :name, "名前", class: "form-label"
+            = f.text_field :name, class: "form-control"
+          .col-md-6
+            = f.label :role, "権限", class: "form-label"
+            = f.select :role, UserInvitation::INVITABLE_ROLES.map { |role| [role, role] }, {}, class: "form-select"
+
+        .mt-4
+          = f.submit "招待URLを作成", class: "btn btn-primary"
+          = link_to "キャンセル", account_users_path, class: "btn btn-outline-secondary ms-2"

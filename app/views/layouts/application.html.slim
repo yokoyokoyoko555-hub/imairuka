@@ -119,6 +119,11 @@ html data-turbo="false"
 
             li.nav-item.mt-3
               small.text-white-50.ps-3 システム
+            - if current_user&.can_manage_users?
+              li.nav-item
+                = link_to account_users_path, class: "nav-link #{controller_path.start_with?('account/') ? 'active' : ''}" do
+                  i.bi.bi-person-plus.me-2
+                  | ユーザー管理
             li.nav-item
               = link_to settings_path, class: "nav-link #{controller_name == 'settings' ? 'active' : ''}" do
                 i.bi.bi-gear.me-2
