@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_11_110500) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_11_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -366,11 +366,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_110500) do
     t.integer "position", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "parent_id"
     t.index ["assignee_id"], name: "index_order_project_tasks_on_assignee_id"
     t.index ["company_id", "order_id"], name: "index_order_project_tasks_on_company_id_and_order_id"
     t.index ["company_id"], name: "index_order_project_tasks_on_company_id"
     t.index ["order_id", "position"], name: "index_order_project_tasks_on_order_id_and_position"
     t.index ["order_id"], name: "index_order_project_tasks_on_order_id"
+    t.index ["parent_id"], name: "index_order_project_tasks_on_parent_id"
   end
 
   create_table "payment_records", force: :cascade do |t|
@@ -579,6 +581,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_110500) do
   add_foreign_key "order_project_issues", "users", column: "assignee_id"
   add_foreign_key "order_project_tasks", "companies"
   add_foreign_key "order_project_tasks", "orders"
+  add_foreign_key "order_project_tasks", "order_project_tasks", column: "parent_id"
   add_foreign_key "order_project_tasks", "users", column: "assignee_id"
   add_foreign_key "order_statuses", "companies"
   add_foreign_key "orders", "companies"

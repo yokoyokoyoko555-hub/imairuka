@@ -64,7 +64,7 @@ class OrderProjectPlanGenerator
     base = Date.current
     [
       ["要件整理", "案件概要をもとに目的、成果物、前提条件を整理します。", base, base + 3.days, "high"],
-      ["実施計画作成", "作業範囲、担当、スケジュール、確認ポイントを定義します。", base + 4.days, base + 7.days, "high"],
+      ["実行計画作成", "作業範囲、担当、スケジュール、確認ポイントを定義します。", base + 4.days, base + 7.days, "high"],
       ["制作・実装", "主要な作業を進め、必要な成果物を作成します。", base + 8.days, base + 21.days, "normal"],
       ["確認・修正", "関係者レビューを行い、指摘事項を反映します。", base + 22.days, base + 27.days, "normal"],
       ["納品・完了処理", "最終確認、納品、請求に必要な情報を整理します。", base + 28.days, base + 31.days, "normal"]
@@ -75,11 +75,12 @@ class OrderProjectPlanGenerator
 
   def prompt
     <<~TEXT
-      次の案件概要からガントチャート用タスクを5〜8件作成してください。
+      次の案件概要から、ガントチャート用の大きな工程を5〜8件作成してください。
+      タスク管理表には工程配下の細かい作業を後から追加するため、ここでは工程レベルにしてください。
       JSON配列、または {"tasks":[...]} のJSONだけを返してください。
-      各タスクは title, description, start_date, due_date, priority(low/normal/high/urgent) を持たせてください。
+      各工程は title, description, start_date, due_date, priority(low/normal/high/urgent) を持たせてください。
 
-      案件名: #{order.project_name.presence || order.order_number}
+      案件名: #{order.project_name.presence || order.display_order_number}
       顧客名: #{order.customer&.name}
       案件概要:
       #{order.project_summary.presence || order.notes}

@@ -4,25 +4,26 @@ class OrderProjectTasksController < ApplicationController
 
   def create
     @task = @order.project_tasks.build(task_params.merge(company: current_company))
-    @task.position ||= @order.project_tasks.maximum(:position).to_i + 1
+    @task.position ||= next_position(@task.parent_id)
+
     if @task.save
-      redirect_to @order, notice: "タスクを追加しました"
+      redirect_to order_path(@order, anchor: "project-management"), notice: "タスクを追加しました"
     else
-      redirect_to @order, alert: @task.errors.full_messages.join("、")
+      redirect_to order_path(@order, anchor: "project-management"), alert: @task.errors.full_messages.join("、")
     end
   end
 
   def update
     if @task.update(task_params)
-      redirect_to @order, notice: "タスクを更新しました"
+      redirect_to order_path(@order, anchor: "project-management"), notice: "タスクを更新しました"
     else
-      redirect_to @order, alert: @task.errors.full_messages.join("、")
+      redirect_to order_path(@order, anchor: "project-management"), alert: @task.errors.full_messages.join("、")
     end
   end
 
   def destroy
     @task.destroy!
-    redirect_to @order, notice: "タスクを削除しました"
+    redirect_to order_path(@order, anchor: "project-management"), notice: "タスクを削除しました"
   end
 
   private
@@ -35,7 +36,11 @@ class OrderProjectTasksController < ApplicationController
     @task = @order.project_tasks.find(params[:id])
   end
 
+  def next_position(parent_id)
+    @order.project_tasks.where(parent_id: parent_id.presence).maximum(:position).to_i + 1
+  end
+
   def task_params
-    params.require(:order_project_task).permit(:title, :description, :status, :priority, :start_date, :due_date, :assignee_id)
+    params.require(:order_project_task).permit(:parent_id, :title, :description, :status, :priority, :start_date, :due_date, :assignee_id)
   end
 end

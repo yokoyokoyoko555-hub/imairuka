@@ -10,10 +10,6 @@ class OrdersController < ApplicationController
     @orders = Order.includes(:customer, :order_status)
                   .order(created_at: :desc)
 
-    if params[:order_number].present?
-      @orders = @orders.where('order_number LIKE ?', "%#{params[:order_number]}%")
-    end
-
     if params[:customer_name].present?
       @orders = @orders.joins(:customer).where('customers.name LIKE ?', "%#{params[:customer_name]}%")
     end
@@ -212,10 +208,10 @@ class OrdersController < ApplicationController
     OrderProjectPlanGenerator.new(@order).generate.each do |attrs|
       @order.project_tasks.create!(attrs.merge(company: current_company))
     end
-    redirect_to @order, notice: "ガントチャート下書きを作成しました"
+    redirect_to order_path(@order, anchor: "project-management"), notice: "ガントチャート下書きを作成しました"
   rescue => e
     Rails.logger.error("Project plan generation failed: #{e.class} #{e.message}")
-    redirect_to @order, alert: "ガントチャート下書きの作成に失敗しました"
+    redirect_to order_path(@order, anchor: "project-management"), alert: "ガントチャート下書きの作成に失敗しました"
   end
 
   def export
@@ -843,11 +839,14 @@ class OrdersController < ApplicationController
   end
 
   def load_project_management
-    @project_tasks = @order.project_tasks.includes(:assignee).ordered
+    @project_phase_tasks = @order.project_tasks.phases.includes(:assignee, :subtasks).ordered
+    @project_detail_tasks = @order.project_tasks.details.includes(:assignee, :parent).ordered
+    @project_tasks = @order.project_tasks.includes(:assignee, :parent).ordered
     @project_issues = @order.project_issues.includes(:assignee).ordered
     @assignments = @order.assignments.includes(:user).order(:role, :id)
     @company_users = current_company.users.active.order(:name, :email)
-    @new_project_task = @order.project_tasks.build(start_date: Date.current, due_date: Date.current + 7.days)
+    @new_project_phase = @order.project_tasks.build(start_date: Date.current, due_date: Date.current + 7.days)
+    @new_project_task = @order.project_tasks.build(start_date: Date.current, due_date: Date.current + 2.days)
     @new_project_issue = @order.project_issues.build
     @new_assignment = @order.assignments.build
   end
@@ -859,19 +858,13 @@ class OrdersController < ApplicationController
   end
 
   def generate_order_number
-    # 既存の最大番号を取得（一時保存データも含む）
-    last_order = Order.kept.where.not(order_number: nil).order(order_number: :desc).first
-    
-    if last_order && last_order.order_number.present? && last_order.order_number.match?(/^O\d{6}$/)
-      last_number = last_order.order_number[1..-1].to_i
-      next_number = last_number + 1
-    else
-      next_number = 1
-    end
-    
+    prefix = "ORD-#{Date.current.strftime('%Y%m')}"
+    last_order = Order.kept.where("order_number LIKE ?", "#{prefix}-%").order(order_number: :desc).first
+    next_number = last_order&.order_number.to_s.split("-").last.to_i + 1
+
     # 重複しない番号を見つけるまでループ
     loop do
-      candidate_number = "O#{format('%06d', next_number)}"
+      candidate_number = "#{prefix}-#{format('%04d', next_number)}"
       unless Order.kept.exists?(order_number: candidate_number)
         return candidate_number
       end

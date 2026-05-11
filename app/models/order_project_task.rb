@@ -4,6 +4,8 @@ class OrderProjectTask < ApplicationRecord
   belongs_to :company
   belongs_to :order
   belongs_to :assignee, class_name: "User", optional: true
+  belongs_to :parent, class_name: "OrderProjectTask", optional: true
+  has_many :subtasks, class_name: "OrderProjectTask", foreign_key: :parent_id, dependent: :nullify, inverse_of: :parent
 
   enum :status, {
     not_started: "not_started",
@@ -22,9 +24,12 @@ class OrderProjectTask < ApplicationRecord
   validates :title, presence: true, length: { maximum: 120 }
   validates :description, length: { maximum: 1000 }
   validate :assignee_belongs_to_company
+  validate :parent_belongs_to_same_order
   validate :date_range
 
   scope :ordered, -> { order(:position, :start_date, :due_date, :id) }
+  scope :phases, -> { where(parent_id: nil) }
+  scope :details, -> { where.not(parent_id: nil) }
 
   def status_label
     {
@@ -50,6 +55,13 @@ class OrderProjectTask < ApplicationRecord
     return if assignee.blank? || assignee.company_id == company_id
 
     errors.add(:assignee, "は同じ会社のユーザーを選択してください")
+  end
+
+  def parent_belongs_to_same_order
+    return if parent.blank?
+
+    errors.add(:parent, "は同じ案件の工程を選択してください") if parent.order_id != order_id || parent.company_id != company_id
+    errors.add(:parent, "に自分自身は指定できません") if parent_id == id
   end
 
   def date_range

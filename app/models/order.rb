@@ -45,6 +45,14 @@ class Order < ApplicationRecord
   scope :published, -> { where(draft: false) }
   scope :drafts, -> { where(draft: true) }
 
+  def display_order_number
+    return order_number if order_number.blank?
+    return order_number if order_number.match?(/\AORD-\d{6}-\d{4}\z/)
+
+    issued_on = created_at || order_date || Time.current
+    "ORD-#{issued_on.strftime('%Y%m')}-#{format('%04d', id || 1)}"
+  end
+
   def self.payment_method_text(method)
     case method.to_s
     when 'credit_card', '0'
@@ -83,19 +91,13 @@ class Order < ApplicationRecord
   def set_order_number
     return if order_number.present?
     
-    # 既存の最大番号を取得（一時保存データも含む）
-    last_order = Order.kept.where.not(order_number: nil).order(order_number: :desc).first
-    
-    if last_order && last_order.order_number.present? && last_order.order_number.match?(/^O\d{6}$/)
-      last_number = last_order.order_number[1..-1].to_i
-      next_number = last_number + 1
-    else
-      next_number = 1
-    end
-    
+    prefix = "ORD-#{Date.current.strftime('%Y%m')}"
+    last_order = Order.kept.where("order_number LIKE ?", "#{prefix}-%").order(order_number: :desc).first
+    next_number = last_order&.order_number.to_s.split("-").last.to_i + 1
+
     # 重複しない番号を見つけるまでループ
     loop do
-      candidate_number = "O#{format('%06d', next_number)}"
+      candidate_number = "#{prefix}-#{format('%04d', next_number)}"
       unless Order.kept.exists?(order_number: candidate_number)
         self.order_number = candidate_number
         break

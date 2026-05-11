@@ -5,11 +5,10 @@
         i.bi.bi-cart.me-2
         | 案件管理
       .d-flex.justify-content-end
-        = link_to new_order_path, class: 'btn btn-primary' do
+        = link_to new_order_path, class: "btn btn-primary" do
           i.bi.bi-plus.me-1
           | 案件登録
 
-  / 検索フィルター
   .card.shadow.mb-4
     .card-header.py-3
       h6.m-0.font-weight-bold.text-primary
@@ -17,29 +16,23 @@
         | 検索条件
     .card-body
       = form_with url: orders_path, method: :get, class: "row g-3" do |f|
-        .col-md-3
-          = f.label :order_number, "案件番号", class: "form-label"
-          = f.text_field :order_number, class: "form-control", value: params[:order_number]
-        .col-md-3
+        .col-md-4
           = f.label :customer_name, "顧客名", class: "form-label"
           = f.text_field :customer_name, class: "form-control", value: params[:customer_name]
-        .col-md-2
+        .col-md-3
           = f.label :status, "ステータス", class: "form-label"
-          = f.select :status, \
-            [["全て", ""]] + OrderStatus.active.ordered.map { |s| [s.name, s.code] }, \
-            { selected: params[:status] }, \
-            class: "form-select"
+          = f.select :status, [["すべて", ""]] + OrderStatus.active.ordered.map { |s| [s.name, s.code] }, { selected: params[:status] }, class: "form-select"
         .col-md-2
-          = f.label :date_from, "注文日（From）", class: "form-label"
+          = f.label :date_from, "注文日 From", class: "form-label"
           = f.date_field :date_from, class: "form-control", value: params[:date_from]
         .col-md-2
-          = f.label :date_to, "注文日（To）", class: "form-label"
+          = f.label :date_to, "注文日 To", class: "form-label"
           = f.date_field :date_to, class: "form-control", value: params[:date_to]
+        .col-md-1.d-flex.align-items-end
+          = f.submit "検索", class: "btn btn-primary w-100"
         .col-12
-          = f.submit "検索", class: "btn btn-primary me-2"
           = link_to "リセット", orders_path, class: "btn btn-outline-secondary"
 
-  / 案件一覧
   .card.shadow.mb-4
     .card-header.py-3.d-flex.justify-content-between.align-items-center
       h6.m-0.font-weight-bold.text-primary
@@ -58,16 +51,17 @@
 
     .card-body
       .table-responsive
-        table.table.table-bordered.table-hover
+        table.table.table-bordered.table-hover.align-middle
           thead.table-light
             tr
-              th
+              th style="width: 44px;"
                 .form-check
                   input.form-check-input[type="checkbox" data-bulk-actions-target="selectAll"]
               th 案件番号
               th 注文日
               th 顧客名
-              th 金額
+              th 案件名
+              th.text-end 金額
               th ステータス
               th 担当者
               th 操作
@@ -77,16 +71,16 @@
                 td
                   .form-check
                     input.form-check-input[type="checkbox" name="selected_orders[]" value=order.id data-bulk-actions-target="checkbox" class="order-checkbox"]
-                td = order.draft? ? (order.order_number || "未設定") : order.order_number
-                td = order.order_date.strftime('%Y/%m/%d')
+                td = order.draft? ? (order.display_order_number.presence || "未設定") : order.display_order_number
+                td = order.order_date.strftime("%Y/%m/%d")
                 td = order.customer&.name || ""
+                td = order.project_name.presence || "-"
                 td.text-end = number_to_currency(order.total_amount, unit: "¥", precision: 0)
                 td
                   - if order.draft?
-                    span.badge.bg-warning style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
-                      | 一時保存
+                    span.badge.bg-warning.text-dark 一時保存
                   - else
-                    span.badge style="background-color: #{order.order_status.color.presence || '#6c757d'}; color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
+                    span.badge style="background-color: #{order.order_status.color.presence || '#6c757d'}; color: #fff;"
                       = order.order_status.name
                 td = order.staff_name
                 td style="white-space: nowrap;"
@@ -97,15 +91,12 @@
                     = link_to edit_order_path(order), class: "btn btn-sm btn-outline-secondary" do
                       i.bi.bi-pencil.me-1
                       | 編集
-                    = link_to order_path(order), \
-                        data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？\nこの操作は取り消せません。" }, \
-                        class: "btn btn-sm btn-outline-danger" do
+                    = link_to order_path(order), data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？\nこの操作は取り消せません。" }, class: "btn btn-sm btn-outline-danger" do
                       i.bi.bi-trash.me-1
                       | 削除
 
-      / ページネーション
       .d-flex.justify-content-center.mt-4
         = paginate @orders
 
 = javascript_include_tag "bulk_actions"
-= javascript_include_tag "delete_actions" 
+= javascript_include_tag "delete_actions"
