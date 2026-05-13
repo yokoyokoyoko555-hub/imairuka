@@ -8,6 +8,9 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root 'dashboard#index'
 
+  get "signup", to: "signup#new", as: :new_signup
+  post "signup", to: "signup#create", as: :signup
+
   # 案件管理
   resources :orders do
     collection do
@@ -63,6 +66,9 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :companies, only: [:index, :show, :new, :create] do
+      member do
+        patch :approve
+      end
       resources :user_invitations, path: :invitations, only: [:new, :create]
     end
   end

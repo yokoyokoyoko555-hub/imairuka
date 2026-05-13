@@ -1,5 +1,7 @@
 module Admin
   class CompaniesController < ApplicationController
+    include InvitationLinks
+
     layout "admin"
 
     before_action -> { require_role!(:platform_admin) }
@@ -35,6 +37,28 @@ module Admin
       @can_invite_user = @company.can_invite_user?
       @orders_count = Order.unscoped.where(company: @company).count
       @payments_count = PaymentRecord.unscoped.where(company: @company).count
+    end
+
+    def approve
+      @company = Company.find(params[:id])
+      @company.contract_status = "trialing"
+      @company.trial_ends_at ||= 14.days.from_now
+
+      if @company.save
+        invitation = @company.user_invitations.pending.find_or_initialize_by(email: @company.email)
+        invitation.assign_attributes(
+          name: @company.representative,
+          role: "owner",
+          invited_by: current_user,
+          skip_company_invite_limit: true
+        )
+        invitation.save!
+        invitation.reset_token! if invitation.raw_token.blank?
+        store_invitation_link(invitation)
+        redirect_to admin_company_path(@company), notice: "契約を承認しました。初期管理者の招待URLを発行しました。"
+      else
+        redirect_to admin_company_path(@company), alert: @company.errors.full_messages.to_sentence
+      end
     end
 
     private

@@ -5,6 +5,13 @@
       .text-muted 契約企業詳細
     = link_to "一覧へ戻る", admin_companies_path, class: "btn btn-outline-secondary"
 
+  - if @company.pending_review?
+    .alert.alert-warning.d-flex.justify-content-between.align-items-center
+      div
+        .fw-bold 利用申込の承認待ちです
+        .small 内容を確認し、問題なければ承認して初期管理者の招待URLを発行します。
+      = button_to "承認して招待URLを発行", approve_admin_company_path(@company), method: :patch, class: "btn btn-primary"
+
   - if flash[:invitation_url].present?
     .alert.alert-info
       .fw-bold.mb-2 招待URL

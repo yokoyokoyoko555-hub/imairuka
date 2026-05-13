@@ -5,7 +5,7 @@ class UserInvitation < ApplicationRecord
   belongs_to :company
   belongs_to :invited_by, class_name: "User", optional: true
 
-  attr_accessor :raw_token
+  attr_accessor :raw_token, :skip_company_invite_limit
 
   before_validation :normalize_email
   before_validation :set_token, on: :create
@@ -80,6 +80,7 @@ class UserInvitation < ApplicationRecord
   end
 
   def company_can_invite_user
+    return if ActiveModel::Type::Boolean.new.cast(skip_company_invite_limit)
     return if company.blank? || company.can_invite_user?
 
     errors.add(:base, company.user_limit_message)

@@ -1,0 +1,43 @@
+.container.py-5
+  .row.justify-content-center
+    .col-lg-8
+      .card.shadow-sm
+        .card-header.bg-white
+          h1.h4.mb-1 Imairuka 利用申込
+          .text-muted 申込内容を確認後、運営より利用開始のご案内をお送りします。
+        .card-body
+          = render "shared/error_messages", model: @company
+
+          = form_with model: @company, url: signup_path, local: true do |f|
+            .row.g-3
+              .col-md-6
+                = f.label :name, "会社名", class: "form-label"
+                = f.text_field :name, class: "form-control", required: true
+              .col-md-6
+                = f.label :representative, "代表者名", class: "form-label"
+                = f.text_field :representative, class: "form-control", required: true
+              .col-md-6
+                = f.label :email, "連絡先メールアドレス", class: "form-label"
+                = f.email_field :email, class: "form-control", required: true
+              .col-md-6
+                = f.label :phone, "電話番号", class: "form-label"
+                = f.telephone_field :phone, class: "form-control", placeholder: "0312345678", required: true
+              .col-md-6
+                = f.label :postal_code, "郵便番号", class: "form-label"
+                = f.text_field :postal_code, class: "form-control", placeholder: "1000000", required: true
+              .col-md-6
+                = f.label :invoice_number, "登録番号", class: "form-label"
+                = f.text_field :invoice_number, class: "form-control", placeholder: "T1234567890123", required: true
+              .col-12
+                = f.label :address, "住所", class: "form-label"
+                = f.text_area :address, class: "form-control", rows: 3, required: true
+              .col-md-6
+                = f.label :business_type, "業種", class: "form-label"
+                = f.text_field :business_type, class: "form-control", required: true
+              .col-md-6
+                = f.label :plan_name, "希望プラン", class: "form-label"
+                = f.select :plan_name, [["standard", "standard"], ["pro", "pro"], ["enterprise", "enterprise"]], {}, class: "form-select"
+
+            .d-flex.justify-content-between.align-items-center.mt-4
+              = link_to "ログインへ戻る", login_path, class: "btn btn-outline-secondary"
+              = f.submit "申込を送信", class: "btn btn-primary"

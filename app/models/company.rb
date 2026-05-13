@@ -14,6 +14,7 @@ class Company < ApplicationRecord
   has_many :payment_records, dependent: :restrict_with_error
 
   enum :contract_status, {
+    pending_review: "pending_review",
     trialing: "trialing",
     active: "active",
     past_due: "past_due",
