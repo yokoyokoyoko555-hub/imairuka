@@ -60,8 +60,11 @@
                 = f.label :contract_status, "契約状態", class: "form-label"
                 = f.select :contract_status, Company.contract_statuses.keys.map { |status| [status, status] }, {}, class: "form-select"
               .col-md-6.mb-3
-                = f.label :plan_name, "プラン", class: "form-label"
-                = f.select :plan_name, [["standard", "standard"], ["professional", "professional"], ["enterprise", "enterprise"]], {}, class: "form-select"
+                = f.label :plan_name, "契約内容", class: "form-label"
+                .border.rounded.p-3.bg-light
+                  .fw-bold = Company::PLAN_LABEL
+                  .small.text-muted 全機能利用可能。標準1名まで。追加アカウントは1名ごとに別途課金です。
+                = f.hidden_field :plan_name, value: Company::DEFAULT_PLAN_NAME
             .mb-3
               = f.label :trial_ends_at, "トライアル終了日時", class: "form-label"
               = f.datetime_field :trial_ends_at, class: "form-control"

@@ -35,11 +35,12 @@ class Company < ApplicationRecord
   before_validation :set_tenant_slug, :normalize_postal_code, :normalize_phone
   before_save :apply_ai_api_key_change
 
+  DEFAULT_PLAN_NAME = "standard".freeze
+  PLAN_LABEL = "基本プラン".freeze
+  INCLUDED_USER_LIMIT = 1
+
   USER_LIMITS = {
-    "starter" => 1,
-    "standard" => 3,
-    "pro" => 10,
-    "enterprise" => nil
+    DEFAULT_PLAN_NAME => INCLUDED_USER_LIMIT
   }.freeze
 
   def contract_active?
@@ -51,11 +52,15 @@ class Company < ApplicationRecord
   end
 
   def user_limit
-    USER_LIMITS.fetch(plan_name.to_s, USER_LIMITS["standard"])
+    USER_LIMITS.fetch(DEFAULT_PLAN_NAME)
+  end
+
+  def plan_label
+    PLAN_LABEL
   end
 
   def user_limit_label
-    user_limit || "無制限"
+    "#{user_limit} 名"
   end
 
   def active_users_count
@@ -85,10 +90,9 @@ class Company < ApplicationRecord
 
   def user_limit_message
     return "アカウント追加は月額契約が有効になると利用できます。" unless account_invitation_unlocked?
-    return "このプランではユーザーを無制限に招待できます。" if user_limit.nil?
-    return "招待可能です。残り#{remaining_user_slots}名まで追加できます。" if can_invite_user?
+    return "基本プランは全機能利用可能で、標準1名まで利用できます。残り#{remaining_user_slots}名まで招待できます。" if can_invite_user?
 
-    "現在のプラン上限に達しています。プラン変更または追加課金が必要です。"
+    "基本プランは標準1名までです。追加アカウントは1名ごとに別途課金が必要です。"
   end
 
   def stripe_connected?

@@ -28,8 +28,10 @@
           dl.row.mb-0
             dt.col-sm-5 契約状態
             dd.col-sm-7 = @company.contract_status
-            dt.col-sm-5 プラン
-            dd.col-sm-7 = @company.plan_name
+            dt.col-sm-5 契約内容
+            dd.col-sm-7
+              .fw-semibold = @company.plan_label
+              .small.text-muted 全機能利用可能 / 標準1名まで
             dt.col-sm-5 トライアル終了
             dd.col-sm-7 = @company.trial_ends_at ? l(@company.trial_ends_at, format: :short) : "-"
             dt.col-sm-5 Stripe Customer

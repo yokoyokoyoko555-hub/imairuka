@@ -10,7 +10,7 @@ class SignupController < ApplicationController
   end
 
   def create
-    @company = Company.new(signup_params.merge(contract_status: "pending_review"))
+    @company = Company.new(signup_params.merge(contract_status: "pending_review", plan_name: Company::DEFAULT_PLAN_NAME))
 
     if @company.save
       redirect_to new_signup_path, notice: "利用申込を受け付けました。運営側で確認後、利用開始のご案内をお送りします。"
@@ -30,8 +30,7 @@ class SignupController < ApplicationController
       :phone,
       :email,
       :representative,
-      :business_type,
-      :plan_name
+      :business_type
     )
   end
 end

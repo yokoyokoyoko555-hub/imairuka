@@ -13,7 +13,7 @@
           tr
             th 会社名
             th 契約状態
-            th プラン
+            th 契約内容
             th Stripe Customer
             th Stripe Subscription
             th 登録日
@@ -25,7 +25,7 @@
               td
                 span.badge class=(company.contract_active? ? "bg-success" : "bg-secondary")
                   = company.contract_status
-              td = company.plan_name
+              td = company.plan_label
               td = company.stripe_customer_id.presence || "-"
               td = company.stripe_subscription_id.presence || "-"
               td = l(company.created_at, format: :short)

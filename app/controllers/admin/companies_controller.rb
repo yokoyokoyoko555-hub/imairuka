@@ -20,7 +20,7 @@ module Admin
     end
 
     def create
-      @company = Company.new(company_params)
+      @company = Company.new(company_params.merge(plan_name: Company::DEFAULT_PLAN_NAME))
       @owner = @company.users.build(owner_params.merge(role: "owner", active: true))
 
       if @company.save
@@ -75,7 +75,6 @@ module Admin
         :representative,
         :business_type,
         :contract_status,
-        :plan_name,
         :trial_ends_at
       )
     end

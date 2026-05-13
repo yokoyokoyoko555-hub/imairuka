@@ -14,8 +14,8 @@
           dl.row.mb-0
             dt.col-5 契約
             dd.col-7 = @company.contract_status
-            dt.col-5 プラン
-            dd.col-7 = @company.plan_name
+            dt.col-5 契約内容
+            dd.col-7 = @company.plan_label
             dt.col-5 使用中
             dd.col-7 = "#{@company.user_slots_used} / #{@company.user_limit_label}"
             dt.col-5 追加可能

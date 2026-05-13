@@ -19,8 +19,8 @@
               .text-muted.small 契約状態
               .fs-5 = current_company.contract_status
             .col-sm-3
-              .text-muted.small プラン
-              .fs-5 = current_company.plan_name
+              .text-muted.small 契約内容
+              .fs-5 = current_company.plan_label
             .col-sm-3
               .text-muted.small 使用中
               .fs-5 = "#{current_company.user_slots_used} / #{current_company.user_limit_label}"

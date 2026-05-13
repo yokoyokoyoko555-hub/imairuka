@@ -32,8 +32,10 @@
           = f.label :business_type, "業種", class: "form-label"
           = f.text_field :business_type, class: "form-control", required: true
         .col-md-6
-          = f.label :plan_name, "希望プラン", class: "form-label"
-          = f.select :plan_name, [["standard", "standard"], ["pro", "pro"], ["enterprise", "enterprise"]], {}, class: "form-select"
+          .border.rounded.p-3.bg-light.h-100
+            .fw-bold 基本プラン
+            .text-muted.small 全機能利用可能。標準1名まで。追加アカウントは1名ごとに別途課金です。
+          = f.hidden_field :plan_name, value: Company::DEFAULT_PLAN_NAME
 
       .d-flex.justify-content-between.align-items-center.mt-4
         = link_to "ログインへ戻る", login_path, class: "btn btn-outline-secondary"
