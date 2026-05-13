@@ -1,5 +1,5 @@
 class SignupController < ApplicationController
-  layout "auth"
+  layout "signup"
 
   skip_before_action :require_login
   skip_before_action :set_current_context
