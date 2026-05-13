@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>イマイルカ 利用者マニュアル</title>
+  <style>
+    @page { size: A4; margin: 16mm 14mm; }
+    body {
+      margin: 0;
+      color: #172033;
+      background: #ffffff;
+      font-family: "Noto Sans CJK JP", "Yu Gothic", "Meiryo", sans-serif;
+      font-size: 12px;
+      line-height: 1.75;
+    }
+    h1, h2, h3 { margin: 0; color: #0f172a; line-height: 1.35; }
+    h1 { font-size: 28px; }
+    h2 {
+      margin-top: 20px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #dbeafe;
+      font-size: 18px;
+    }
+    h3 { margin-top: 14px; font-size: 14px; }
+    p { margin: 7px 0; }
+    ul, ol { margin: 6px 0 10px 20px; padding: 0; }
+    li { margin: 3px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; }
+    th, td { border: 1px solid #d8dee9; padding: 7px 8px; vertical-align: top; }
+    th { background: #f1f5f9; text-align: left; }
+    .cover {
+      min-height: 220mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 1px solid #d8dee9;
+      padding: 24mm 18mm;
+      background: #f8fafc;
+      box-sizing: border-box;
+    }
+    .cover .brand { font-size: 14px; color: #2563eb; font-weight: 700; margin-bottom: 10px; }
+    .cover .meta { margin-top: 22px; color: #475569; }
+    .page-break { page-break-before: always; }
+    .note {
+      margin: 10px 0;
+      padding: 10px 12px;
+      border-left: 4px solid #2563eb;
+      background: #eff6ff;
+    }
+    .warning {
+      margin: 10px 0;
+      padding: 10px 12px;
+      border-left: 4px solid #f59e0b;
+      background: #fffbeb;
+    }
+    .flow {
+      display: table;
+      width: 100%;
+      margin: 10px 0 16px;
+      table-layout: fixed;
+    }
+    .flow .step {
+      display: table-cell;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      padding: 8px;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: 700;
+    }
+    .flow .arrow {
+      display: table-cell;
+      width: 18px;
+      text-align: center;
+      vertical-align: middle;
+      color: #64748b;
+      font-weight: 700;
+    }
+    .small { color: #64748b; font-size: 10px; }
+    .label { color: #2563eb; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <div class="brand">Imairuka</div>
+    <h1>イマイルカ<br>利用者マニュアル</h1>
+    <p class="meta">ASP / SaaS版 現時点版<br>対象: 利用企業の管理者・担当者</p>
+    <p class="small">この資料は、利用者がイマイルカを使い始め、案件・文書・決済・ユーザーを管理するための基本操作をまとめたものです。</p>
+  </section>
+
+  <section class="page-break">
+    <h2>1. イマイルカでできること</h2>
+    <p>イマイルカは、受注・案件管理を中心に、顧客、商品、見積書、納品書、請求書、領収書、決済履歴、プロジェクト進行をまとめて管理する業務管理システムです。</p>
+    <table>
+      <tr><th>領域</th><th>主な機能</th></tr>
+      <tr><td>案件管理</td><td>案件登録、案件名・案件概要、請求情報、処理履歴、プロジェクト管理</td></tr>
+      <tr><td>プロジェクト管理</td><td>ガントチャート、AIによる下書き、タスク管理、課題管理、アサイン管理</td></tr>
+      <tr><td>文書管理</td><td>見積書、納品書、請求書、領収書の作成・一覧・印刷</td></tr>
+      <tr><td>決済管理</td><td>Stripe連携、決済開始、Webhookによる決済履歴保存、入金状態確認</td></tr>
+      <tr><td>設定</td><td>会社情報、ステータス、Stripe連携、AI APIキー設定</td></tr>
+      <tr><td>ユーザー管理</td><td>複数アカウント招待、権限変更、停止、プランに応じた招待可能数表示</td></tr>
+    </table>
+
+    <h2>2. 利用開始の流れ</h2>
+    <div class="flow">
+      <div class="step">利用申込</div><div class="arrow">→</div>
+      <div class="step">運営承認</div><div class="arrow">→</div>
+      <div class="step">招待URL受領</div><div class="arrow">→</div>
+      <div class="step">アカウント作成</div><div class="arrow">→</div>
+      <div class="step">ログイン</div>
+    </div>
+    <ol>
+      <li>利用者は申込フォームから会社情報を送信します。</li>
+      <li>運営側が申込内容を確認し、承認します。</li>
+      <li>承認後、初期管理者用の招待URLが発行されます。</li>
+      <li>招待URLから氏名・メールアドレス・パスワードを設定します。</li>
+      <li>ログイン後、会社情報やStripe連携などの初期設定を行います。</li>
+    </ol>
+    <p><span class="label">申込URL:</span> https://imairuka-order-793fd07d208c.herokuapp.com/signup</p>
+    <p><span class="label">ログインURL:</span> https://imairuka-order-793fd07d208c.herokuapp.com/login</p>
+  </section>
+
+  <section class="page-break">
+    <h2>3. 基本画面の見方</h2>
+    <p>ログイン後は、左メニューから各機能へ移動します。上部メニューには主要な管理機能が表示されます。</p>
+    <table>
+      <tr><th>メニュー</th><th>用途</th></tr>
+      <tr><td>ダッシュボード</td><td>全体状況の確認に使います。</td></tr>
+      <tr><td>案件管理</td><td>受注・案件の登録、確認、プロジェクト管理に使います。</td></tr>
+      <tr><td>請求管理</td><td>請求対象の案件、支払期限、支払方法、入金状態を確認します。</td></tr>
+      <tr><td>決済履歴</td><td>Stripe決済や入金記録を確認します。</td></tr>
+      <tr><td>文書管理</td><td>見積書、納品書、請求書、領収書を管理します。</td></tr>
+      <tr><td>顧客管理・商品管理</td><td>顧客情報、商品・サービス情報を登録します。</td></tr>
+      <tr><td>設定</td><td>会社情報、ステータス、Stripe、AI APIキーを設定します。</td></tr>
+    </table>
+
+    <h2>4. 案件管理</h2>
+    <h3>案件を登録する</h3>
+    <ol>
+      <li>左メニューの「案件管理」を開きます。</li>
+      <li>新規作成ボタンから案件を作成します。</li>
+      <li>顧客、案件名、案件概要、商品、金額、支払方法、支払期限などを入力します。</li>
+      <li>保存すると案件一覧に表示されます。</li>
+    </ol>
+    <div class="note">案件番号はシステムが自動で発行します。形式は例として「ORD-202605-0001」のような実運用向けの番号です。</div>
+
+    <h3>案件詳細で確認できること</h3>
+    <ul>
+      <li>顧客名、案件名、案件概要</li>
+      <li>金額、支払方法、支払期限、ステータス</li>
+      <li>処理履歴</li>
+      <li>プロジェクト管理への移動</li>
+    </ul>
+  </section>
+
+  <section class="page-break">
+    <h2>5. プロジェクト管理</h2>
+    <p>案件詳細の「プロジェクト管理」から、案件の進行を管理できます。</p>
+    <table>
+      <tr><th>機能</th><th>説明</th></tr>
+      <tr><td>ガントチャート</td><td>案件全体の大まかな工程を確認します。</td></tr>
+      <tr><td>AI下書き作成</td><td>案件概要をもとに、工程・タスクの下書きを作成します。</td></tr>
+      <tr><td>タスク管理</td><td>ガントの工程より細かい作業単位を管理します。</td></tr>
+      <tr><td>課題管理</td><td>進行上の問題、対応状況、担当者を管理します。</td></tr>
+      <tr><td>アサイン管理</td><td>案件に関わる担当者を登録します。</td></tr>
+    </table>
+    <div class="warning">AI機能を使うには、設定画面で利用企業自身のAI APIキーを登録する必要があります。</div>
+
+    <h2>6. 顧客管理・商品管理</h2>
+    <p>案件や文書を作成する前に、顧客情報と商品情報を登録しておくと入力がスムーズになります。</p>
+    <ul>
+      <li>顧客管理では、会社名、担当者、住所、連絡先などを管理します。</li>
+      <li>商品管理では、商品名、単価、税率などを管理します。</li>
+      <li>案件・見積・請求書などで、登録済み情報を利用できます。</li>
+    </ul>
+  </section>
+
+  <section class="page-break">
+    <h2>7. 文書管理</h2>
+    <p>文書管理では、見積書、納品書、請求書、領収書を作成・確認できます。各一覧には案件名も表示されるため、どの案件に紐づく文書か確認しやすくなっています。</p>
+    <table>
+      <tr><th>文書</th><th>主な用途</th></tr>
+      <tr><td>見積書</td><td>受注前の金額・条件提示に使います。</td></tr>
+      <tr><td>納品書</td><td>納品内容の記録に使います。</td></tr>
+      <tr><td>請求書</td><td>顧客への請求内容を管理します。</td></tr>
+      <tr><td>領収書</td><td>入金後の領収記録として使います。</td></tr>
+    </table>
+    <h3>文書作成の基本手順</h3>
+    <ol>
+      <li>左メニューから作成したい文書を開きます。</li>
+      <li>新規作成ボタンを押します。</li>
+      <li>顧客名、案件名、明細、金額、担当者などを入力します。</li>
+      <li>保存後、一覧または詳細画面から確認・印刷します。</li>
+    </ol>
+  </section>
+
+  <section class="page-break">
+    <h2>8. 請求管理・決済管理</h2>
+    <h3>請求一覧</h3>
+    <p>請求一覧では、案件ごとの支払期限、支払方法、入金状況を確認できます。案件名列も表示されます。</p>
+
+    <h3>Stripe連携</h3>
+    <ol>
+      <li>設定画面を開きます。</li>
+      <li>Stripe連携を選択します。</li>
+      <li>「Stripeと連携」から、利用企業自身のStripeアカウントを接続します。</li>
+      <li>決済受付が有効になると、案件からStripe決済を開始できます。</li>
+    </ol>
+    <div class="note">イマイルカはStripe Connect方式を利用します。利用企業ごとにStripeアカウントを連携し、自社の顧客から決済を受け付ける形です。</div>
+
+    <h3>決済履歴</h3>
+    <p>決済履歴では、案件番号、顧客名、決済金額、支払方法、支払期限、入金日、決済状態を確認できます。</p>
+    <p>Stripe Session IDは通常業務では不要なため、一覧画面には表示していません。内部的にはWebhook照合や障害調査のため保持しています。</p>
+  </section>
+
+  <section class="page-break">
+    <h2>9. ユーザー管理と権限</h2>
+    <p>管理者権限を持つユーザーは、同じ会社のユーザーを招待できます。招待可能なユーザー数は契約プランに応じて制限されます。</p>
+    <table>
+      <tr><th>権限</th><th>概要</th></tr>
+      <tr><td>オーナー</td><td>会社設定、ユーザー管理、主要機能を管理できます。</td></tr>
+      <tr><td>管理者</td><td>業務管理とユーザー管理を行えます。</td></tr>
+      <tr><td>経理</td><td>請求・決済関連の操作に向いた権限です。</td></tr>
+      <tr><td>一般</td><td>案件や文書など通常業務を行うユーザーです。</td></tr>
+      <tr><td>閲覧のみ</td><td>確認中心のユーザーです。</td></tr>
+    </table>
+    <div class="warning">追加アカウントは契約状態とプランに応じて解放されます。未課金または上限到達時は招待できません。</div>
+
+    <h2>10. 設定</h2>
+    <ul>
+      <li>会社情報: 自社名、住所、連絡先、登録番号などを管理します。</li>
+      <li>ステータス設定: 案件の進行ステータスを管理します。</li>
+      <li>Stripe連携: 決済受付のためのStripe Connectを設定します。</li>
+      <li>AI設定: AIによるガント・タスク下書きに使うAPIキーを設定します。</li>
+    </ul>
+  </section>
+
+  <section class="page-break">
+    <h2>11. よくある運用の流れ</h2>
+    <ol>
+      <li>顧客と商品を登録します。</li>
+      <li>案件を作成し、案件名と案件概要を入力します。</li>
+      <li>必要に応じてAIでプロジェクト計画を下書きします。</li>
+      <li>タスク、課題、担当者を整理します。</li>
+      <li>見積書を作成します。</li>
+      <li>受注後、納品書・請求書を作成します。</li>
+      <li>Stripe決済または入金情報を確認します。</li>
+      <li>入金後、領収書を発行します。</li>
+    </ol>
+
+    <h2>12. 困ったとき</h2>
+    <table>
+      <tr><th>状況</th><th>確認ポイント</th></tr>
+      <tr><td>ログインできない</td><td>メールアドレス、パスワード、招待URLの有効期限を確認してください。</td></tr>
+      <tr><td>ユーザーを招待できない</td><td>契約状態、プラン上限、既存の招待中メールアドレスを確認してください。</td></tr>
+      <tr><td>Stripe決済が使えない</td><td>Stripe連携状態、決済受付の有効化、本人確認の状況を確認してください。</td></tr>
+      <tr><td>AI下書きが使えない</td><td>設定画面でAI APIキーが登録されているか確認してください。</td></tr>
+      <tr><td>文書の案件が分かりにくい</td><td>各文書一覧の「案件名」列を確認してください。</td></tr>
+    </table>
+
+    <p class="small">最終更新: 2026年5月13日 / Imairuka ASP版 利用者マニュアル</p>
+  </section>
+</body>
+</html>
