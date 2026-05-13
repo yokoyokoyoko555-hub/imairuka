@@ -55,6 +55,7 @@
               th 案件番号
               th 注文日
               th 顧客名
+              th 案件名
               th 合計金額
               th 支払期限
               th 支払方法
@@ -66,6 +67,7 @@
                 td = order.order_number
                 td = order.order_date.strftime('%Y/%m/%d')
                 td = order.customer&.name || ""
+                td = order.project_name.presence || "-"
                 td.text-end = number_to_currency(order.total_amount, unit: "¥", precision: 0)
                 td = order.payment_due_date&.strftime('%Y/%m/%d') || '未設定'
                 td = Order.payment_method_text(order.payment_method).presence || '未設定'

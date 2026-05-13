@@ -55,6 +55,7 @@
               th 見積書番号
               th 作成日
               th 顧客名
+              th 案件名
               th.text-end 金額
               th 有効期限
               th 担当者
@@ -66,6 +67,7 @@
                 td = quotation.quotation_number
                 td = format_date(quotation.quotation_date)
                 td = quotation.customer_name
+                td = quotation.subject.presence || "-"
                 td.text-end = number_to_currency(quotation.total_amount_with_tax, unit: "¥", precision: 0)
                 td = format_date(quotation.valid_until)
                 td = quotation.staff_name

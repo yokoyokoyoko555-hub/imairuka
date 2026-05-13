@@ -52,6 +52,7 @@
               th 領収書番号
               th 発行日
               th 顧客名
+              th 案件名
               th.text-end 金額
               th ステータス
               th 操作
@@ -61,6 +62,7 @@
                 td = receipt.receipt_number
                 td = format_date(receipt.issue_date)
                 td = receipt.customer_name
+                td = receipt.subject.presence || "-"
                 td.text-end = number_to_currency(receipt.total_amount_with_tax, unit: "¥", precision: 0)
                 td
                   - if receipt.draft?

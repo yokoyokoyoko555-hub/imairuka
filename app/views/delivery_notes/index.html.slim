@@ -52,6 +52,7 @@
               th 納品書番号
               th 納品日
               th 顧客名
+              th 案件名
               th.text-end 金額
               th 担当者
               th ステータス
@@ -62,6 +63,7 @@
                 td = delivery_note.delivery_number
                 td = format_date(delivery_note.delivery_date)
                 td = delivery_note.customer_name
+                td = delivery_note.subject.presence || "-"
                 td.text-end = number_to_currency(delivery_note.total_amount_with_tax, unit: "¥", precision: 0)
                 td = delivery_note.staff_name
                 td

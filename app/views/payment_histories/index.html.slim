@@ -49,7 +49,6 @@
               th 支払期限
               th 入金日
               th 決済状態
-              th Stripe Session
               th 操作
           tbody
             - @payments.each do |payment|
@@ -70,17 +69,12 @@
                   - else
                     span.badge.bg-warning.text-dark 未入金
                 td
-                  - if payment.stripe_checkout_session_id.present?
-                    code.small = payment.stripe_checkout_session_id
-                  - else
-                    | -
-                td
                   = link_to show_billing_order_path(payment.order), class: "btn btn-sm btn-outline-primary" do
                     i.bi.bi-eye.me-1
                     | 詳細
             - if @payments.empty?
               tr
-                td.text-center.text-muted colspan="9"
+                td.text-center.text-muted colspan="8"
                   | 決済履歴はまだありません。請求画面からStripe決済を開始すると履歴が作成されます。
 
       .d-flex.justify-content-center.mt-4

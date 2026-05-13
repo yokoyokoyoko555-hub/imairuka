@@ -52,6 +52,7 @@
               th 請求書番号
               th 作成日
               th 顧客名
+              th 案件名
               th.text-end 金額
               th 支払期限
               th 担当者
@@ -63,6 +64,7 @@
                 td = invoice.invoice_number
                 td = format_date(invoice.invoice_date)
                 td = invoice.customer_name
+                td = invoice.subject.presence || "-"
                 td.text-end = number_to_currency(invoice.total_amount_with_tax, unit: "¥", precision: 0)
                 td = format_date(invoice.payment_due_date)
                 td = invoice.staff_name
