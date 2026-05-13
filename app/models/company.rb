@@ -59,6 +59,28 @@ class Company < ApplicationRecord
     trialing? || active?
   end
 
+  def contract_status_label
+    {
+      "pending_review" => "申込受付",
+      "trialing" => "トライアル",
+      "active" => "利用中",
+      "past_due" => "支払確認中",
+      "suspended" => "停止中",
+      "canceled" => "解約"
+    }.fetch(contract_status, contract_status)
+  end
+
+  def contract_status_badge_class
+    {
+      "pending_review" => "bg-warning text-dark",
+      "trialing" => "bg-info text-dark",
+      "active" => "bg-success",
+      "past_due" => "bg-warning text-dark",
+      "suspended" => "bg-secondary",
+      "canceled" => "bg-dark"
+    }.fetch(contract_status, "bg-secondary")
+  end
+
   def account_invitation_unlocked?
     active?
   end
@@ -72,7 +94,7 @@ class Company < ApplicationRecord
   end
 
   def user_limit_label
-    "#{user_limit} 名"
+    "#{user_limit}名"
   end
 
   def active_users_count
@@ -146,9 +168,17 @@ class Company < ApplicationRecord
   private
 
   def set_tenant_slug
-    return if tenant_slug.present?
+    self.tenant_slug = tenant_slug.to_s.parameterize if tenant_slug.present?
+    return if tenant_slug.present? && !self.class.where.not(id: id).exists?(tenant_slug: tenant_slug)
 
-    self.tenant_slug = name.to_s.parameterize.presence || "company-#{SecureRandom.hex(4)}"
+    base_slug = name.to_s.parameterize.presence || "company"
+    candidate = base_slug
+
+    while self.class.where.not(id: id).exists?(tenant_slug: candidate)
+      candidate = "#{base_slug}-#{SecureRandom.hex(3)}"
+    end
+
+    self.tenant_slug = candidate
   end
 
   def normalize_postal_code

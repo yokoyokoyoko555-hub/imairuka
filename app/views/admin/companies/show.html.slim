@@ -14,20 +14,22 @@
 
   - if flash[:invitation_url].present?
     .alert.alert-info
-      .fw-bold.mb-2 招待URL
+      .fw-bold.mb-2 初期管理者 招待URL
       .input-group
         input#invitation-url.form-control type="text" readonly="readonly" value=flash[:invitation_url]
         button.btn.btn-outline-primary type="button" onclick="navigator.clipboard.writeText(document.getElementById('invitation-url').value); this.textContent='コピー済み';" コピー
 
   .row.g-3
     .col-md-6
-      .card.shadow-sm
+      .card.shadow-sm.h-100
         .card-header
           strong 契約情報
         .card-body
           dl.row.mb-0
             dt.col-sm-5 契約状態
-            dd.col-sm-7 = @company.contract_status
+            dd.col-sm-7
+              span.badge class=@company.contract_status_badge_class
+                = @company.contract_status_label
             dt.col-sm-5 契約内容
             dd.col-sm-7
               .fw-semibold = @company.plan_label
@@ -40,7 +42,27 @@
             dd.col-sm-7 = @company.stripe_subscription_id.presence || "-"
 
     .col-md-6
-      .card.shadow-sm
+      .card.shadow-sm.h-100
+        .card-header
+          strong 申込情報
+        .card-body
+          dl.row.mb-0
+            dt.col-sm-5 代表者
+            dd.col-sm-7 = @company.representative
+            dt.col-sm-5 メール
+            dd.col-sm-7 = @company.email
+            dt.col-sm-5 電話番号
+            dd.col-sm-7 = @company.phone
+            dt.col-sm-5 登録番号
+            dd.col-sm-7 = @company.invoice_number
+            dt.col-sm-5 業種
+            dd.col-sm-7 = @company.business_type
+            dt.col-sm-5 住所
+            dd.col-sm-7 = "〒#{@company.postal_code} #{@company.address}"
+
+  .row.g-3.mt-0
+    .col-md-6
+      .card.shadow-sm.h-100
         .card-header
           strong 利用状況
         .card-body
@@ -48,13 +70,24 @@
             dt.col-sm-5 ユーザー枠
             dd.col-sm-7 = "#{@company.user_slots_used} / #{@company.user_limit_label}"
             dt.col-sm-5 追加可能
-            dd.col-sm-7 = @company.remaining_user_slots.nil? ? "無制限" : "#{@company.remaining_user_slots} 名"
+            dd.col-sm-7 = @company.remaining_user_slots.nil? ? "無制限" : "#{@company.remaining_user_slots}名"
             dt.col-sm-5 案件数
             dd.col-sm-7 = @orders_count
             dt.col-sm-5 決済履歴数
             dd.col-sm-7 = @payments_count
           .alert class=(@can_invite_user ? "alert-success" : "alert-warning") class="mt-3 mb-0"
             = @company.user_limit_message
+
+    .col-md-6
+      .card.shadow-sm.h-100
+        .card-header
+          strong 承認後の流れ
+        .card-body
+          ol.mb-0
+            li 申込内容を確認します。
+            li 承認すると、初期管理者向けの招待URLが発行されます。
+            li 利用者が招待URLからパスワードを設定します。
+            li ログイン後、Imairukaの利用を開始できます。
 
   .card.shadow-sm.mt-3
     .card-header.d-flex.justify-content-between.align-items-center
@@ -64,45 +97,51 @@
       - else
         button.btn.btn-sm.btn-secondary type="button" disabled="disabled" ユーザーを招待
     .card-body.p-0
-      table.table.table-hover.mb-0
-        thead.table-light
-          tr
-            th メール
-            th 名前
-            th 権限
-            th 状態
-            th 最終ログイン
-        tbody
-          - @users.each do |user|
+      .table-responsive
+        table.table.table-hover.mb-0
+          thead.table-light
             tr
-              td = user.email
-              td = user.name.presence || "-"
-              td = user.role_label
-              td = user.active? ? "有効" : "停止"
-              td = user.last_login_at ? l(user.last_login_at, format: :short) : "-"
+              th メール
+              th 名前
+              th 権限
+              th 状態
+              th 最終ログイン
+          tbody
+            - if @users.any?
+              - @users.each do |user|
+                tr
+                  td = user.email
+                  td = user.name.presence || "-"
+                  td = user.role_label
+                  td = user.active? ? "有効" : "停止"
+                  td = user.last_login_at ? l(user.last_login_at, format: :short) : "-"
+            - else
+              tr
+                td.text-muted colspan="5" まだユーザーは作成されていません
 
   .card.shadow-sm.mt-3
     .card-header
       strong 未承諾の招待
       span.badge.bg-secondary.ms-2 = @pending_invitations.size
     .card-body.p-0
-      table.table.table-hover.mb-0
-        thead.table-light
-          tr
-            th メール
-            th 名前
-            th 権限
-            th 期限
-            th 招待者
-        tbody
-          - if @pending_invitations.any?
-            - @pending_invitations.each do |invitation|
-              tr
-                td = invitation.email
-                td = invitation.name.presence || "-"
-                td = invitation.role_label
-                td = l(invitation.expires_at, format: :short)
-                td = invitation.invited_by&.display_name || "-"
-          - else
+      .table-responsive
+        table.table.table-hover.mb-0
+          thead.table-light
             tr
-              td.text-muted colspan="5" 未承諾の招待はありません
+              th メール
+              th 名前
+              th 権限
+              th 期限
+              th 招待者
+          tbody
+            - if @pending_invitations.any?
+              - @pending_invitations.each do |invitation|
+                tr
+                  td = invitation.email
+                  td = invitation.name.presence || "-"
+                  td = invitation.role_label
+                  td = l(invitation.expires_at, format: :short)
+                  td = invitation.invited_by&.display_name || "-"
+            - else
+              tr
+                td.text-muted colspan="5" 未承諾の招待はありません

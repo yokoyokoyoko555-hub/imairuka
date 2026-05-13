@@ -13,7 +13,7 @@ module Admin
     def new
       @company = Company.new(
         contract_status: "trialing",
-        plan_name: "standard",
+        plan_name: Company::DEFAULT_PLAN_NAME,
         trial_ends_at: 14.days.from_now
       )
       @owner = User.new(role: "owner", active: true)
