@@ -100,7 +100,7 @@
           .col-md-2 = f.submit "タスク追加", class: "btn btn-primary w-100"
           .col-md-8 = f.text_area :description, class: "form-control", rows: 2, placeholder: "作業内容"
 
-      .col-lg-6
+      .col-lg-6#issues
         h6.text-primary
           i.bi.bi-exclamation-triangle.me-2
           | 課題管理表
@@ -126,7 +126,7 @@
           .col-12 = f.text_area :description, class: "form-control", rows: 2, placeholder: "内容"
           .col-12 = f.submit "課題を追加", class: "btn btn-primary"
 
-      .col-lg-6
+      .col-lg-6#assignments
         h6.text-primary
           i.bi.bi-people.me-2
           | アサイン管理

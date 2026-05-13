@@ -32,7 +32,6 @@ class OrdersController < ApplicationController
 
   def show
     @order = Order.with_discarded.includes(:customer).find(params[:id])
-    load_project_management
   end
 
   def new
@@ -208,10 +207,10 @@ class OrdersController < ApplicationController
     OrderProjectPlanGenerator.new(@order).generate.each do |attrs|
       @order.project_tasks.create!(attrs.merge(company: current_company))
     end
-    redirect_to order_path(@order, anchor: "project-management"), notice: "ガントチャート下書きを作成しました"
+    redirect_to project_management_path(@order, anchor: "project-management"), notice: "ガントチャート下書きを作成しました"
   rescue => e
     Rails.logger.error("Project plan generation failed: #{e.class} #{e.message}")
-    redirect_to order_path(@order, anchor: "project-management"), alert: "ガントチャート下書きの作成に失敗しました"
+    redirect_to project_management_path(@order, anchor: "project-management"), alert: "ガントチャート下書きの作成に失敗しました"
   end
 
   def export

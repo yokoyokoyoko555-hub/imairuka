@@ -32,6 +32,10 @@ html data-turbo="false"
             li.nav-item
               = link_to orders_path, class: "nav-link #{controller_name == 'orders' && !['billing', 'show_billing', 'edit_payment', 'update_payment'].include?(action_name) ? 'active' : ''}" do
                 i.bi.bi-cart.me-2
+                | 案件一覧
+            li.nav-item
+              = link_to project_managements_path, class: "nav-link #{controller_name == 'project_managements' ? 'active' : ''}" do
+                i.bi.bi-kanban.me-1
                 | 案件管理
             li.nav-item
               = link_to customers_path, class: "nav-link #{controller_name == 'customers' ? 'active' : ''}" do
@@ -74,6 +78,10 @@ html data-turbo="false"
             li.nav-item
               = link_to orders_path, class: "nav-link #{controller_name == 'orders' && !['billing', 'show_billing', 'edit_payment', 'update_payment'].include?(action_name) ? 'active' : ''}" do
                 i.bi.bi-cart.me-2
+                | 案件一覧
+            li.nav-item
+              = link_to project_managements_path, class: "nav-link #{controller_name == 'project_managements' ? 'active' : ''}" do
+                i.bi.bi-kanban.me-2
                 | 案件管理
             li.nav-item
               = link_to billing_orders_path, class: "nav-link #{controller_name == 'orders' && ['billing', 'show_billing', 'edit_payment', 'update_payment'].include?(action_name) ? 'active' : ''}" do

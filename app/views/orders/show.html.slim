@@ -90,8 +90,6 @@
                 td.text-end colspan="3" 合計
                 td.text-end = number_to_currency(@order.total_amount, unit: "¥", precision: 0)
 
-      = render "project_management"
-
     .col-lg-4
       .card.shadow.mb-4
         .card-header.py-3
@@ -100,9 +98,12 @@
             | 操作
         .card-body
           .d-grid.gap-2
-            = link_to "#project-management", class: "btn btn-primary" do
+            = link_to project_management_path(@order), class: "btn btn-primary" do
               i.bi.bi-kanban.me-1
-              | プロジェクト管理
+              | 案件管理
+            = link_to show_billing_order_path(@order), class: "btn btn-outline-primary" do
+              i.bi.bi-receipt.me-1
+              | 請求・決済
             = link_to edit_order_path(@order), class: "btn btn-outline-primary" do
               i.bi.bi-pencil.me-1
               | 編集

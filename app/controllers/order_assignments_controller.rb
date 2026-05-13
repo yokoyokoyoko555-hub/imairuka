@@ -5,23 +5,23 @@ class OrderAssignmentsController < ApplicationController
   def create
     @assignment = @order.assignments.build(assignment_params.merge(company: current_company))
     if @assignment.save
-      redirect_to @order, notice: "アサインを追加しました"
+      redirect_to project_management_path(@order, anchor: "assignments"), notice: "アサインを追加しました"
     else
-      redirect_to @order, alert: @assignment.errors.full_messages.join("、")
+      redirect_to project_management_path(@order, anchor: "assignments"), alert: @assignment.errors.full_messages.join("、")
     end
   end
 
   def update
     if @assignment.update(assignment_params)
-      redirect_to @order, notice: "アサインを更新しました"
+      redirect_to project_management_path(@order, anchor: "assignments"), notice: "アサインを更新しました"
     else
-      redirect_to @order, alert: @assignment.errors.full_messages.join("、")
+      redirect_to project_management_path(@order, anchor: "assignments"), alert: @assignment.errors.full_messages.join("、")
     end
   end
 
   def destroy
     @assignment.destroy!
-    redirect_to @order, notice: "アサインを削除しました"
+    redirect_to project_management_path(@order, anchor: "assignments"), notice: "アサインを削除しました"
   end
 
   private

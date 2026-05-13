@@ -11,6 +11,7 @@ class InvoicesController < ApplicationController
 
   def new
     @invoice = Invoice.new(invoice_date: Date.today, status: 'pending')
+    prefill_from_order(@invoice) if params[:order_id].present?
   end
 
   def edit
@@ -227,5 +228,30 @@ class InvoicesController < ApplicationController
         :_destroy
       ]
     )
+  end
+
+  def prefill_from_order(invoice)
+    order = current_company.orders.includes(:customer, order_items: :product).find_by(id: params[:order_id])
+    return if order.blank?
+
+    invoice.assign_attributes(
+      customer_name: order.customer&.name,
+      customer_address: order.customer&.address,
+      subject: order.project_name.presence || order.display_order_number,
+      staff_name: order.staff_name,
+      payment_due_date: order.payment_due_date,
+      payment_method: Order.payment_method_text(order.payment_method),
+      notes: order.project_summary
+    )
+    order.order_items.each do |item|
+      invoice.invoice_items.build(
+        product_code: item.product&.code,
+        product_name: item.product&.name,
+        unit_price: item.unit_price,
+        quantity: item.quantity,
+        amount: item.amount,
+        tax_rate: item.product&.tax_rate
+      )
+    end
   end
 end 

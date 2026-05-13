@@ -11,6 +11,7 @@ class DeliveryNotesController < ApplicationController
 
   def new
     @delivery_note = DeliveryNote.new(delivery_date: Date.today, status: 'pending')
+    prefill_from_order(@delivery_note) if params[:order_id].present?
   end
 
   def edit
@@ -227,5 +228,29 @@ class DeliveryNotesController < ApplicationController
         :id, :product_code, :product_name, :unit_price, :quantity, :amount, :tax_rate, :_destroy
       ]
     )
+  end
+
+  def prefill_from_order(delivery_note)
+    order = current_company.orders.includes(:customer, order_items: :product).find_by(id: params[:order_id])
+    return if order.blank?
+
+    delivery_note.assign_attributes(
+      delivery_date: order.delivery_date || Date.current,
+      customer_name: order.customer&.name,
+      customer_address: order.customer&.address,
+      subject: order.project_name.presence || order.display_order_number,
+      staff_name: order.staff_name,
+      notes: order.project_summary
+    )
+    order.order_items.each do |item|
+      delivery_note.delivery_note_items.build(
+        product_code: item.product&.code,
+        product_name: item.product&.name,
+        unit_price: item.unit_price,
+        quantity: item.quantity,
+        amount: item.amount,
+        tax_rate: item.product&.tax_rate
+      )
+    end
   end
 end 

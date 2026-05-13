@@ -11,7 +11,7 @@ class QuotationsController < ApplicationController
 
   def new
     @quotation = Quotation.new
-    # 初期状態では商品行を作成しない
+    prefill_from_order(@quotation) if params[:order_id].present?
   end
 
   def edit
@@ -397,5 +397,29 @@ class QuotationsController < ApplicationController
         :_destroy
       ]
     )
+  end
+
+  def prefill_from_order(quotation)
+    order = current_company.orders.includes(:customer, order_items: :product).find_by(id: params[:order_id])
+    return if order.blank?
+
+    quotation.assign_attributes(
+      quotation_date: Date.current,
+      customer_name: order.customer&.name,
+      customer_address: order.customer&.address,
+      subject: order.project_name.presence || order.display_order_number,
+      staff_name: order.staff_name,
+      notes: order.project_summary
+    )
+    order.order_items.each do |item|
+      quotation.quotation_items.build(
+        product_code: item.product&.code,
+        product_name: item.product&.name,
+        unit_price: item.unit_price,
+        quantity: item.quantity,
+        amount: item.amount,
+        tax_rate: item.product&.tax_rate
+      )
+    end
   end
 end 

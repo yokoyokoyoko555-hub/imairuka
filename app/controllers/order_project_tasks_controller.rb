@@ -7,23 +7,23 @@ class OrderProjectTasksController < ApplicationController
     @task.position ||= next_position(@task.parent_id)
 
     if @task.save
-      redirect_to order_path(@order, anchor: "project-management"), notice: "タスクを追加しました"
+      redirect_to project_management_path(@order, anchor: "project-management"), notice: "タスクを追加しました"
     else
-      redirect_to order_path(@order, anchor: "project-management"), alert: @task.errors.full_messages.join("、")
+      redirect_to project_management_path(@order, anchor: "project-management"), alert: @task.errors.full_messages.join("、")
     end
   end
 
   def update
     if @task.update(task_params)
-      redirect_to order_path(@order, anchor: "project-management"), notice: "タスクを更新しました"
+      redirect_to project_management_path(@order, anchor: "project-management"), notice: "タスクを更新しました"
     else
-      redirect_to order_path(@order, anchor: "project-management"), alert: @task.errors.full_messages.join("、")
+      redirect_to project_management_path(@order, anchor: "project-management"), alert: @task.errors.full_messages.join("、")
     end
   end
 
   def destroy
     @task.destroy!
-    redirect_to order_path(@order, anchor: "project-management"), notice: "タスクを削除しました"
+    redirect_to project_management_path(@order, anchor: "project-management"), notice: "タスクを削除しました"
   end
 
   private

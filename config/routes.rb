@@ -12,6 +12,8 @@ Rails.application.routes.draw do
   post "signup", to: "signup#create", as: :signup
 
   # 案件管理
+  resources :project_managements, only: [:index, :show]
+
   resources :orders do
     collection do
       get :export

@@ -1,0 +1,76 @@
+.container-fluid
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h1.h3.mb-1
+        i.bi.bi-kanban.me-2
+        | 案件管理
+      .text-muted ガント、タスク、課題、アサインを案件ごとに管理します。
+    = link_to orders_path, class: "btn btn-outline-secondary" do
+      i.bi.bi-list-ul.me-1
+      | 案件一覧へ
+
+  .card.shadow.mb-4
+    .card-header.py-3
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-search.me-2
+        | 検索条件
+    .card-body
+      = form_with url: project_managements_path, method: :get, local: true, class: "row g-3" do |f|
+        .col-md-4
+          = f.label :customer_name, "顧客名", class: "form-label"
+          = f.text_field :customer_name, value: params[:customer_name], class: "form-control"
+        .col-md-4
+          = f.label :project_name, "案件名", class: "form-label"
+          = f.text_field :project_name, value: params[:project_name], class: "form-control"
+        .col-md-4
+          = f.label :status, "ステータス", class: "form-label"
+          = f.select :status, options_from_collection_for_select(@order_statuses, :code, :name, params[:status]), { include_blank: "すべて" }, class: "form-select"
+        .col-12
+          = f.submit "検索", class: "btn btn-primary"
+          = link_to "リセット", project_managements_path, class: "btn btn-outline-secondary ms-2"
+
+  .card.shadow
+    .card-header.py-3
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-kanban.me-2
+        | 管理対象案件一覧
+        span.badge.bg-secondary.ms-2 = @total_count
+    .card-body.p-0
+      .table-responsive
+        table.table.table-hover.align-middle.mb-0
+          thead.table-light
+            tr
+              th 案件番号
+              th 顧客名
+              th 案件名
+              th ステータス
+              th タスク
+              th 課題
+              th アサイン
+              th 操作
+          tbody
+            - @orders.each do |order|
+              tr
+                td = order.display_order_number
+                td = order.customer&.name || "-"
+                td
+                  .fw-semibold = order.project_name.presence || "-"
+                  .small.text-muted = truncate(order.project_summary.to_s, length: 60)
+                td = order.order_status&.name || "-"
+                td = order.project_tasks.size
+                td = order.project_issues.size
+                td = order.assignments.size
+                td
+                  .d-flex.gap-2
+                    = link_to project_management_path(order), class: "btn btn-sm btn-primary" do
+                      i.bi.bi-kanban.me-1
+                      | 管理
+                    = link_to order_path(order), class: "btn btn-sm btn-outline-secondary" do
+                      i.bi.bi-info-circle.me-1
+                      | 詳細
+            - if @orders.empty?
+              tr
+                td.text-center.text-muted colspan="8" 条件に一致する案件はありません。
+    - if @orders.respond_to?(:total_pages)
+      .card-footer
+        = paginate @orders

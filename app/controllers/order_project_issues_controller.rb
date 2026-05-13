@@ -5,23 +5,23 @@ class OrderProjectIssuesController < ApplicationController
   def create
     @issue = @order.project_issues.build(issue_params.merge(company: current_company))
     if @issue.save
-      redirect_to @order, notice: "課題を追加しました"
+      redirect_to project_management_path(@order, anchor: "issues"), notice: "課題を追加しました"
     else
-      redirect_to @order, alert: @issue.errors.full_messages.join("、")
+      redirect_to project_management_path(@order, anchor: "issues"), alert: @issue.errors.full_messages.join("、")
     end
   end
 
   def update
     if @issue.update(issue_params)
-      redirect_to @order, notice: "課題を更新しました"
+      redirect_to project_management_path(@order, anchor: "issues"), notice: "課題を更新しました"
     else
-      redirect_to @order, alert: @issue.errors.full_messages.join("、")
+      redirect_to project_management_path(@order, anchor: "issues"), alert: @issue.errors.full_messages.join("、")
     end
   end
 
   def destroy
     @issue.destroy!
-    redirect_to @order, notice: "課題を削除しました"
+    redirect_to project_management_path(@order, anchor: "issues"), notice: "課題を削除しました"
   end
 
   private

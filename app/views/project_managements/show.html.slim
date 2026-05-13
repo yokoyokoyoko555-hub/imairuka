@@ -1,0 +1,87 @@
+.container-fluid
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h1.h3.mb-1
+        i.bi.bi-kanban.me-2
+        | 案件管理
+      .text-muted = "#{@order.display_order_number} / #{@order.project_name.presence || @order.customer&.name || '案件'}"
+    .d-flex.gap-2
+      = link_to project_managements_path, class: "btn btn-outline-secondary" do
+        i.bi.bi-arrow-left.me-1
+        | 管理一覧へ
+      = link_to order_path(@order), class: "btn btn-outline-primary" do
+        i.bi.bi-info-circle.me-1
+        | 案件詳細
+
+  .card.shadow.mb-4
+    .card-header.py-3
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-clipboard-data.me-2
+        | 進行サマリー
+    .card-body
+      .row.g-3
+        .col-md-4
+          .small.text-muted 顧客名
+          .fw-semibold = @order.customer&.name || "-"
+        .col-md-4
+          .small.text-muted 案件名
+          .fw-semibold = @order.project_name.presence || "-"
+        .col-md-4
+          .small.text-muted ステータス
+          .fw-semibold = @order.order_status&.name || "-"
+        .col-md-4
+          .small.text-muted 期間
+          .fw-semibold = "#{@project_phase_tasks.map(&:start_date).compact.min || '-'} - #{@project_phase_tasks.map { |task| task.due_date || task.start_date }.compact.max || '-'}"
+        .col-md-4
+          .small.text-muted 未完了タスク
+          .fw-semibold = @project_tasks.reject { |task| task.done? }.size
+        .col-md-4
+          .small.text-muted 未解決課題
+          .fw-semibold = @project_issues.reject { |issue| issue.resolved? || issue.closed? }.size
+        .col-12
+          .small.text-muted 案件概要
+          .border.rounded.bg-light.p-3 = simple_format(@order.project_summary.presence || "-")
+
+      .row.g-3.mt-1
+        .col-lg-8
+          .border.rounded.p-3.h-100
+            .d-flex.justify-content-between.align-items-center.mb-2
+              .fw-bold
+                i.bi.bi-file-earmark-text.me-2
+                | 関連文書
+              = link_to "文書管理へ", quotations_path(q: { customer_name_cont: @order.customer&.name }), class: "btn btn-sm btn-outline-secondary"
+            .row.g-2
+              .col-6.col-md-3
+                = link_to new_quotation_path(order_id: @order.id), class: "btn btn-outline-primary w-100" do
+                  i.bi.bi-file-earmark-text.me-1
+                  | 見積
+                .small.text-muted.mt-1 = "既存 #{@document_counts[:quotations]} 件"
+              .col-6.col-md-3
+                = link_to new_delivery_note_path(order_id: @order.id), class: "btn btn-outline-primary w-100" do
+                  i.bi.bi-file-earmark-check.me-1
+                  | 納品
+                .small.text-muted.mt-1 = "既存 #{@document_counts[:delivery_notes]} 件"
+              .col-6.col-md-3
+                = link_to new_invoice_path(order_id: @order.id), class: "btn btn-outline-primary w-100" do
+                  i.bi.bi-file-earmark-text.me-1
+                  | 請求
+                .small.text-muted.mt-1 = "既存 #{@document_counts[:invoices]} 件"
+              .col-6.col-md-3
+                = link_to new_receipt_path(order_id: @order.id), class: "btn btn-outline-primary w-100" do
+                  i.bi.bi-receipt.me-1
+                  | 領収
+                .small.text-muted.mt-1 = "既存 #{@document_counts[:receipts]} 件"
+        .col-lg-4
+          .border.rounded.p-3.h-100
+            .fw-bold.mb-2
+              i.bi.bi-credit-card.me-2
+              | 決済状況
+            .small.text-muted 支払方法
+            .fw-semibold = Order.payment_method_text(@order.payment_method).presence || "未設定"
+            .small.text-muted.mt-2 支払期限
+            .fw-semibold = @order.payment_due_date&.strftime("%Y/%m/%d") || "未設定"
+            .small.text-muted.mt-2 決済履歴
+            .fw-semibold = "#{@order.payment_records.size} 件"
+            = link_to "請求管理へ", show_billing_order_path(@order), class: "btn btn-sm btn-outline-primary mt-3"
+
+  = render "orders/project_management"
