@@ -59,6 +59,10 @@ class Company < ApplicationRecord
     trialing? || active?
   end
 
+  def service_available?
+    contract_active?
+  end
+
   def contract_status_label
     {
       "pending_review" => "申込受付",
@@ -82,7 +86,7 @@ class Company < ApplicationRecord
   end
 
   def account_invitation_unlocked?
-    active?
+    service_available?
   end
 
   def user_limit

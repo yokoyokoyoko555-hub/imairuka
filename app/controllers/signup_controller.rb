@@ -17,10 +17,13 @@ class SignupController < ApplicationController
     )
 
     if @company.save
-      redirect_to new_signup_path, notice: "利用申込を受け付けました。運営側で確認後、利用開始のご案内をお送りします。"
+      redirect_to signup_complete_path, notice: "利用申込を受け付けました。"
     else
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def complete
   end
 
   private

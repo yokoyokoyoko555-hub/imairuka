@@ -7,14 +7,13 @@
         .card-body
           h1.h4.mb-3 = "#{@invitation.company.name} へ参加"
           p.text-muted 招待されたメールアドレスでアカウントを作成します。
-
           = render "shared/error_messages", model: @user
 
           dl.row
             dt.col-sm-4 メール
             dd.col-sm-8 = @invitation.email
             dt.col-sm-4 権限
-            dd.col-sm-8 = @invitation.role
+            dd.col-sm-8 = @invitation.role_label
 
           = form_with model: @user, url: accept_invitation_path(@token), local: true do |f|
             .mb-3

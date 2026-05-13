@@ -1,5 +1,6 @@
 class InvitationAcceptancesController < ApplicationController
   skip_before_action :require_login
+  skip_before_action :ensure_current_company_available
   skip_before_action :set_current_context
   skip_before_action :set_company_info
 
@@ -41,7 +42,7 @@ class InvitationAcceptancesController < ApplicationController
   end
 
   def ensure_available_invitation
-    return if @invitation&.available? && @invitation.company.account_invitation_unlocked?
+    return if @invitation&.available? && @invitation.company.service_available?
 
     redirect_to login_path, alert: "招待リンクが無効、期限切れ、または契約状態により利用できません。"
   end

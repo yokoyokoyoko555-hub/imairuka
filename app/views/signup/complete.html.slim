@@ -1,0 +1,22 @@
+.card.shadow-sm.signup-card
+  .card-header.bg-primary.text-white.text-center.py-3
+    h1.h4.mb-0
+      i.bi.bi-check-circle.me-2
+      | 利用申込を受け付けました
+
+  .card-body
+    .mx-auto style="max-width: 680px;"
+      p.lead.mb-3
+        | お申し込みありがとうございます。
+      p.text-muted
+        | 申込内容は運営側の契約管理に「申込受付」の契約候補として登録されました。内容を確認後、利用開始のご案内をお送りします。
+
+      .border.rounded.bg-light.p-3.mb-4
+        .fw-bold.mb-2 今後の流れ
+        ol.mb-0
+          li 運営側で申込内容を確認します。
+          li 承認後、初期管理者向けの招待URLを発行します。
+          li 招待URLからパスワードを設定すると利用開始できます。
+
+      .d-grid.gap-2.d-sm-flex.justify-content-sm-end
+        = link_to "ログイン画面へ", login_path, class: "btn btn-primary"

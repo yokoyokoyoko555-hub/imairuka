@@ -1,39 +1,31 @@
 doctype html
 html
   head
-    title 案件管理システム イマイルカ - ログイン
+    title Imairuka ログイン
     meta[name="viewport" content="width=device-width,initial-scale=1"]
     = csrf_meta_tags
     = csp_meta_tag
     = stylesheet_link_tag "application", "data-turbo-track": "reload"
     = javascript_importmap_tags
-    / Bootstrap CSS
     link[href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"]
-    / Bootstrap Icons
     link[href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"]
-    / Custom CSS
     = stylesheet_link_tag "custom", "data-turbo-track": "reload"
 
   body.bg-light
     .container-fluid
       .row.justify-content-center.align-items-center.min-vh-100
         .col-12.col-sm-10.col-md-7.col-lg-5.col-xl-4
-          .card.shadow-lg.border-0.rounded-lg.mt-5
+          .card.shadow-lg.border-0.rounded-lg
             .card-header.bg-primary.text-white.text-center.py-4
               h3.mb-0
                 i.bi.bi-box-arrow-in-right.me-2
                 | ログイン
-            = render 'shared/flash_messages'
+            = render "shared/flash_messages"
             .card-body.p-4
               = yield
             .card-footer.text-center.py-3
-              / .small
-              /   a.text-decoration-none href="#" パスワードをお忘れですか？
-              hr.my-3
               .small.text-muted
-                | © 案件管理システム イマイルカ
+                | © Imairuka 案件管理システム
 
-    / Bootstrap Bundle with Popper
     script[src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"]
-    / Custom JavaScript
-    = javascript_include_tag "custom", "data-turbo-track": "reload" 
+    = javascript_include_tag "custom", "data-turbo-track": "reload"

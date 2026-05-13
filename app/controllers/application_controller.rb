@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   before_action :require_login
+  before_action :ensure_current_company_available
   before_action :set_current_context
   before_action :set_company_info
 
@@ -31,6 +32,15 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def ensure_current_company_available
+    return unless current_user
+    return if current_user.platform_admin?
+    return if current_company&.service_available?
+
+    reset_login_state
+    redirect_to login_path, alert: "契約状態により現在は利用できません。運営までお問い合わせください。"
+  end
+
   def set_current_context
     Current.user = current_user
     Current.company = current_company
@@ -44,5 +54,14 @@ class ApplicationController < ActionController::Base
     return if current_user && roles.map(&:to_s).include?(current_user.role)
 
     redirect_to root_path, alert: "この操作を行う権限がありません"
+  end
+
+  def reset_login_state
+    current_user&.forget
+    session[:user_id] = nil
+    cookies.delete(:user_id)
+    cookies.delete(:remember_token)
+    @current_user = nil
+    @current_company = nil
   end
 end

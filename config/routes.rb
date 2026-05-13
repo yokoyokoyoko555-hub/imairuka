@@ -10,6 +10,7 @@ Rails.application.routes.draw do
 
   get "signup", to: "signup#new", as: :new_signup
   post "signup", to: "signup#create", as: :signup
+  get "signup/complete", to: "signup#complete", as: :signup_complete
 
   # 案件管理
   resources :project_managements, only: [:index, :show]
