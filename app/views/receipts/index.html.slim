@@ -46,24 +46,24 @@
 
     .card-body
       .table-responsive
-        table.table.table-bordered.table-hover
+        table.table.table-bordered.table-hover.table-stable.document-table
           thead.table-light
             tr
-              th 領収書番号
-              th 発行日
-              th 顧客名
+              th style="width: 118px;" 領収書番号
+              th style="width: 132px;" 発行日
+              th style="width: 180px;" 顧客名
               th 案件名
-              th.text-end 金額
-              th ステータス
-              th 操作
+              th.text-end style="width: 104px;" 金額
+              th.status-cell ステータス
+              th.action-cell 操作
           tbody
             - @receipts.each do |receipt|
               tr
-                td = receipt.receipt_number
-                td = format_date(receipt.issue_date)
-                td = receipt.customer_name
-                td = receipt.subject.presence || "-"
-                td.text-end = number_to_currency(receipt.total_amount_with_tax, unit: "¥", precision: 0)
+                td.text-nowrap-cell = receipt.receipt_number
+                td.text-nowrap-cell = format_date(receipt.issue_date)
+                td.text-wrap-cell = receipt.customer_name
+                td.text-wrap-cell = receipt.subject.presence || "-"
+                td.text-end.text-nowrap-cell = number_to_currency(receipt.total_amount_with_tax, unit: "¥", precision: 0)
                 td
                   - if receipt.draft?
                     span.badge.bg-warning style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
@@ -72,19 +72,15 @@
                     span.badge class="bg-#{receipt_status_color(receipt.status)}" style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
                       = receipt_status_label(receipt.status)
                 td
-                  .btn-group
-                    = link_to receipt_path(receipt), class: 'btn btn-sm btn-outline-primary' do
-                      i.bi.bi-eye.me-1
-                      | 詳細
-                    = link_to edit_receipt_path(receipt), class: 'btn btn-sm btn-outline-secondary' do
-                      i.bi.bi-pencil.me-1
-                      | 編集
-                    = link_to print_receipt_path(receipt), class: 'btn btn-sm btn-outline-info', target: '_blank' do
-                      i.bi.bi-printer.me-1
-                      | プレビュー
-                    = link_to receipt_path(receipt), class: 'btn btn-sm btn-outline-danger', data: { delete_action: true, confirm: 'この領収書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
-                      i.bi.bi-trash.me-1
-                      | 削除
+                  .action-buttons
+                    = link_to receipt_path(receipt), class: 'btn btn-sm btn-outline-primary', title: '詳細' do
+                      i.bi.bi-eye
+                    = link_to edit_receipt_path(receipt), class: 'btn btn-sm btn-outline-secondary', title: '編集' do
+                      i.bi.bi-pencil
+                    = link_to print_receipt_path(receipt), class: 'btn btn-sm btn-outline-info', target: '_blank', title: 'プレビュー' do
+                      i.bi.bi-printer
+                    = link_to receipt_path(receipt), class: 'btn btn-sm btn-outline-danger', title: '削除', data: { delete_action: true, confirm: 'この領収書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
+                      i.bi.bi-trash
 
       / ページネーション
       .d-flex.justify-content-center.mt-4

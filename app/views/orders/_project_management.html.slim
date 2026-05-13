@@ -26,7 +26,7 @@
       - max_date = @project_phase_tasks.map { |task| task.due_date || task.start_date }.compact.max || min_date
       - total_days = [(max_date - min_date).to_i + 1, 1].max
       .table-responsive.mb-3
-        table.table.table-sm.align-middle
+        table.table.table-sm.align-middle.table-stable
           tbody
             - @project_phase_tasks.each do |task|
               - start_offset = task.start_date ? [(task.start_date - min_date).to_i, 0].max : 0
@@ -62,31 +62,32 @@
           i.bi.bi-list-check.me-2
           | タスク管理表
         .table-responsive
-          table.table.table-bordered.table-hover.align-middle
+          table.table.table-bordered.table-hover.align-middle.table-stable
             thead.table-light
               tr
-                th 工程
+                th style="width: 170px;" 工程
                 th タスク
-                th 担当
-                th 期間
-                th 状態
-                th 優先度
-                th 操作
+                th style="width: 150px;" 担当
+                th style="width: 180px;" 期間
+                th style="width: 180px;" 状態
+                th style="width: 88px;" 優先度
+                th style="width: 76px;" 操作
             tbody
               - @project_detail_tasks.each do |task|
                 tr
-                  td = task.parent&.title || "-"
+                  td.text-wrap-cell = task.parent&.title || "-"
                   td
                     strong = task.title
                     .small.text-muted = task.description
-                  td = task.assignee&.display_name || "-"
-                  td = "#{task.start_date || '-'} - #{task.due_date || '-'}"
+                  td.text-wrap-cell = task.assignee&.display_name || "-"
+                  td.text-nowrap-cell = "#{task.start_date || '-'} - #{task.due_date || '-'}"
                   td
                     = form_with model: [@order, task], local: true, class: "d-flex gap-2" do |f|
                       = f.select :status, OrderProjectTask.statuses.keys.map { |s| [OrderProjectTask.new(status: s).status_label, s] }, {}, class: "form-select form-select-sm"
                       = f.submit "更新", class: "btn btn-sm btn-outline-primary"
-                  td = task.priority_label
-                  td = button_to "削除", order_order_project_task_path(@order, task), method: :delete, class: "btn btn-sm btn-outline-danger"
+                  td.text-nowrap-cell = task.priority_label
+                  td = button_to order_order_project_task_path(@order, task), method: :delete, class: "btn btn-sm btn-outline-danger", title: "削除" do
+                    i.bi.bi-trash
               - if @project_detail_tasks.empty?
                 tr
                   td.text-muted.text-center colspan="7" 詳細タスクはまだありません。
@@ -104,22 +105,23 @@
         h6.text-primary
           i.bi.bi-exclamation-triangle.me-2
           | 課題管理表
-        table.table.table-bordered.table-hover.align-middle
+        table.table.table-bordered.table-hover.align-middle.table-stable
           thead.table-light
             tr
               th 課題
-              th 状態
-              th 担当
-              th
+              th.status-cell 状態
+              th style="width: 150px;" 担当
+              th style="width: 76px;"
           tbody
             - @project_issues.each do |issue|
               tr
                 td
                   strong = issue.title
                   .small.text-muted = issue.description
-                td = issue.status_label
-                td = issue.assignee&.display_name || "-"
-                td = button_to "削除", order_order_project_issue_path(@order, issue), method: :delete, class: "btn btn-sm btn-outline-danger"
+                td.text-nowrap-cell = issue.status_label
+                td.text-wrap-cell = issue.assignee&.display_name || "-"
+                td = button_to order_order_project_issue_path(@order, issue), method: :delete, class: "btn btn-sm btn-outline-danger", title: "削除" do
+                  i.bi.bi-trash
         = form_with model: [@order, @new_project_issue], local: true, class: "row g-2" do |f|
           .col-md-6 = f.text_field :title, class: "form-control", placeholder: "課題名", required: true
           .col-md-6 = f.collection_select :assignee_id, @company_users, :id, :display_name, { include_blank: "担当なし" }, class: "form-select"
@@ -130,18 +132,19 @@
         h6.text-primary
           i.bi.bi-people.me-2
           | アサイン管理
-        table.table.table-bordered.table-hover.align-middle
+        table.table.table-bordered.table-hover.align-middle.table-stable
           thead.table-light
             tr
               th ユーザー
-              th 役割
-              th
+              th style="width: 140px;" 役割
+              th style="width: 76px;"
           tbody
             - @assignments.each do |assignment|
               tr
-                td = assignment.user.display_name
-                td = assignment.role_label
-                td = button_to "削除", order_order_assignment_path(@order, assignment), method: :delete, class: "btn btn-sm btn-outline-danger"
+                td.text-wrap-cell = assignment.user.display_name
+                td.text-nowrap-cell = assignment.role_label
+                td = button_to order_order_assignment_path(@order, assignment), method: :delete, class: "btn btn-sm btn-outline-danger", title: "削除" do
+                  i.bi.bi-trash
         = form_with model: [@order, @new_assignment], local: true, class: "row g-2" do |f|
           .col-md-6 = f.collection_select :user_id, @company_users, :id, :display_name, { include_blank: "ユーザー選択" }, class: "form-select", required: true
           .col-md-4 = f.select :role, OrderAssignment.roles.keys.map { |r| [OrderAssignment.new(role: r).role_label, r] }, {}, class: "form-select"

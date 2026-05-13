@@ -161,6 +161,75 @@ body.admin-layout .sidebar {
   background-color: #f8f9fa;
 }
 
+.table-stable {
+  table-layout: fixed;
+  min-width: 980px;
+}
+
+.table-stable th,
+.table-stable td {
+  vertical-align: middle;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.table-stable th {
+  white-space: nowrap;
+}
+
+.text-wrap-cell {
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.text-nowrap-cell {
+  white-space: nowrap;
+}
+
+.number-cell {
+  width: 64px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-cell {
+  width: 108px;
+  white-space: nowrap;
+}
+
+.action-cell {
+  width: 156px;
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  justify-content: flex-start;
+}
+
+.action-buttons .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 34px;
+  white-space: nowrap;
+}
+
+.action-buttons .btn-label {
+  margin-left: 0.25rem;
+}
+
+.document-table {
+  min-width: 1120px;
+}
+
+.project-table {
+  min-width: 1040px;
+}
+
 /* バッジ */
 .badge {
   padding: 0.5em 0.75em;

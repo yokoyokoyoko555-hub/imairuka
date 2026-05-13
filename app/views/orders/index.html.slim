@@ -51,49 +51,46 @@
 
     .card-body
       .table-responsive
-        table.table.table-bordered.table-hover.align-middle
+        table.table.table-bordered.table-hover.align-middle.table-stable.document-table
           thead.table-light
             tr
               th style="width: 44px;"
                 .form-check
                   input.form-check-input[type="checkbox" data-bulk-actions-target="selectAll"]
-              th 案件番号
-              th 注文日
-              th 顧客名
+              th style="width: 150px;" 案件番号
+              th style="width: 112px;" 注文日
+              th style="width: 180px;" 顧客名
               th 案件名
-              th.text-end 金額
-              th ステータス
-              th 担当者
-              th 操作
+              th.text-end style="width: 112px;" 金額
+              th.status-cell ステータス
+              th style="width: 120px;" 担当者
+              th.action-cell 操作
           tbody
             - @orders.each do |order|
               tr
                 td
                   .form-check
                     input.form-check-input[type="checkbox" name="selected_orders[]" value=order.id data-bulk-actions-target="checkbox" class="order-checkbox"]
-                td = order.draft? ? (order.display_order_number.presence || "未設定") : order.display_order_number
-                td = order.order_date.strftime("%Y/%m/%d")
-                td = order.customer&.name || ""
-                td = order.project_name.presence || "-"
-                td.text-end = number_to_currency(order.total_amount, unit: "¥", precision: 0)
+                td.text-nowrap-cell = order.draft? ? (order.display_order_number.presence || "未設定") : order.display_order_number
+                td.text-nowrap-cell = order.order_date.strftime("%Y/%m/%d")
+                td.text-wrap-cell = order.customer&.name || ""
+                td.text-wrap-cell = order.project_name.presence || "-"
+                td.text-end.text-nowrap-cell = number_to_currency(order.total_amount, unit: "¥", precision: 0)
                 td
                   - if order.draft?
                     span.badge.bg-warning.text-dark 一時保存
                   - else
                     span.badge style="background-color: #{order.order_status.color.presence || '#6c757d'}; color: #fff;"
                       = order.order_status.name
-                td = order.staff_name
-                td style="white-space: nowrap;"
-                  .btn-group
-                    = link_to order_path(order), class: "btn btn-sm btn-outline-primary" do
-                      i.bi.bi-eye.me-1
-                      | 詳細
-                    = link_to edit_order_path(order), class: "btn btn-sm btn-outline-secondary" do
-                      i.bi.bi-pencil.me-1
-                      | 編集
-                    = link_to order_path(order), data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？\nこの操作は取り消せません。" }, class: "btn btn-sm btn-outline-danger" do
-                      i.bi.bi-trash.me-1
-                      | 削除
+                td.text-wrap-cell = order.staff_name
+                td
+                  .action-buttons
+                    = link_to order_path(order), class: "btn btn-sm btn-outline-primary", title: "詳細" do
+                      i.bi.bi-eye
+                    = link_to edit_order_path(order), class: "btn btn-sm btn-outline-secondary", title: "編集" do
+                      i.bi.bi-pencil
+                    = link_to order_path(order), data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？\nこの操作は取り消せません。" }, class: "btn btn-sm btn-outline-danger", title: "削除" do
+                      i.bi.bi-trash
 
       .d-flex.justify-content-center.mt-4
         = paginate @orders

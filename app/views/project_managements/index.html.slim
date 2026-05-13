@@ -37,37 +37,37 @@
         span.badge.bg-secondary.ms-2 = @total_count
     .card-body.p-0
       .table-responsive
-        table.table.table-hover.align-middle.mb-0
+        table.table.table-hover.align-middle.mb-0.table-stable.project-table
           thead.table-light
             tr
-              th 案件番号
-              th 顧客名
+              th style="width: 150px;" 案件番号
+              th style="width: 180px;" 顧客名
               th 案件名
-              th ステータス
-              th タスク
-              th 課題
-              th アサイン
-              th 操作
+              th.status-cell ステータス
+              th.number-cell タスク
+              th.number-cell 課題
+              th.number-cell アサイン
+              th.action-cell 操作
           tbody
             - @orders.each do |order|
               tr
-                td = order.display_order_number
-                td = order.customer&.name || "-"
+                td.text-nowrap-cell = order.display_order_number
+                td.text-wrap-cell = order.customer&.name || "-"
                 td
                   .fw-semibold = order.project_name.presence || "-"
                   .small.text-muted = truncate(order.project_summary.to_s, length: 60)
-                td = order.order_status&.name || "-"
-                td = order.project_tasks.size
-                td = order.project_issues.size
-                td = order.assignments.size
+                td.text-nowrap-cell = order.order_status&.name || "-"
+                td.text-center = order.project_tasks.size
+                td.text-center = order.project_issues.size
+                td.text-center = order.assignments.size
                 td
-                  .d-flex.gap-2
+                  .action-buttons
                     = link_to project_management_path(order), class: "btn btn-sm btn-primary" do
-                      i.bi.bi-kanban.me-1
-                      | 管理
+                      i.bi.bi-kanban
+                      span.btn-label 管理
                     = link_to order_path(order), class: "btn btn-sm btn-outline-secondary" do
-                      i.bi.bi-info-circle.me-1
-                      | 詳細
+                      i.bi.bi-info-circle
+                      span.btn-label 詳細
             - if @orders.empty?
               tr
                 td.text-center.text-muted colspan="8" 条件に一致する案件はありません。
