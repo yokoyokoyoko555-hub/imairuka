@@ -83,13 +83,13 @@ html data-turbo="false"
               = link_to project_managements_path, class: "nav-link #{controller_name == 'project_managements' ? 'active' : ''}" do
                 i.bi.bi-kanban.me-2
                 | 案件管理
+
+            li.nav-item.mt-3
+              small.text-white-50.ps-3 決済管理
             li.nav-item
               = link_to billing_orders_path, class: "nav-link #{controller_name == 'orders' && ['billing', 'show_billing', 'edit_payment', 'update_payment'].include?(action_name) ? 'active' : ''}" do
                 i.bi.bi-receipt.me-2
                 | 請求管理
-
-            li.nav-item.mt-3
-              small.text-white-50.ps-3 決済管理
             li.nav-item
               = link_to payment_histories_path, class: "nav-link #{controller_name == 'payment_histories' ? 'active' : ''}" do
                 i.bi.bi-credit-card.me-2
