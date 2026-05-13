@@ -13,6 +13,22 @@ class Company < ApplicationRecord
   has_many :delivery_notes, dependent: :restrict_with_error
   has_many :payment_records, dependent: :restrict_with_error
 
+  DEFAULT_PLAN_NAME = "standard".freeze
+  PLAN_LABEL = "基本プラン".freeze
+  INCLUDED_USER_LIMIT = 1
+  AI_PROVIDERS = {
+    "openai" => "OpenAI",
+    "claude" => "Claude",
+    "gemini" => "Gemini",
+    "copilot" => "Copilot"
+  }.freeze
+  DEFAULT_AI_MODELS = {
+    "openai" => "gpt-5",
+    "claude" => "claude-sonnet-4-5",
+    "gemini" => "gemini-2.5-pro",
+    "copilot" => "copilot"
+  }.freeze
+
   enum :contract_status, {
     pending_review: "pending_review",
     trialing: "trialing",
@@ -31,13 +47,11 @@ class Company < ApplicationRecord
   validates :representative, presence: true, length: { maximum: 50 }
   validates :business_type, presence: true, length: { maximum: 50 }
   validates :tenant_slug, presence: true, uniqueness: true
+  validates :ai_provider, presence: true, inclusion: { in: AI_PROVIDERS.keys }
+  validates :ai_model, presence: true, length: { maximum: 100 }
 
   before_validation :set_tenant_slug, :normalize_postal_code, :normalize_phone
   before_save :apply_ai_api_key_change
-
-  DEFAULT_PLAN_NAME = "standard".freeze
-  PLAN_LABEL = "基本プラン".freeze
-  INCLUDED_USER_LIMIT = 1
 
   USER_LIMITS = {
     DEFAULT_PLAN_NAME => INCLUDED_USER_LIMIT
@@ -97,6 +111,14 @@ class Company < ApplicationRecord
 
   def stripe_connected?
     stripe_account_id.present? && stripe_charges_enabled?
+  end
+
+  def ai_provider_label
+    AI_PROVIDERS.fetch(ai_provider, ai_provider)
+  end
+
+  def ai_model_or_default
+    ai_model.presence || DEFAULT_AI_MODELS.fetch(ai_provider, DEFAULT_AI_MODELS["openai"])
   end
 
   def ai_configured?

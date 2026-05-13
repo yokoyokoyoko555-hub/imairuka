@@ -166,11 +166,12 @@
               .row.mb-3
                 .col-md-6
                   = f.label :ai_provider, "AIプロバイダー", class: "form-label"
-                  = f.select :ai_provider, [["OpenAI", "openai"]], {}, class: "form-select"
+                  = f.select :ai_provider, Company::AI_PROVIDERS.map { |value, label| [label, value] }, {}, class: "form-select"
+                  .form-text 対応AI: OpenAI / Claude / Gemini / Copilot
                 .col-md-6
                   = f.label :ai_model, "モデル", class: "form-label"
-                  = f.text_field :ai_model, class: "form-control", placeholder: "gpt-5"
-                  .form-text 例: gpt-5 / gpt-5-mini など
+                  = f.text_field :ai_model, class: "form-control", placeholder: @company.ai_model_or_default
+                  .form-text 例: gpt-5、claude-sonnet-4-5、gemini-2.5-pro など
               .mb-3
                 label.form-label APIキー状態
                 p.form-control-plaintext
@@ -179,9 +180,13 @@
                   - else
                     span.badge.bg-secondary 未設定
               .mb-3
-                = f.label :ai_api_key, "OpenAI APIキー", class: "form-label"
-                = f.password_field :ai_api_key, class: "form-control", autocomplete: "new-password", placeholder: @company.ai_configured? ? "変更する場合のみ入力" : "sk-..."
+                = f.label :ai_api_key, "APIキー", class: "form-label"
+                = f.password_field :ai_api_key, class: "form-control", autocomplete: "new-password", placeholder: @company.ai_configured? ? "変更する場合のみ入力" : "選択したAIのAPIキー"
                 .form-text APIキーは暗号化して保存します。画面上に再表示されません。
+              .alert.alert-light.border
+                .small.mb-1
+                  strong Copilotについて
+                .small.text-muted Copilotは利用形態によってAPI仕様が異なるため、Microsoft側の接続方式が確定してから実決済環境で有効化します。現時点のAI下書き生成はOpenAI / Claude / Geminiが対象です。
               - if @company.ai_configured?
                 .form-check.mb-3
                   = f.check_box :clear_ai_api_key, class: "form-check-input"

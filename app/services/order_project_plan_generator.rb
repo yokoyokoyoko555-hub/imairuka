@@ -1,3 +1,4 @@
+require "erb"
 require "json"
 require "net/http"
 require "uri"
@@ -9,7 +10,7 @@ class OrderProjectPlanGenerator
   end
 
   def generate
-    tasks = openai_tasks.presence || fallback_tasks
+    tasks = ai_tasks.presence || fallback_tasks
     tasks.each_with_index.map do |task, index|
       {
         title: task.fetch("title"),
@@ -26,17 +27,36 @@ class OrderProjectPlanGenerator
 
   attr_reader :order, :company
 
-  def openai_tasks
+  def ai_tasks
     api_key = company.decrypted_ai_api_key
     return [] if api_key.blank?
 
+    case company.ai_provider
+    when "openai"
+      openai_tasks(api_key)
+    when "claude"
+      claude_tasks(api_key)
+    when "gemini"
+      gemini_tasks(api_key)
+    when "copilot"
+      Rails.logger.warn("Project plan AI fallback: Copilot direct API is not enabled")
+      []
+    else
+      []
+    end
+  rescue => e
+    Rails.logger.warn("Project plan AI fallback: #{e.class} #{e.message}")
+    []
+  end
+
+  def openai_tasks(api_key)
     uri = URI("https://api.openai.com/v1/responses")
     request = Net::HTTP::Post.new(uri)
     request["Authorization"] = "Bearer #{api_key}"
     request["Content-Type"] = "application/json"
     request.body = {
-      model: company.ai_model.presence || "gpt-5",
-      instructions: "あなたは日本語のプロジェクトマネージャーです。JSONだけを返してください。",
+      model: company.ai_model_or_default,
+      instructions: system_instruction,
       input: prompt
     }.to_json
 
@@ -46,15 +66,65 @@ class OrderProjectPlanGenerator
     body = JSON.parse(response.body)
     text = body.fetch("output", []).flat_map { |item| item.fetch("content", []) }.find { |content| content["type"] == "output_text" }&.fetch("text", nil)
     parse_json_tasks(text)
-  rescue => e
-    Rails.logger.warn("Project plan AI fallback: #{e.class} #{e.message}")
-    []
+  end
+
+  def claude_tasks(api_key)
+    uri = URI("https://api.anthropic.com/v1/messages")
+    request = Net::HTTP::Post.new(uri)
+    request["x-api-key"] = api_key
+    request["anthropic-version"] = "2023-06-01"
+    request["Content-Type"] = "application/json"
+    request.body = {
+      model: company.ai_model_or_default,
+      max_tokens: 1_500,
+      system: system_instruction,
+      messages: [
+        { role: "user", content: prompt }
+      ]
+    }.to_json
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(request) }
+    return [] unless response.is_a?(Net::HTTPSuccess)
+
+    body = JSON.parse(response.body)
+    text = body.fetch("content", []).find { |content| content["type"] == "text" }&.fetch("text", nil)
+    parse_json_tasks(text)
+  end
+
+  def gemini_tasks(api_key)
+    model = ERB::Util.url_encode(company.ai_model_or_default)
+    key = ERB::Util.url_encode(api_key)
+    uri = URI("https://generativelanguage.googleapis.com/v1beta/models/#{model}:generateContent?key=#{key}")
+    request = Net::HTTP::Post.new(uri)
+    request["Content-Type"] = "application/json"
+    request.body = {
+      system_instruction: {
+        parts: [{ text: system_instruction }]
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }]
+        }
+      ],
+      generation_config: {
+        temperature: 0.2
+      }
+    }.to_json
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(request) }
+    return [] unless response.is_a?(Net::HTTPSuccess)
+
+    body = JSON.parse(response.body)
+    text = body.fetch("candidates", []).first&.dig("content", "parts")&.find { |part| part["text"].present? }&.fetch("text", nil)
+    parse_json_tasks(text)
   end
 
   def parse_json_tasks(text)
     return [] if text.blank?
 
-    parsed = JSON.parse(text)
+    cleaned = text.to_s.strip.sub(/\A```(?:json)?/i, "").sub(/```\z/, "").strip
+    parsed = JSON.parse(cleaned)
     parsed.is_a?(Hash) ? parsed.fetch("tasks", []) : parsed
   rescue JSON::ParserError
     []
@@ -86,6 +156,10 @@ class OrderProjectPlanGenerator
       #{order.project_summary.presence || order.notes}
       今日: #{Date.current}
     TEXT
+  end
+
+  def system_instruction
+    "あなたは日本語のプロジェクトマネージャーです。JSONだけを返してください。"
   end
 
   def parse_date(value)
