@@ -230,6 +230,16 @@ body.admin-layout .sidebar {
   min-width: 1040px;
 }
 
+.compact-table {
+  min-width: 0;
+  width: 100%;
+}
+
+.compact-table th,
+.compact-table td {
+  overflow-wrap: anywhere;
+}
+
 /* バッジ */
 .badge {
   padding: 0.5em 0.75em;
