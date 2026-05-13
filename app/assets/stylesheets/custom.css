@@ -75,6 +75,56 @@ body .sidebar {
   letter-spacing: 0.05em;
 }
 
+/* Platform admin layout */
+body.admin-layout {
+  background-color: #f3f4f6;
+}
+
+.admin-layout .admin-navbar {
+  background-color: #e5e7eb;
+  border-bottom: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.admin-layout .navbar-brand,
+.admin-layout .navbar .nav-link,
+.admin-layout .navbar .btn-link {
+  color: #1f2937;
+}
+
+.admin-layout .navbar .nav-link:hover,
+.admin-layout .navbar .btn-link:hover {
+  color: #0d6efd;
+}
+
+body.admin-layout .sidebar {
+  background-color: #e5e7eb !important;
+  border-right: 1px solid #d1d5db;
+}
+
+.admin-layout .sidebar .nav-link,
+.admin-layout .sidebar .nav-link:visited {
+  color: #374151;
+}
+
+.admin-layout .sidebar .nav-link:hover {
+  color: #111827;
+  background: #d1d5db;
+}
+
+.admin-layout .sidebar .nav-link.active {
+  color: #111827;
+  background: #cbd5e1;
+}
+
+.admin-layout .sidebar .text-white-50 {
+  color: #6b7280 !important;
+}
+
+.admin-layout #content {
+  background-color: #f3f4f6;
+}
+
 /* メインコンテンツ */
 #content {
   margin-left: 250px;
