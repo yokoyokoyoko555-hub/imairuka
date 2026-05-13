@@ -167,7 +167,7 @@
                 .col-md-6
                   = f.label :ai_provider, "AIプロバイダー", class: "form-label"
                   = f.select :ai_provider, Company::AI_PROVIDERS.map { |value, label| [label, value] }, {}, class: "form-select"
-                  .form-text 対応AI: OpenAI / Claude / Gemini / Copilot
+                  .form-text 対応AI: OpenAI / Claude / Gemini
                 .col-md-6
                   = f.label :ai_model, "モデル", class: "form-label"
                   = f.text_field :ai_model, class: "form-control", placeholder: @company.ai_model_or_default
@@ -183,10 +183,6 @@
                 = f.label :ai_api_key, "APIキー", class: "form-label"
                 = f.password_field :ai_api_key, class: "form-control", autocomplete: "new-password", placeholder: @company.ai_configured? ? "変更する場合のみ入力" : "選択したAIのAPIキー"
                 .form-text APIキーは暗号化して保存します。画面上に再表示されません。
-              .alert.alert-light.border
-                .small.mb-1
-                  strong Copilotについて
-                .small.text-muted Copilotは利用形態によってAPI仕様が異なるため、Microsoft側の接続方式が確定してから実決済環境で有効化します。現時点のAI下書き生成はOpenAI / Claude / Geminiが対象です。
               - if @company.ai_configured?
                 .form-check.mb-3
                   = f.check_box :clear_ai_api_key, class: "form-check-input"

@@ -38,9 +38,6 @@ class OrderProjectPlanGenerator
       claude_tasks(api_key)
     when "gemini"
       gemini_tasks(api_key)
-    when "copilot"
-      Rails.logger.warn("Project plan AI fallback: Copilot direct API is not enabled")
-      []
     else
       []
     end

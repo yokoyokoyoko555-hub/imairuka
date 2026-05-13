@@ -19,14 +19,12 @@ class Company < ApplicationRecord
   AI_PROVIDERS = {
     "openai" => "OpenAI",
     "claude" => "Claude",
-    "gemini" => "Gemini",
-    "copilot" => "Copilot"
+    "gemini" => "Gemini"
   }.freeze
   DEFAULT_AI_MODELS = {
     "openai" => "gpt-5",
     "claude" => "claude-sonnet-4-5",
-    "gemini" => "gemini-2.5-pro",
-    "copilot" => "copilot"
+    "gemini" => "gemini-2.5-pro"
   }.freeze
 
   enum :contract_status, {
