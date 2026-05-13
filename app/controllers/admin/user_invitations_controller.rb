@@ -2,6 +2,8 @@ module Admin
   class UserInvitationsController < ApplicationController
     include InvitationLinks
 
+    layout "admin"
+
     before_action -> { require_role!(:platform_admin) }
     before_action :set_company
     before_action :ensure_invitable!, only: [:new, :create]

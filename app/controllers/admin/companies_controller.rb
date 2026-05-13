@@ -1,5 +1,7 @@
 module Admin
   class CompaniesController < ApplicationController
+    layout "admin"
+
     before_action -> { require_role!(:platform_admin) }
 
     def index
