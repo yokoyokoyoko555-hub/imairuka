@@ -12,6 +12,10 @@ class StripeWebhooksController < ApplicationController
       handle_checkout_session_completed(event)
     when "checkout.session.expired"
       handle_checkout_session_expired(event)
+    when "customer.subscription.updated"
+      handle_subscription_updated(event)
+    when "customer.subscription.deleted"
+      handle_subscription_deleted(event)
     end
 
     head :ok
@@ -86,6 +90,38 @@ class StripeWebhooksController < ApplicationController
       company.stripe_additional_users_subscription_status = "active"
       company.save!
     end
+  end
+
+  def handle_subscription_updated(event)
+    subscription = event.data.object
+    return unless subscription.metadata&.purpose == "account_addon"
+
+    company = find_addon_company(subscription)
+    return unless company
+
+    company.update!(
+      stripe_additional_users_subscription_id: stripe_id(subscription),
+      stripe_additional_users_subscription_status: subscription.status
+    )
+  end
+
+  def handle_subscription_deleted(event)
+    subscription = event.data.object
+    return unless subscription.metadata&.purpose == "account_addon"
+
+    company = find_addon_company(subscription)
+    return unless company
+
+    company.with_lock do
+      company.additional_user_slots = [company.additional_user_slots.to_i - 1, 0].max
+      company.stripe_additional_users_subscription_status = subscription.status.presence || "canceled"
+      company.save!
+    end
+  end
+
+  def find_addon_company(subscription)
+    Company.find_by(id: subscription.metadata&.company_id) ||
+      Company.find_by(stripe_additional_users_subscription_id: stripe_id(subscription))
   end
 
   def stripe_id(value)

@@ -6,17 +6,22 @@
     = link_to "新規契約を追加", new_admin_company_path, class: "btn btn-primary"
 
   .row.g-3.mb-3
-    .col-md-4
+    .col-md-3
       .card.shadow-sm.h-100
         .card-body
           .text-muted.small 契約候補
           .fs-3.fw-bold = @companies.count(&:pending_review?)
-    .col-md-4
+    .col-md-3
       .card.shadow-sm.h-100
         .card-body
           .text-muted.small 利用中・トライアル
           .fs-3.fw-bold = @companies.count(&:contract_active?)
-    .col-md-4
+    .col-md-3
+      .card.shadow-sm.h-100
+        .card-body
+          .text-muted.small 追加枠合計
+          .fs-3.fw-bold = @companies.sum { |company| company.additional_user_slots.to_i }
+    .col-md-3
       .card.shadow-sm.h-100
         .card-body
           .text-muted.small 全契約
@@ -34,9 +39,10 @@
               th 会社名
               th 申込者
               th 契約状態
-              th 契約内容
-              th Stripe Customer
-              th Stripe Subscription
+              th プラン
+              th ユーザー枠
+              th 追加枠
+              th 追加課金
               th 登録日
               th
           tbody
@@ -50,8 +56,14 @@
                   span.badge class=company.contract_status_badge_class
                     = company.contract_status_label
                 td = company.plan_label
-                td = company.stripe_customer_id.presence || "-"
-                td = company.stripe_subscription_id.presence || "-"
+                td = "#{company.user_slots_used} / #{company.user_limit_label}"
+                td = "#{company.additional_user_slots.to_i}名"
+                td
+                  - if company.stripe_additional_users_subscription_id.present?
+                    .small = company.stripe_additional_users_subscription_status.presence || "-"
+                    .small.text-muted = company.stripe_additional_users_subscription_id
+                  - else
+                    span.text-muted -
                 td = l(company.created_at, format: :short)
                 td.text-end
                   = link_to "詳細", admin_company_path(company), class: "btn btn-sm btn-outline-primary"
