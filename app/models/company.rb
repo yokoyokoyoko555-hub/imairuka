@@ -16,6 +16,7 @@ class Company < ApplicationRecord
   DEFAULT_PLAN_NAME = "standard".freeze
   PLAN_LABEL = "基本プラン".freeze
   INCLUDED_USER_LIMIT = 1
+  ADDITIONAL_USER_MONTHLY_AMOUNT = ENV.fetch("ADDITIONAL_USER_MONTHLY_AMOUNT", "3000").to_i
   AI_PROVIDERS = {
     "openai" => "OpenAI",
     "claude" => "Claude",
@@ -89,8 +90,12 @@ class Company < ApplicationRecord
     service_available?
   end
 
+  def included_user_limit
+    INCLUDED_USER_LIMIT
+  end
+
   def user_limit
-    USER_LIMITS.fetch(DEFAULT_PLAN_NAME)
+    USER_LIMITS.fetch(DEFAULT_PLAN_NAME) + additional_user_slots.to_i
   end
 
   def plan_label
@@ -99,6 +104,10 @@ class Company < ApplicationRecord
 
   def user_limit_label
     "#{user_limit}名"
+  end
+
+  def additional_user_monthly_amount
+    ADDITIONAL_USER_MONTHLY_AMOUNT
   end
 
   def active_users_count
@@ -128,9 +137,9 @@ class Company < ApplicationRecord
 
   def user_limit_message
     return "アカウント追加は月額契約が有効になると利用できます。" unless account_invitation_unlocked?
-    return "基本プランは全機能利用可能で、標準1名まで利用できます。残り#{remaining_user_slots}名まで招待できます。" if can_invite_user?
+    return "基本プランは全機能利用可能で、標準#{included_user_limit}名まで利用できます。追加枠#{additional_user_slots.to_i}名、残り#{remaining_user_slots}名まで招待できます。" if can_invite_user?
 
-    "基本プランは標準1名までです。追加アカウントは1名ごとに別途課金が必要です。"
+    "基本プランは標準#{included_user_limit}名までです。追加アカウントは1名ごとに月額課金が必要です。"
   end
 
   def stripe_connected?

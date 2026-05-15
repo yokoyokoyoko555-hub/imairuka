@@ -81,6 +81,8 @@ Rails.application.routes.draw do
   end
 
   namespace :account do
+    post "billing/add_user_slot", to: "billing#add_user_slot", as: :add_user_slot
+
     resources :users, only: [:index, :update] do
       member do
         patch :activate

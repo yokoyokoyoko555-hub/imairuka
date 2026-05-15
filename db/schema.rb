@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_11_123000) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_15_153000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,6 +75,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_123000) do
     t.string "ai_provider", default: "openai", null: false
     t.string "ai_model", default: "gpt-5", null: false
     t.text "ai_api_key_ciphertext"
+    t.integer "additional_user_slots", default: 0, null: false
+    t.string "stripe_additional_users_subscription_id"
+    t.string "stripe_additional_users_subscription_status"
+    t.index ["stripe_additional_users_subscription_id"], name: "index_companies_on_stripe_additional_users_subscription_id"
     t.index ["stripe_account_id"], name: "index_companies_on_stripe_account_id", unique: true
     t.index ["stripe_customer_id"], name: "index_companies_on_stripe_customer_id"
     t.index ["stripe_subscription_id"], name: "index_companies_on_stripe_subscription_id"
