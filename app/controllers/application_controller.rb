@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
 
   before_action :require_login
   before_action :ensure_current_company_available
+  before_action :prevent_read_only_write
   before_action :set_current_context
   before_action :set_company_info
 
@@ -39,6 +40,14 @@ class ApplicationController < ActionController::Base
 
     reset_login_state
     redirect_to login_path, alert: "契約状態により現在は利用できません。運営までお問い合わせください。"
+  end
+
+  def prevent_read_only_write
+    return unless current_user&.read_only?
+    return if request.get? || request.head?
+    return if controller_name == "sessions" && action_name == "destroy"
+
+    redirect_back fallback_location: root_path, alert: "閲覧のみのアカウントでは更新操作はできません。"
   end
 
   def set_current_context

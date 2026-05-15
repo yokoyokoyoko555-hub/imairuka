@@ -14,14 +14,32 @@ class PaymentHistoriesController < ApplicationController
       @payments = @payments.where(status: params[:payment_status])
     end
 
-    if params[:payment_date_from].present?
-      @payments = @payments.where("paid_at >= ?", Time.zone.parse(params[:payment_date_from]).beginning_of_day)
+    if parsed_payment_date_from
+      @payments = @payments.where("paid_at >= ?", parsed_payment_date_from.beginning_of_day)
     end
 
-    if params[:payment_date_to].present?
-      @payments = @payments.where("paid_at <= ?", Time.zone.parse(params[:payment_date_to]).end_of_day)
+    if parsed_payment_date_to
+      @payments = @payments.where("paid_at <= ?", parsed_payment_date_to.end_of_day)
     end
 
     @payments = @payments.page(params[:page]).per(20)
+  end
+
+  private
+
+  def parsed_payment_date_from
+    @parsed_payment_date_from ||= parse_date_param(:payment_date_from)
+  end
+
+  def parsed_payment_date_to
+    @parsed_payment_date_to ||= parse_date_param(:payment_date_to)
+  end
+
+  def parse_date_param(key)
+    return if params[key].blank?
+
+    Time.zone.parse(params[key])
+  rescue ArgumentError, TypeError
+    nil
   end
 end

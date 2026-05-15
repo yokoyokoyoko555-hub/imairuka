@@ -240,6 +240,35 @@ body.admin-layout .sidebar {
   overflow-wrap: anywhere;
 }
 
+.project-summary-box {
+  min-height: 96px;
+  overflow-wrap: anywhere;
+}
+
+.gantt-table {
+  min-width: 860px;
+}
+
+.gantt-track {
+  height: 28px;
+}
+
+.gantt-bar {
+  height: 28px;
+  line-height: 28px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.task-table {
+  min-width: 1080px;
+}
+
+.project-status-select {
+  min-width: 116px;
+  flex: 1 1 116px;
+}
+
 /* バッジ */
 .badge {
   padding: 0.5em 0.75em;

@@ -716,7 +716,7 @@ class OrdersController < ApplicationController
       return
     end
 
-    company = Company.first
+    company = current_company
     unless StripeSettings.configured?
       redirect_to show_billing_order_path(@order), alert: "Stripe secret key が未設定です。"
       return
@@ -776,11 +776,12 @@ class OrdersController < ApplicationController
     if params[:session_id].present? && StripeSettings.configured?
       session = Stripe::Checkout::Session.retrieve(params[:session_id])
       if session.payment_status == "paid" && session.metadata&.order_id.present?
-        order = Order.find_by(id: session.metadata.order_id)
+        company = Company.find_by(id: session.metadata.company_id) || current_company
+        order = company.orders.find_by(id: session.metadata.order_id)
         if order
           order.update(payment_date: Date.current)
           order.payment_records.find_or_initialize_by(stripe_checkout_session_id: session.id).tap do |payment|
-            payment.company ||= Company.find_by(id: session.metadata.company_id)
+            payment.company ||= company
             payment.stripe_account_id ||= StripeSettings.connect_mode? ? payment.company&.stripe_account_id : nil
             payment.stripe_payment_intent_id = session.payment_intent
             payment.status = "paid"

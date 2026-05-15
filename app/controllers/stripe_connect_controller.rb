@@ -58,7 +58,7 @@ class StripeConnectController < ApplicationController
   private
 
   def set_company
-    @company = Company.first_or_initialize
+    @company = current_company
   end
 
   def stripe_configured?
