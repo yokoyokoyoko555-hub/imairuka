@@ -5,7 +5,7 @@
         i.bi.bi-people.me-2
         | 顧客管理
       .d-flex.justify-content-end
-        = link_to new_customer_path, class: 'btn btn-primary' do
+        = link_to new_customer_path, class: 'btn btn-primary write-action' do
           i.bi.bi-plus.me-1
           | 新規作成
 
@@ -110,4 +110,4 @@
         = paginate @customers
 
 = javascript_include_tag "bulk_actions"
-= javascript_include_tag "delete_actions" 
+= javascript_include_tag "delete_actions"

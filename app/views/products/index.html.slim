@@ -5,7 +5,7 @@
         i.bi.bi-box.me-2
         | 商品管理
       .d-flex.justify-content-end
-        = link_to new_product_path, class: 'btn btn-primary' do
+        = link_to new_product_path, class: 'btn btn-primary write-action' do
           i.bi.bi-plus.me-1
           | 新規作成
 
@@ -103,4 +103,4 @@
         = paginate @products
 
 = javascript_include_tag "bulk_actions"
-= javascript_include_tag "delete_actions" 
+= javascript_include_tag "delete_actions"

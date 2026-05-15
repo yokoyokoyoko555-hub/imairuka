@@ -269,6 +269,10 @@ body.admin-layout .sidebar {
   flex: 1 1 116px;
 }
 
+body.read-only-user .write-action {
+  display: none !important;
+}
+
 /* バッジ */
 .badge {
   padding: 0.5em 0.75em;
@@ -418,4 +422,4 @@ body.admin-layout .sidebar {
   color: #FFFFFF !important;
   background-color: #e0a800 !important;
   border-color: #e0a800 !important;
-} 
+}

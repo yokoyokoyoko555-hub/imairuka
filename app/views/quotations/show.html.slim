@@ -8,7 +8,7 @@
         = link_to quotations_path, class: 'btn btn-outline-secondary' do
           i.bi.bi-arrow-left.me-1
           | 一覧に戻る
-        = link_to edit_quotation_path(@quotation), class: 'btn btn-outline-primary' do
+        = link_to edit_quotation_path(@quotation), class: 'btn btn-outline-primary write-action' do
           i.bi.bi-pencil.me-1
           | 編集
 
@@ -134,7 +134,7 @@
             = link_to download_pdf_quotation_path(@quotation), class: 'btn btn-outline-success' do
               i.bi.bi-download.me-1
               | PDFダウンロード
-            = link_to quotation_path(@quotation), class: 'btn btn-outline-danger', data: { delete_action: true, confirm: 'この見積書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
+            = link_to quotation_path(@quotation), class: 'btn btn-outline-danger write-action', data: { delete_action: true, confirm: 'この見積書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
               i.bi.bi-trash.me-1
               | 削除
 
@@ -148,19 +148,19 @@
           p.text-muted.small.mb-3 この見積書の基本情報と商品情報を基に他の書類を作成できます
           .row.g-3
             .col-12
-              = link_to copy_to_delivery_note_quotation_path(@quotation), class: "card text-decoration-none h-100 border-primary" do
+              = link_to copy_to_delivery_note_quotation_path(@quotation), class: "card text-decoration-none h-100 border-primary write-action" do
                 .card-body.text-center.py-4
                   i.bi.bi-file-earmark-check.text-primary.fs-1.mb-3
                   h6.card-title.text-primary 納品書を作成
                   p.card-text.small.text-muted 見積書の基本情報と商品情報を基に納品書を作成します
             .col-12
-              = link_to copy_to_invoice_quotation_path(@quotation), class: "card text-decoration-none h-100 border-success" do
+              = link_to copy_to_invoice_quotation_path(@quotation), class: "card text-decoration-none h-100 border-success write-action" do
                 .card-body.text-center.py-4
                   i.bi.bi-file-earmark-text.text-success.fs-1.mb-3
                   h6.card-title.text-success 請求書を作成
                   p.card-text.small.text-muted 見積書の基本情報と商品情報を基に請求書を作成します
             .col-12
-              = link_to copy_to_receipt_quotation_path(@quotation), class: "card text-decoration-none h-100 border-info" do
+              = link_to copy_to_receipt_quotation_path(@quotation), class: "card text-decoration-none h-100 border-info write-action" do
                 .card-body.text-center.py-4
                   i.bi.bi-receipt.text-info.fs-1.mb-3
                   h6.card-title.text-info 領収書を作成

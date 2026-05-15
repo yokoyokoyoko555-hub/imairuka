@@ -5,7 +5,7 @@
         i.bi.bi-truck.me-2
         | 納品書管理
       .d-flex.justify-content-end
-        = link_to new_delivery_note_path, class: 'btn btn-primary' do
+        = link_to new_delivery_note_path, class: 'btn btn-primary write-action' do
           i.bi.bi-plus.me-1
           | 新規作成
 
@@ -77,15 +77,15 @@
                   .action-buttons
                     = link_to delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-primary', title: '詳細' do
                       i.bi.bi-eye
-                    = link_to edit_delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-secondary', title: '編集' do
+                    = link_to edit_delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-secondary write-action', title: '編集' do
                       i.bi.bi-pencil
                     = link_to print_delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-info', target: '_blank', title: 'プレビュー' do
                       i.bi.bi-printer
-                    = link_to delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-danger', title: '削除', data: { delete_action: true, confirm: 'この納品書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
+                    = link_to delivery_note_path(delivery_note), class: 'btn btn-sm btn-outline-danger write-action', title: '削除', data: { delete_action: true, confirm: 'この納品書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
                       i.bi.bi-trash
 
       / ページネーション
       .d-flex.justify-content-center.mt-4
         = paginate @delivery_notes
 
-= javascript_include_tag "delete_actions" 
+= javascript_include_tag "delete_actions"

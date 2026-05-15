@@ -8,7 +8,7 @@
         = link_to customers_path, class: 'btn btn-outline-secondary' do
           i.bi.bi-arrow-left.me-1
           | 一覧に戻る
-        = link_to edit_customer_path(@customer), class: 'btn btn-outline-primary' do
+        = link_to edit_customer_path(@customer), class: 'btn btn-outline-primary write-action' do
           i.bi.bi-pencil.me-1
           | 編集
 
@@ -166,8 +166,8 @@
           .d-grid.gap-2
             = link_to customer_path(@customer), \
                 data: { delete_action: true, confirm: "この顧客を削除してもよろしいですか？\nこの操作は取り消せません。" }, \
-                class: "btn btn-outline-danger" do
+                class: "btn btn-outline-danger write-action" do
               i.bi.bi-trash.me-1
               | 削除
 
-= javascript_include_tag "delete_actions" 
+= javascript_include_tag "delete_actions"

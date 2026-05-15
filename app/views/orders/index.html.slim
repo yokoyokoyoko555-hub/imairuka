@@ -5,7 +5,7 @@
         i.bi.bi-cart.me-2
         | 案件一覧
       .d-flex.justify-content-end
-        = link_to new_order_path, class: "btn btn-primary" do
+        = link_to new_order_path, class: "btn btn-primary write-action" do
           i.bi.bi-plus.me-1
           | 案件登録
 
@@ -87,9 +87,9 @@
                   .action-buttons
                     = link_to order_path(order), class: "btn btn-sm btn-outline-primary", title: "詳細" do
                       i.bi.bi-eye
-                    = link_to edit_order_path(order), class: "btn btn-sm btn-outline-secondary", title: "編集" do
+                    = link_to edit_order_path(order), class: "btn btn-sm btn-outline-secondary write-action", title: "編集" do
                       i.bi.bi-pencil
-                    = link_to order_path(order), data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？\nこの操作は取り消せません。" }, class: "btn btn-sm btn-outline-danger", title: "削除" do
+                    = link_to order_path(order), data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？\nこの操作は取り消せません。" }, class: "btn btn-sm btn-outline-danger write-action", title: "削除" do
                       i.bi.bi-trash
 
       .d-flex.justify-content-center.mt-4

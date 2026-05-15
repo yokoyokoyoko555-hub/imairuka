@@ -8,7 +8,7 @@
         = link_to orders_path, class: "btn btn-outline-secondary me-2" do
           i.bi.bi-arrow-left.me-1
           | 一覧に戻る
-        = link_to edit_order_path(@order), class: "btn btn-outline-primary" do
+        = link_to edit_order_path(@order), class: "btn btn-outline-primary write-action" do
           i.bi.bi-pencil.me-1
           | 編集
 
@@ -104,10 +104,10 @@
             = link_to show_billing_order_path(@order), class: "btn btn-outline-primary" do
               i.bi.bi-receipt.me-1
               | 請求・決済
-            = link_to edit_order_path(@order), class: "btn btn-outline-primary" do
+            = link_to edit_order_path(@order), class: "btn btn-outline-primary write-action" do
               i.bi.bi-pencil.me-1
               | 編集
-            = link_to order_path(@order), data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？\nこの操作は取り消せません。" }, class: "btn btn-outline-danger" do
+            = link_to order_path(@order), data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？\nこの操作は取り消せません。" }, class: "btn btn-outline-danger write-action" do
               i.bi.bi-trash.me-1
               | 削除
 

@@ -1,4 +1,8 @@
 module ApplicationHelper
+  def can_write?
+    current_user.present? && !current_user.read_only?
+  end
+
   def active_class(path)
     current_page?(path) ? 'active' : ''
   end

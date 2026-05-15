@@ -60,7 +60,7 @@
                   = f.label :business_type, "業種", class: "form-label required"
                   = f.text_field :business_type, class: "form-control", required: true, maxlength: 50
               .text-end
-                = f.submit "設定を保存", class: "btn btn-primary", data: { disable_with: "保存中..." }
+                = f.submit "設定を保存", class: "btn btn-primary write-action", data: { disable_with: "保存中..." }
 
       - if params[:tab] == "status"
         .card.shadow.mb-4
@@ -68,7 +68,7 @@
             h6.m-0.font-weight-bold.text-primary
               i.bi.bi-tag.me-2
               | ステータス設定
-            = link_to new_order_status_path, class: "btn btn-primary btn-sm" do
+            = link_to new_order_status_path, class: "btn btn-primary btn-sm write-action" do
               i.bi.bi-plus.me-1
               | ステータス登録
           .card-body
@@ -96,9 +96,9 @@
                       - else
                         span.badge.bg-secondary 無効
                     td.text-end
-                      = link_to edit_order_status_path(status), class: "btn btn-sm btn-outline-primary me-1" do
+                      = link_to edit_order_status_path(status), class: "btn btn-sm btn-outline-primary me-1 write-action" do
                         i.bi.bi-pencil
-                      = link_to order_status_path(status), class: "btn btn-sm btn-outline-danger", data: { delete_action: true, confirm: "このステータスを削除しますか？" } do
+                      = link_to order_status_path(status), class: "btn btn-sm btn-outline-danger write-action", data: { delete_action: true, confirm: "このステータスを削除しますか？" } do
                         i.bi.bi-trash.me-1
                         | 削除
 
@@ -147,7 +147,7 @@
                 i.bi.bi-exclamation-triangle.me-2
                 | 運営側 Stripe Connect 用キーが未設定です。
             - else
-              = button_to stripe_connect_path, method: :post, class: "btn btn-primary", form: { data: { turbo: false } } do
+              = button_to stripe_connect_path, method: :post, class: "btn btn-primary write-action", form: { data: { turbo: false } } do
                 i.bi.bi-box-arrow-up-right.me-2
                 = @company.stripe_account_id.present? ? "Stripe設定を再開" : "Stripeと連携"
 
@@ -188,6 +188,6 @@
                   = f.check_box :clear_ai_api_key, class: "form-check-input"
                   = f.label :clear_ai_api_key, "保存済みAPIキーを削除する", class: "form-check-label"
               .text-end
-                = f.submit "AI設定を保存", class: "btn btn-primary", data: { disable_with: "保存中..." }
+                = f.submit "AI設定を保存", class: "btn btn-primary write-action", data: { disable_with: "保存中..." }
 
 = javascript_include_tag "delete_actions"

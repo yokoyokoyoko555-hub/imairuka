@@ -28,9 +28,9 @@ class Product < ApplicationRecord
   validates :supplier_email, length: { maximum: 100, message: 'メールアドレスは100文字以内で入力してください' }
   validates :notes, length: { maximum: 1000, message: 'メモは1000文字以内で入力してください' }
 
-  with_options on: :create do
-    validates :image, content_type: { in: ['image/png', 'image/jpeg', 'image/gif'], message: '画像ファイル（PNG、JPEG、GIF）を選択してください' }, unless: :draft?,
-                      size: { less_than: 5.megabytes, message: '画像サイズは5MB以下にしてください' }, unless: :draft?
+  with_options on: :create, unless: :draft? do
+    validates :image, content_type: { in: ['image/png', 'image/jpeg', 'image/gif'], message: '画像ファイル（PNG、JPEG、GIF）を選択してください' },
+                      size: { less_than: 5.megabytes, message: '画像サイズは5MB以下にしてください' }
   end
 
   before_validation :normalize_supplier_phone
@@ -55,10 +55,10 @@ class Product < ApplicationRecord
 
   def self.to_csv
     headers = %w[商品コード 商品名 単価 商品説明 ステータス]
-    
+
     CSV.generate(headers: true) do |csv|
       csv << headers
-      
+
       all.each do |product|
         csv << [
           product.code,
@@ -74,7 +74,7 @@ class Product < ApplicationRecord
   # Cloudinary用の画像URL取得メソッド
   def image_url(size = :medium)
     return nil unless image.attached?
-    
+
     begin
       case size
       when :thumbnail
@@ -112,4 +112,4 @@ class Product < ApplicationRecord
       throw(:abort)
     end
   end
-end 
+end

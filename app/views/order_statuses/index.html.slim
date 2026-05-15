@@ -5,7 +5,7 @@
         i.bi.bi-gear.me-2
         | ステータス設定
       .d-flex.justify-content-end
-        = link_to new_order_status_path, class: 'btn btn-primary' do
+        = link_to new_order_status_path, class: 'btn btn-primary write-action' do
           i.bi.bi-plus.me-1
           | 新規登録
 
@@ -47,4 +47,4 @@
                       i.bi.bi-trash.me-1
                       | 削除
 
-= javascript_include_tag "delete_actions" 
+= javascript_include_tag "delete_actions"

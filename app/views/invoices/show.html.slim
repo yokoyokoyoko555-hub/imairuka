@@ -8,7 +8,7 @@
         = link_to invoices_path, class: 'btn btn-outline-secondary' do
           i.bi.bi-arrow-left.me-1
           | 一覧に戻る
-        = link_to edit_invoice_path(@invoice), class: 'btn btn-outline-primary' do
+        = link_to edit_invoice_path(@invoice), class: 'btn btn-outline-primary write-action' do
           i.bi.bi-pencil.me-1
           | 編集
 
@@ -133,7 +133,7 @@
             = link_to download_pdf_invoice_path(@invoice), class: 'btn btn-outline-success' do
               i.bi.bi-download.me-1
               | PDFダウンロード
-            = link_to invoice_path(@invoice), class: 'btn btn-outline-danger', data: { delete_action: true, confirm: 'この請求書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
+            = link_to invoice_path(@invoice), class: 'btn btn-outline-danger write-action', data: { delete_action: true, confirm: 'この請求書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
               i.bi.bi-trash.me-1
               | 削除
 

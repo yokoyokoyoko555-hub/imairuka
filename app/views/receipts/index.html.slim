@@ -5,7 +5,7 @@
         i.bi.bi-receipt.me-2
         | 領収書管理
       .d-flex.justify-content-end
-        = link_to new_receipt_path, class: 'btn btn-primary' do
+        = link_to new_receipt_path, class: 'btn btn-primary write-action' do
           i.bi.bi-plus.me-1
           | 新規作成
 
@@ -75,15 +75,15 @@
                   .action-buttons
                     = link_to receipt_path(receipt), class: 'btn btn-sm btn-outline-primary', title: '詳細' do
                       i.bi.bi-eye
-                    = link_to edit_receipt_path(receipt), class: 'btn btn-sm btn-outline-secondary', title: '編集' do
+                    = link_to edit_receipt_path(receipt), class: 'btn btn-sm btn-outline-secondary write-action', title: '編集' do
                       i.bi.bi-pencil
                     = link_to print_receipt_path(receipt), class: 'btn btn-sm btn-outline-info', target: '_blank', title: 'プレビュー' do
                       i.bi.bi-printer
-                    = link_to receipt_path(receipt), class: 'btn btn-sm btn-outline-danger', title: '削除', data: { delete_action: true, confirm: 'この領収書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
+                    = link_to receipt_path(receipt), class: 'btn btn-sm btn-outline-danger write-action', title: '削除', data: { delete_action: true, confirm: 'この領収書を削除してもよろしいですか？\nこの操作は取り消せません。' } do
                       i.bi.bi-trash
 
       / ページネーション
       .d-flex.justify-content-center.mt-4
         = paginate @receipts
 
-= javascript_include_tag "delete_actions" 
+= javascript_include_tag "delete_actions"
