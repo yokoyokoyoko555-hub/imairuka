@@ -71,6 +71,10 @@ Rails.application.routes.draw do
     resources :companies, only: [:index, :show, :new, :create] do
       member do
         patch :approve
+        patch :activate_contract
+        patch :suspend_contract
+        patch :resume_contract
+        patch :cancel_contract
       end
       resources :user_invitations, path: :invitations, only: [:new, :create]
     end
