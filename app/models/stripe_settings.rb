@@ -15,6 +15,21 @@ class StripeSettings
     ENV["STRIPE_SECRET_KEY"].present?
   end
 
+  def self.live_key?
+    ENV["STRIPE_SECRET_KEY"].to_s.start_with?("sk_live_")
+  end
+
+  def self.test_key?
+    ENV["STRIPE_SECRET_KEY"].to_s.start_with?("sk_test_")
+  end
+
+  def self.key_mode_label
+    return "本番モード" if live_key?
+    return "テストモード" if test_key?
+
+    "未判定"
+  end
+
   def self.checkout_available?(company)
     return false unless configured?
     return true if direct_mode?

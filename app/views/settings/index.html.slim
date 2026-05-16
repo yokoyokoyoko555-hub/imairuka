@@ -118,7 +118,8 @@
                 label.form-label Stripeキー
                 p.form-control-plaintext
                   - if StripeSettings.configured?
-                    span.badge.bg-success 設定済み
+                    span.badge class=(StripeSettings.live_key? ? "bg-success" : "bg-warning text-dark")
+                      = "#{StripeSettings.key_mode_label} / 設定済み"
                   - else
                     span.badge.bg-secondary 未設定
             .row.mb-4
@@ -146,6 +147,10 @@
               .alert.alert-warning
                 i.bi.bi-exclamation-triangle.me-2
                 | 運営側 Stripe Connect 用キーが未設定です。
+            - elsif StripeSettings.test_key?
+              .alert.alert-warning
+                i.bi.bi-exclamation-triangle.me-2
+                | 現在はStripeテストキーで動作しています。本番決済を開始する前に、HerokuのSTRIPE_SECRET_KEYとSTRIPE_WEBHOOK_SECRETを本番用に切り替えてください。
             - else
               = button_to stripe_connect_path, method: :post, class: "btn btn-primary write-action", form: { data: { turbo: false } } do
                 i.bi.bi-box-arrow-up-right.me-2
