@@ -185,10 +185,10 @@ class Company < ApplicationRecord
   private
 
   def set_tenant_slug
-    self.tenant_slug = tenant_slug.to_s.parameterize if tenant_slug.present?
+    self.tenant_slug = safe_parameterize(tenant_slug) if tenant_slug.present?
     return if tenant_slug.present? && !self.class.where.not(id: id).exists?(tenant_slug: tenant_slug)
 
-    base_slug = name.to_s.parameterize.presence || "company"
+    base_slug = safe_parameterize(name).presence || "company"
     candidate = base_slug
 
     while self.class.where.not(id: id).exists?(tenant_slug: candidate)
@@ -196,6 +196,10 @@ class Company < ApplicationRecord
     end
 
     self.tenant_slug = candidate
+  end
+
+  def safe_parameterize(value)
+    value.to_s.encode("UTF-8", invalid: :replace, undef: :replace, replace: "").parameterize
   end
 
   def normalize_postal_code
