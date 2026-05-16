@@ -6,13 +6,13 @@
     - if @can_invite_user
       = link_to "ユーザーを招待", new_account_user_invitation_path, class: "btn btn-primary"
     - else
-      = button_to "追加アカウントを購入", account_add_user_slot_path, method: :post, class: "btn btn-primary", form: { data: { turbo: false } }
+      button.btn.btn-secondary type="button" disabled="disabled" 招待枠がありません
 
   .row.g-3.mb-3
     .col-lg-8
       .card.shadow-sm.h-100
         .card-header
-          strong 月額契約とユーザー枠
+          strong 契約とユーザー枠
         .card-body
           .row.g-3
             .col-sm-3
@@ -36,12 +36,12 @@
         .card-header
           strong 追加アカウント
         .card-body
-          .fs-5.fw-bold = number_to_currency(current_company.additional_user_monthly_amount, unit: "¥", precision: 0)
-          .text-muted.small.mb-3 1名あたり月額
+          .fs-5.fw-bold 契約変更
+          .text-muted.small.mb-3 追加アカウントはStripe課金ではなく、運営側で契約内容を変更して解放します。
           - if @can_invite_user
             .text-muted.small 現在は招待可能な空き枠があります。
           - else
-            = button_to "1名分を追加購入", account_add_user_slot_path, method: :post, class: "btn btn-primary w-100", form: { data: { turbo: false } }
+            .alert.alert-warning.mb-0 追加が必要な場合は運営へお問い合わせください。
 
   - if flash[:invitation_url].present?
     .alert.alert-info

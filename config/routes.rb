@@ -68,9 +68,11 @@ Rails.application.routes.draw do
   resources :payment_histories, only: [:index]
 
   namespace :admin do
+    resources :vendors
     resources :companies, only: [:index, :show, :new, :create] do
       member do
         patch :approve
+        patch :mark_paid
         patch :activate_contract
         patch :suspend_contract
         patch :resume_contract

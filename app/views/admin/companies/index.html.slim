@@ -2,7 +2,7 @@
   .d-flex.justify-content-between.align-items-center.mb-4
     div
       h1.h3.mb-1 契約管理
-      .text-muted 利用申込から作成された契約候補と契約中の企業を管理します
+      .text-muted 利用会社1社ごとの契約、請求書発行、銀行振込の入金状況を管理します
     = link_to "新規契約を追加", new_admin_company_path, class: "btn btn-primary"
 
   .row.g-3.mb-3
@@ -14,18 +14,18 @@
     .col-md-3
       .card.shadow-sm.h-100
         .card-body
-          .text-muted.small 利用中・トライアル
-          .fs-3.fw-bold = @companies.count(&:contract_active?)
+          .text-muted.small 請求済み
+          .fs-3.fw-bold = @companies.count(&:billing_invoiced?)
     .col-md-3
       .card.shadow-sm.h-100
         .card-body
-          .text-muted.small 追加枠合計
-          .fs-3.fw-bold = @companies.sum { |company| company.additional_user_slots.to_i }
+          .text-muted.small 入金済み
+          .fs-3.fw-bold = @companies.count(&:billing_paid?)
     .col-md-3
       .card.shadow-sm.h-100
         .card-body
-          .text-muted.small 全契約
-          .fs-3.fw-bold = @companies.size
+          .text-muted.small 契約金額合計
+          .fs-3.fw-bold = number_to_currency(@companies.sum(&:contract_amount), unit: "¥", precision: 0)
 
   .card.shadow-sm
     .card-header
@@ -36,13 +36,13 @@
         table.table.table-hover.mb-0.align-middle
           thead.table-light
             tr
-              th 会社名
-              th 申込者
+              th 利用会社
+              th 販売経路
+              th 請求先
               th 契約状態
-              th プラン
-              th ユーザー枠
-              th 追加枠
-              th 追加課金
+              th 請求状態
+              th 金額
+              th 契約期間
               th 登録日
               th
           tbody
@@ -51,21 +51,19 @@
                 td
                   .fw-semibold = company.name
                   .small.text-muted = company.email
-                td = company.representative
+                td
+                  .fw-semibold = company.sales_channel_label
+                  - if company.vendor?
+                    .small.text-muted = company.vendor&.name || "-"
+                td = company.billing_payer_label
                 td
                   span.badge class=company.contract_status_badge_class
                     = company.contract_status_label
                 td
-                  .fw-semibold = company.plan_label
-                  .small.text-muted = company.plan_description
-                td = "#{company.user_slots_used} / #{company.user_limit_label}"
-                td = "#{company.additional_user_slots.to_i}名"
-                td
-                  - if company.stripe_additional_users_subscription_id.present?
-                    .small = company.stripe_additional_users_subscription_status.presence || "-"
-                    .small.text-muted = company.stripe_additional_users_subscription_id
-                  - else
-                    span.text-muted -
+                  span.badge class=company.billing_status_badge_class
+                    = company.billing_status_label
+                td = company.contract_amount_label
+                td = company.contract_period_label
                 td = l(company.created_at, format: :short)
                 td.text-end
                   = link_to "詳細", admin_company_path(company), class: "btn btn-sm btn-outline-primary"

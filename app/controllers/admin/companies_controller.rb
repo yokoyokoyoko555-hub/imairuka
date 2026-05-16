@@ -8,6 +8,7 @@ module Admin
     before_action :set_company, only: [
       :show,
       :approve,
+      :mark_paid,
       :activate_contract,
       :suspend_contract,
       :resume_contract,
@@ -15,16 +16,20 @@ module Admin
     ]
 
     def index
-      @companies = Company.order(created_at: :desc)
+      @companies = Company.includes(:vendor).order(created_at: :desc)
     end
 
     def new
       @company = Company.new(
-        contract_status: "trialing",
+        contract_status: "pending_review",
         plan_name: Company::DEFAULT_PLAN_NAME,
-        trial_ends_at: 14.days.from_now
+        sales_channel: "direct",
+        billing_status: "unbilled",
+        contract_amount: Company::DEFAULT_CONTRACT_AMOUNT,
+        contract_months: Company::DEFAULT_CONTRACT_MONTHS
       )
       @owner = User.new(role: "owner", active: true)
+      load_vendors
     end
 
     def create
@@ -32,8 +37,9 @@ module Admin
       @owner = @company.users.build(owner_params.merge(role: "owner", active: true))
 
       if @company.save
-        redirect_to admin_company_path(@company), notice: "新しい契約を追加しました。"
+        redirect_to admin_company_path(@company), notice: "新しい契約候補を追加しました。"
       else
+        load_vendors
         render :new, status: :unprocessable_entity
       end
     end
@@ -44,8 +50,27 @@ module Admin
 
     def approve
       @company.assign_attributes(
-        contract_status: "trialing",
-        trial_ends_at: @company.trial_ends_at || 14.days.from_now,
+        contract_status: "past_due",
+        billing_status: "invoiced",
+        invoiced_on: Date.current,
+        payment_due_on: @company.payment_due_on || 1.month.from_now.to_date,
+        internal_invoice_number: @company.internal_invoice_number.presence || next_invoice_number
+      )
+
+      if @company.save
+        redirect_to admin_company_path(@company), notice: "請求書発行済みにしました。銀行振込の入金確認後に利用開始できます。"
+      else
+        redirect_to admin_company_path(@company), alert: @company.errors.full_messages.to_sentence
+      end
+    end
+
+    def mark_paid
+      @company.assign_attributes(
+        contract_status: "active",
+        billing_status: "paid",
+        paid_on: Date.current,
+        contract_starts_on: @company.contract_starts_on || Date.current,
+        contract_ends_on: @company.contract_ends_on || Date.current.advance(months: @company.contract_months),
         suspended_at: nil
       )
 
@@ -60,7 +85,7 @@ module Admin
         invitation.save!
         invitation.reset_token! if invitation.raw_token.blank?
         store_invitation_link(invitation)
-        redirect_to admin_company_path(@company), notice: "契約を承認しました。初期管理者の招待URLを発行しました。"
+        redirect_to admin_company_path(@company), notice: "入金済みにして利用開始しました。初期管理者の招待URLを発行しました。"
       else
         redirect_to admin_company_path(@company), alert: @company.errors.full_messages.to_sentence
       end
@@ -99,6 +124,14 @@ module Admin
       @payments_count = PaymentRecord.unscoped.where(company: @company).count
     end
 
+    def load_vendors
+      @vendors = Vendor.active.order(:name)
+    end
+
+    def next_invoice_number
+      "IM-#{Time.current.strftime('%Y%m%d')}-#{@company.id || SecureRandom.hex(3)}"
+    end
+
     def change_contract_status!(status, message)
       @company.contract_status = status
 
@@ -121,6 +154,19 @@ module Admin
         :representative,
         :business_type,
         :contract_status,
+        :sales_channel,
+        :vendor_id,
+        :billing_status,
+        :internal_invoice_number,
+        :invoiced_on,
+        :payment_due_on,
+        :paid_on,
+        :contract_amount,
+        :contract_months,
+        :contract_starts_on,
+        :contract_ends_on,
+        :contract_notes,
+        :additional_user_slots,
         :trial_ends_at
       )
     end

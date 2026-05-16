@@ -36,6 +36,10 @@ html data-turbo="false"
               = link_to admin_companies_path, class: "nav-link #{controller_path == 'admin/companies' ? 'active' : ''}" do
                 i.bi.bi-building.me-2
                 | 契約管理
+            li.nav-item
+              = link_to admin_vendors_path, class: "nav-link #{controller_path == 'admin/vendors' ? 'active' : ''}" do
+                i.bi.bi-diagram-3.me-2
+                | ベンダー管理
             li.nav-item.mt-3
               small.text-white-50.ps-3 契約操作
             li.nav-item

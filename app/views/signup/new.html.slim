@@ -9,7 +9,7 @@
       .mb-4
         h2.h5.fw-bold.mb-2 申込内容を確認後、運営より利用開始のご案内をお送りします
         p.text-muted.mb-0
-          | 送信された内容は、運営側の契約管理に「申込受付」の契約候補として自動登録されます。
+          | 送信された内容は、運営側の契約管理に「申込受付」の契約候補として自動登録されます。SaaS利用料は請求書・銀行振込でのお支払いです。
 
       = render "shared/error_messages", model: @company
 
@@ -43,10 +43,14 @@
             .border.rounded.p-3.bg-light.h-100
               .fw-bold = Company::PLAN_LABEL
               .text-muted.small
-                | 全機能利用可能。標準1名まで、追加アカウントは1名ごとに別途月額課金です。
+                | 全機能利用可能。標準1名まで、追加アカウントは契約変更で対応します。
               .small.mt-2
-                | 追加アカウント単価: #{number_to_currency(@company.additional_user_monthly_amount, unit: "¥", precision: 0)} / 月
+                | 契約単位: 利用会社1社 / 2年契約
             = f.hidden_field :plan_name, value: Company::DEFAULT_PLAN_NAME
+          .col-12
+            = f.label :vendor_code, "ベンダーコード（紹介元がある場合のみ）", class: "form-label"
+            = f.text_field :vendor_code, class: "form-control", placeholder: "例: VENDOR-A"
+            .form-text 未入力の場合は直販申込として受け付けます。
 
         .d-flex.justify-content-between.align-items-center.mt-4
           = link_to "ログインへ戻る", login_path, class: "btn btn-outline-secondary"

@@ -1,0 +1,39 @@
+= form_with model: [:admin, @vendor], local: true do |f|
+  = render "shared/error_messages", model: @vendor
+
+  .card.shadow-sm
+    .card-header
+      strong ベンダー情報
+    .card-body
+      .row.g-3
+        .col-md-4
+          = f.label :code, "ベンダーコード", class: "form-label"
+          = f.text_field :code, class: "form-control", placeholder: "VENDOR-A", required: true
+        .col-md-8
+          = f.label :name, "ベンダー名", class: "form-label"
+          = f.text_field :name, class: "form-control", required: true
+        .col-md-6
+          = f.label :contact_name, "担当者名", class: "form-label"
+          = f.text_field :contact_name, class: "form-control"
+        .col-md-6
+          = f.label :email, "メール", class: "form-label"
+          = f.email_field :email, class: "form-control"
+        .col-md-4
+          = f.label :phone, "電話番号", class: "form-label"
+          = f.telephone_field :phone, class: "form-control"
+        .col-md-4
+          = f.label :postal_code, "郵便番号", class: "form-label"
+          = f.text_field :postal_code, class: "form-control"
+        .col-md-4
+          = f.label :status, "状態", class: "form-label"
+          = f.select :status, Vendor::STATUSES.map { |value, label| [label, value] }, {}, class: "form-select"
+        .col-12
+          = f.label :address, "住所", class: "form-label"
+          = f.text_area :address, class: "form-control", rows: 2
+        .col-12
+          = f.label :notes, "メモ", class: "form-label"
+          = f.text_area :notes, class: "form-control", rows: 3
+
+  .mt-4
+    = f.submit "保存", class: "btn btn-primary"
+    = link_to "キャンセル", admin_vendors_path, class: "btn btn-outline-secondary ms-2"

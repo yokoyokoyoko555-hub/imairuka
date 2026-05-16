@@ -1,0 +1,79 @@
+.container-fluid
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h1.h3.mb-1 = @vendor.name
+      .text-muted = "ベンダーコード: #{@vendor.code}"
+    .d-flex.gap-2
+      = link_to "編集", edit_admin_vendor_path(@vendor), class: "btn btn-primary"
+      = link_to "一覧へ戻る", admin_vendors_path, class: "btn btn-outline-secondary"
+
+  .row.g-3.mb-3
+    .col-lg-5
+      .card.shadow-sm.h-100
+        .card-header
+          strong ベンダー情報
+        .card-body
+          dl.row.mb-0
+            dt.col-sm-4 状態
+            dd.col-sm-8
+              span.badge class=@vendor.status_badge_class
+                = @vendor.status_label
+            dt.col-sm-4 担当者
+            dd.col-sm-8 = @vendor.contact_name.presence || "-"
+            dt.col-sm-4 メール
+            dd.col-sm-8 = @vendor.email.presence || "-"
+            dt.col-sm-4 電話番号
+            dd.col-sm-8 = @vendor.phone.presence || "-"
+            dt.col-sm-4 住所
+            dd.col-sm-8 = [@vendor.postal_code, @vendor.address].compact_blank.join(" ")
+            dt.col-sm-4 メモ
+            dd.col-sm-8 = simple_format(@vendor.notes.presence || "-")
+    .col-lg-7
+      .card.shadow-sm.h-100
+        .card-header
+          strong 集計
+        .card-body
+          .row.g-3
+            .col-md-4
+              .text-muted.small 利用会社数
+              .fs-4.fw-bold = @companies.size
+            .col-md-4
+              .text-muted.small 入金済み
+              .fs-4.fw-bold = @companies.count(&:billing_paid?)
+            .col-md-4
+              .text-muted.small 卸請求合計
+              .fs-4.fw-bold = number_to_currency(@companies.sum(&:contract_amount), unit: "¥", precision: 0)
+
+  .card.shadow-sm
+    .card-header
+      strong 配下利用会社
+      span.badge.bg-secondary.ms-2 = @companies.size
+    .card-body.p-0
+      .table-responsive
+        table.table.table-hover.mb-0.align-middle
+          thead.table-light
+            tr
+              th 利用会社
+              th 契約状態
+              th 請求状態
+              th 契約金額
+              th 契約期間
+              th 登録日
+              th
+          tbody
+            - @companies.each do |company|
+              tr
+                td
+                  .fw-semibold = company.name
+                  .small.text-muted = company.email
+                td
+                  span.badge class=company.contract_status_badge_class
+                    = company.contract_status_label
+                td
+                  span.badge class=company.billing_status_badge_class
+                    = company.billing_status_label
+                td = company.contract_amount_label
+                td = company.contract_period_label
+                td = l(company.created_at, format: :short)
+                td.text-end
+                  = link_to "詳細", admin_company_path(company), class: "btn btn-sm btn-outline-primary"

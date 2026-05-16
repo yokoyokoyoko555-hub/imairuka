@@ -1,0 +1,38 @@
+.container-fluid
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h1.h3.mb-1 ベンダー管理
+      .text-muted ベンダー経由の利用会社契約と請求状況を管理します
+    = link_to "ベンダーを追加", new_admin_vendor_path, class: "btn btn-primary"
+
+  .card.shadow-sm
+    .card-header
+      strong ベンダー一覧
+      span.badge.bg-secondary.ms-2 = @vendors.size
+    .card-body.p-0
+      .table-responsive
+        table.table.table-hover.mb-0.align-middle
+          thead.table-light
+            tr
+              th ベンダー名
+              th コード
+              th 担当者
+              th メール
+              th 状態
+              th 利用会社数
+              th 登録日
+              th
+          tbody
+            - @vendors.each do |vendor|
+              tr
+                td.fw-semibold = vendor.name
+                td = vendor.code
+                td = vendor.contact_name.presence || "-"
+                td = vendor.email.presence || "-"
+                td
+                  span.badge class=vendor.status_badge_class
+                    = vendor.status_label
+                td = vendor.companies.size
+                td = l(vendor.created_at, format: :short)
+                td.text-end
+                  = link_to "詳細", admin_vendor_path(vendor), class: "btn btn-sm btn-outline-primary"

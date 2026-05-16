@@ -1,6 +1,7 @@
 class Company < ApplicationRecord
-  attr_accessor :ai_api_key, :clear_ai_api_key
+  attr_accessor :ai_api_key, :clear_ai_api_key, :vendor_code
 
+  belongs_to :vendor, optional: true
   has_many :users, dependent: :restrict_with_error
   has_many :user_invitations, dependent: :destroy
   has_many :customers, dependent: :restrict_with_error
@@ -16,7 +17,8 @@ class Company < ApplicationRecord
   DEFAULT_PLAN_NAME = "standard".freeze
   PLAN_LABEL = "基本プラン".freeze
   INCLUDED_USER_LIMIT = 1
-  ADDITIONAL_USER_MONTHLY_AMOUNT = ENV.fetch("ADDITIONAL_USER_MONTHLY_AMOUNT", "3000").to_i
+  DEFAULT_CONTRACT_AMOUNT = 100_000
+  DEFAULT_CONTRACT_MONTHS = 24
   AI_PROVIDERS = {
     "openai" => "OpenAI",
     "claude" => "Claude",
@@ -37,6 +39,24 @@ class Company < ApplicationRecord
     canceled: "canceled"
   }, default: "trialing"
 
+  enum :sales_channel, {
+    direct: "direct",
+    vendor: "vendor"
+  }, default: "direct"
+
+  enum :billing_payer_type, {
+    company: "company",
+    vendor: "vendor"
+  }, default: "company", prefix: :payer
+
+  enum :billing_status, {
+    unbilled: "unbilled",
+    invoiced: "invoiced",
+    paid: "paid",
+    overdue: "overdue",
+    waived: "waived"
+  }, default: "unbilled", prefix: :billing
+
   validates :name, presence: true, length: { maximum: 100 }
   validates :invoice_number, presence: true, format: { with: /\AT\d{13}\z/ }, length: { maximum: 20 }
   validates :postal_code, presence: true, format: { with: /\A\d{7}\z/ }, length: { maximum: 10 }
@@ -48,8 +68,11 @@ class Company < ApplicationRecord
   validates :tenant_slug, presence: true, uniqueness: true
   validates :ai_provider, presence: true, inclusion: { in: AI_PROVIDERS.keys }
   validates :ai_model, presence: true, length: { maximum: 100 }
+  validates :contract_amount, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :contract_months, numericality: { only_integer: true, greater_than: 0 }
+  validates :vendor, presence: true, if: :vendor?
 
-  before_validation :set_tenant_slug, :normalize_postal_code, :normalize_phone
+  before_validation :set_tenant_slug, :normalize_postal_code, :normalize_phone, :set_contract_defaults, :set_billing_payer
   before_save :apply_ai_api_key_change
 
   USER_LIMITS = {
@@ -103,15 +126,47 @@ class Company < ApplicationRecord
   end
 
   def plan_description
-    "全機能利用可能 / 標準#{included_user_limit}名まで"
+    "全機能利用可能 / 標準#{included_user_limit}名まで / 追加アカウントは契約変更で対応"
   end
 
   def user_limit_label
     "#{user_limit}名"
   end
 
-  def additional_user_monthly_amount
-    ADDITIONAL_USER_MONTHLY_AMOUNT
+  def contract_amount_label
+    "¥#{contract_amount.to_i.to_fs(:delimited)}"
+  end
+
+  def contract_period_label
+    "#{contract_months.to_i}ヶ月"
+  end
+
+  def sales_channel_label
+    vendor? ? "ベンダー経由" : "直販"
+  end
+
+  def billing_payer_label
+    payer_vendor? ? (vendor&.name || "ベンダー") : name
+  end
+
+  def billing_status_label
+    {
+      "unbilled" => "未請求",
+      "invoiced" => "請求済み",
+      "paid" => "入金済み",
+      "overdue" => "期限超過",
+      "waived" => "請求なし"
+    }.fetch(billing_status, billing_status)
+  end
+
+  def billing_status_badge_class
+    {
+      "unbilled" => "bg-secondary",
+      "invoiced" => "bg-warning text-dark",
+      "paid" => "bg-success",
+      "overdue" => "bg-danger",
+      "waived" => "bg-info text-dark"
+    }.fetch(billing_status, "bg-secondary")
   end
 
   def active_users_count
@@ -141,9 +196,9 @@ class Company < ApplicationRecord
 
   def user_limit_message
     return "アカウント追加は、契約承認後に利用できます。" unless account_invitation_unlocked?
-    return "基本プランは全機能利用可能で、標準#{included_user_limit}名まで利用できます。追加枠#{additional_user_slots.to_i}名、残り#{remaining_user_slots}名まで招待できます。" if can_invite_user?
+    return "基本契約は標準#{included_user_limit}名まで利用できます。追加枠#{additional_user_slots.to_i}名、残り#{remaining_user_slots}名まで招待できます。" if can_invite_user?
 
-    "基本プランは標準#{included_user_limit}名までです。追加アカウントは1名ごとに月額課金が必要です。"
+    "基本契約は標準#{included_user_limit}名までです。追加アカウントは運営側で契約変更後に利用できます。"
   end
 
   def stripe_connected?
@@ -222,6 +277,15 @@ class Company < ApplicationRecord
     end
 
     self.phone = phone.gsub(/[^\d]/, "")
+  end
+
+  def set_contract_defaults
+    self.contract_amount = DEFAULT_CONTRACT_AMOUNT if contract_amount.blank?
+    self.contract_months = DEFAULT_CONTRACT_MONTHS if contract_months.blank?
+  end
+
+  def set_billing_payer
+    self.billing_payer_type = vendor? ? "vendor" : "company"
   end
 
   def apply_ai_api_key_change
