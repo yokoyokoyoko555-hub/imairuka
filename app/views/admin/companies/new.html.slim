@@ -64,6 +64,7 @@
                 .border.rounded.p-3.bg-light
                   .fw-bold = Company::PLAN_LABEL
                   .small.text-muted 全機能利用可能。標準1名まで、追加アカウントは1名ごとに別途月額課金です。
+                  .small.mt-2 = "追加アカウント単価: #{number_to_currency(@company.additional_user_monthly_amount, unit: "¥", precision: 0)} / 月"
                 = f.hidden_field :plan_name, value: Company::DEFAULT_PLAN_NAME
             .mb-3
               = f.label :trial_ends_at, "トライアル終了日時", class: "form-label"

@@ -103,6 +103,8 @@
             dd.col-sm-7 = "#{@company.included_user_limit}名"
             dt.col-sm-5 追加枠
             dd.col-sm-7 = "#{@company.additional_user_slots.to_i}名"
+            dt.col-sm-5 追加単価
+            dd.col-sm-7 = "#{number_to_currency(@company.additional_user_monthly_amount, unit: "¥", precision: 0)} / 月"
             dt.col-sm-5 追加可能
             dd.col-sm-7 = @company.remaining_user_slots.nil? ? "無制限" : "#{@company.remaining_user_slots}名"
             dt.col-sm-5 案件数
