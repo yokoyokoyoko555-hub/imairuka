@@ -102,6 +102,10 @@ class Company < ApplicationRecord
     PLAN_LABEL
   end
 
+  def plan_description
+    "全機能利用可能 / 標準#{included_user_limit}名まで"
+  end
+
   def user_limit_label
     "#{user_limit}名"
   end
@@ -136,7 +140,7 @@ class Company < ApplicationRecord
   end
 
   def user_limit_message
-    return "アカウント追加は月額契約が有効になると利用できます。" unless account_invitation_unlocked?
+    return "アカウント追加は、契約承認後に利用できます。" unless account_invitation_unlocked?
     return "基本プランは全機能利用可能で、標準#{included_user_limit}名まで利用できます。追加枠#{additional_user_slots.to_i}名、残り#{remaining_user_slots}名まで招待できます。" if can_invite_user?
 
     "基本プランは標準#{included_user_limit}名までです。追加アカウントは1名ごとに月額課金が必要です。"

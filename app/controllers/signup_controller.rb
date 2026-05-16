@@ -16,6 +16,12 @@ class SignupController < ApplicationController
       plan_name: Company::DEFAULT_PLAN_NAME
     )
 
+    if duplicate_pending_signup?
+      @company.errors.add(:email, "は既に利用申込を受付中です。運営からの案内をお待ちください。")
+      render :new, status: :unprocessable_entity
+      return
+    end
+
     if @company.save
       redirect_to signup_complete_path, notice: "利用申込を受け付けました。"
     else
@@ -27,6 +33,12 @@ class SignupController < ApplicationController
   end
 
   private
+
+  def duplicate_pending_signup?
+    email = signup_params[:email].to_s.strip.downcase
+    name = signup_params[:name].to_s.strip
+    Company.pending_review.where("LOWER(email) = ? OR name = ?", email, name).exists?
+  end
 
   def signup_params
     params.require(:company).permit(

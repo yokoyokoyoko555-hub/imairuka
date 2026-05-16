@@ -55,7 +55,9 @@
                 td
                   span.badge class=company.contract_status_badge_class
                     = company.contract_status_label
-                td = company.plan_label
+                td
+                  .fw-semibold = company.plan_label
+                  .small.text-muted = company.plan_description
                 td = "#{company.user_slots_used} / #{company.user_limit_label}"
                 td = "#{company.additional_user_slots.to_i}名"
                 td

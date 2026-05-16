@@ -42,7 +42,8 @@
           .col-md-6
             .border.rounded.p-3.bg-light.h-100
               .fw-bold = Company::PLAN_LABEL
-              .text-muted.small 全機能利用可能。標準1名まで、追加アカウントは1名ごとに別途課金です。
+              .text-muted.small
+                | 全機能利用可能。標準1名まで、追加アカウントは1名ごとに別途月額課金です。
             = f.hidden_field :plan_name, value: Company::DEFAULT_PLAN_NAME
 
         .d-flex.justify-content-between.align-items-center.mt-4

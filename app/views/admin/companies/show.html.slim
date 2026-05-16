@@ -35,7 +35,7 @@
                 dt.col-sm-5 契約内容
                 dd.col-sm-7
                   .fw-semibold = @company.plan_label
-                  .small.text-muted = "全機能利用可能 / 標準#{@company.included_user_limit}名まで"
+                  .small.text-muted = @company.plan_description
                 dt.col-sm-5 トライアル終了
                 dd.col-sm-7 = @company.trial_ends_at ? l(@company.trial_ends_at, format: :short) : "-"
             .col-md-6
@@ -67,7 +67,7 @@
               - unless @company.canceled?
                 = button_to "契約を解約", cancel_contract_admin_company_path(@company), method: :patch, class: "btn btn-outline-danger", data: { turbo_confirm: "この契約を解約状態にします。よろしいですか？" }
             - if @company.pending_review?
-              .text-muted.small 承認前の契約は、上部の承認ボタンから利用開始できます。
+              .text-muted.small 承認前の契約です。上部の承認ボタンから利用開始できます。
             - elsif @company.canceled?
               .text-muted.small 解約済みの契約です。再開が必要な場合は新しい契約として扱う想定です。
 
