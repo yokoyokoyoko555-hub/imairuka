@@ -195,10 +195,13 @@ class Company < ApplicationRecord
   end
 
   def user_limit_message
-    return "アカウント追加は、契約承認後に利用できます。" unless account_invitation_unlocked?
-    return "基本契約は標準#{included_user_limit}名まで利用できます。追加枠#{additional_user_slots.to_i}名、残り#{remaining_user_slots}名まで招待できます。" if can_invite_user?
+    return "アカウント追加は、契約確認後に利用できます。" unless account_invitation_unlocked?
 
-    "基本契約は標準#{included_user_limit}名までです。追加アカウントは運営側で契約変更後に利用できます。"
+    if can_invite_user?
+      "基本契約は標準#{included_user_limit}名まで利用できます。追加枠#{additional_user_slots.to_i}名、残り#{remaining_user_slots}名まで招待できます。"
+    else
+      "基本契約は標準#{included_user_limit}名までです。追加アカウントは運営側で契約変更後に利用できます。"
+    end
   end
 
   def stripe_connected?

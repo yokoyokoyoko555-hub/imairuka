@@ -69,7 +69,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :vendors
-    resources :companies, only: [:index, :show, :new, :create] do
+    resources :companies, only: [:index, :show, :new, :create, :edit, :update] do
       member do
         patch :approve
         patch :mark_paid

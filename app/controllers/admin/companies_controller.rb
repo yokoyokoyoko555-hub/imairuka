@@ -7,6 +7,8 @@ module Admin
     before_action -> { require_role!(:platform_admin) }
     before_action :set_company, only: [
       :show,
+      :edit,
+      :update,
       :approve,
       :mark_paid,
       :activate_contract,
@@ -46,6 +48,19 @@ module Admin
 
     def show
       load_company_detail
+    end
+
+    def edit
+      load_vendors
+    end
+
+    def update
+      if @company.update(company_params.merge(plan_name: Company::DEFAULT_PLAN_NAME))
+        redirect_to admin_company_path(@company), notice: "契約情報を更新しました。"
+      else
+        load_vendors
+        render :edit, status: :unprocessable_entity
+      end
     end
 
     def approve

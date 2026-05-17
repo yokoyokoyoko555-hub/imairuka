@@ -1,41 +1,39 @@
 .container-fluid
   .d-flex.justify-content-between.align-items-center.mb-4
     div
-      h1.h3.mb-1 新しい契約を追加
-      .text-muted 利用会社1社分の契約候補と初期オーナーアカウントを作成します
-    = link_to "一覧へ戻る", admin_companies_path, class: "btn btn-outline-secondary"
+      h1.h3.mb-1 契約条件を編集
+      .text-muted = @company.name
+    = link_to "詳細へ戻る", admin_company_path(@company), class: "btn btn-outline-secondary"
 
-  = form_with model: @company, url: admin_companies_path, local: true do |f|
-    - if @company.errors.any? || @owner.errors.any?
+  = form_with model: @company, url: admin_company_path(@company), method: :patch, local: true do |f|
+    - if @company.errors.any?
       .alert.alert-danger
         ul.mb-0
           - @company.errors.full_messages.each do |message|
             li = message
-          - @owner.errors.full_messages.each do |message|
-            li = message
 
     .row.g-3
       .col-lg-6
-        .card.shadow-sm
+        .card.shadow-sm.h-100
           .card-header
-            strong 利用会社
+            strong 利用会社情報
           .card-body
             .mb-3
               = f.label :name, "会社名", class: "form-label"
               = f.text_field :name, class: "form-control", required: true
             .mb-3
               = f.label :tenant_slug, "テナントID", class: "form-label"
-              = f.text_field :tenant_slug, class: "form-control", placeholder: "未入力なら自動作成"
+              = f.text_field :tenant_slug, class: "form-control", required: true
             .mb-3
               = f.label :invoice_number, "登録番号", class: "form-label"
-              = f.text_field :invoice_number, class: "form-control", placeholder: "T1234567890123", required: true
+              = f.text_field :invoice_number, class: "form-control", required: true
             .row
               .col-md-6.mb-3
                 = f.label :postal_code, "郵便番号", class: "form-label"
-                = f.text_field :postal_code, class: "form-control", placeholder: "1000000", required: true
+                = f.text_field :postal_code, class: "form-control", required: true
               .col-md-6.mb-3
                 = f.label :phone, "電話番号", class: "form-label"
-                = f.text_field :phone, class: "form-control", placeholder: "0312345678", required: true
+                = f.text_field :phone, class: "form-control", required: true
             .mb-3
               = f.label :address, "住所", class: "form-label"
               = f.text_area :address, class: "form-control", rows: 3, required: true
@@ -51,9 +49,9 @@
                 = f.text_field :business_type, class: "form-control", required: true
 
       .col-lg-6
-        .card.shadow-sm.mb-3
+        .card.shadow-sm.h-100
           .card-header
-            strong 契約・請求
+            strong 契約・請求条件
           .card-body
             .row
               .col-md-6.mb-3
@@ -78,37 +76,32 @@
                 = f.number_field :contract_months, class: "form-control", min: 1, step: 1
             .row
               .col-md-6.mb-3
+                = f.label :contract_starts_on, "契約開始日", class: "form-label"
+                = f.date_field :contract_starts_on, class: "form-control"
+              .col-md-6.mb-3
+                = f.label :contract_ends_on, "契約終了日", class: "form-label"
+                = f.date_field :contract_ends_on, class: "form-control"
+            .row
+              .col-md-6.mb-3
                 = f.label :payment_due_on, "入金予定日", class: "form-label"
                 = f.date_field :payment_due_on, class: "form-control"
+              .col-md-6.mb-3
+                = f.label :paid_on, "入金日", class: "form-label"
+                = f.date_field :paid_on, class: "form-control"
+            .row
+              .col-md-6.mb-3
+                = f.label :internal_invoice_number, "請求番号", class: "form-label"
+                = f.text_field :internal_invoice_number, class: "form-control"
               .col-md-6.mb-3
                 = f.label :additional_user_slots, "追加アカウント枠", class: "form-label"
                 = f.number_field :additional_user_slots, class: "form-control", min: 0, step: 1
             .mb-3
               = f.label :contract_notes, "契約メモ", class: "form-label"
-              = f.text_area :contract_notes, class: "form-control", rows: 3
+              = f.text_area :contract_notes, class: "form-control", rows: 4
             .border.rounded.p-3.bg-light
-              .fw-bold = Company::PLAN_LABEL
-              .small.text-muted 全機能利用可能。標準1名まで、追加アカウントは契約変更で対応します。
-            = f.hidden_field :plan_name, value: Company::DEFAULT_PLAN_NAME
-
-        .card.shadow-sm
-          .card-header
-            strong 初期オーナー
-          .card-body
-            = fields_for :owner, @owner do |owner_fields|
-              .mb-3
-                = owner_fields.label :name, "氏名", class: "form-label"
-                = owner_fields.text_field :name, class: "form-control"
-              .mb-3
-                = owner_fields.label :email, "メール", class: "form-label"
-                = owner_fields.email_field :email, class: "form-control", required: true
-              .mb-3
-                = owner_fields.label :password, "初期パスワード", class: "form-label"
-                = owner_fields.password_field :password, class: "form-control", required: true, minlength: 6
-              .mb-3
-                = owner_fields.label :password_confirmation, "初期パスワード確認", class: "form-label"
-                = owner_fields.password_field :password_confirmation, class: "form-control", required: true, minlength: 6
+              .fw-bold = @company.plan_label
+              .small.text-muted = @company.plan_description
 
     .mt-4
-      = f.submit "契約候補を追加", class: "btn btn-primary"
-      = link_to "キャンセル", admin_companies_path, class: "btn btn-outline-secondary ms-2"
+      = f.submit "契約情報を保存", class: "btn btn-primary"
+      = link_to "キャンセル", admin_company_path(@company), class: "btn btn-outline-secondary ms-2"

@@ -3,7 +3,9 @@
     div
       h1.h3.mb-1 = @company.name
       .text-muted 契約詳細
-    = link_to "一覧へ戻る", admin_companies_path, class: "btn btn-outline-secondary"
+    .d-flex.gap-2
+      = link_to "契約条件を編集", edit_admin_company_path(@company), class: "btn btn-primary"
+      = link_to "一覧へ戻る", admin_companies_path, class: "btn btn-outline-secondary"
 
   .card.shadow-sm.mb-3
     .card-header
@@ -91,6 +93,7 @@
           strong 契約操作
         .card-body
           .d-grid.gap-2
+            = link_to "契約条件を編集", edit_admin_company_path(@company), class: "btn btn-primary"
             - if @company.billing_invoiced?
               = button_to "入金済みにして利用開始", mark_paid_admin_company_path(@company), method: :patch, class: "btn btn-success"
             - if @company.contract_active?
@@ -172,7 +175,7 @@
           strong Stripe Connect
         .card-body
           .alert.alert-light.border
-            | Stripeは利用会社が自社顧客から決済を受ける場合のみ使用します。SaaS利用料とベンダー卸料は請求書・銀行振込で管理します。
+            | Stripeは利用会社が自社顧客から決済を受ける場合のみ使用します。SaaS利用料とベンダー卸料金は請求書・銀行振込で管理します。
           dl.row.mb-0
             dt.col-sm-5 連携状態
             dd.col-sm-7 = @company.stripe_connect_status
