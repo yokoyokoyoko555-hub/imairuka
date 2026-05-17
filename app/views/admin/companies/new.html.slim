@@ -1,7 +1,7 @@
 .container-fluid
   .d-flex.justify-content-between.align-items-center.mb-4
     div
-      h1.h3.mb-1 新規契約を追加
+      h1.h3.mb-1 新しい契約を追加
       .text-muted 利用会社1社分の契約候補と初期オーナーアカウントを作成します
     = link_to "一覧へ戻る", admin_companies_path, class: "btn btn-outline-secondary"
 
@@ -88,7 +88,7 @@
               = f.text_area :contract_notes, class: "form-control", rows: 3
             .border.rounded.p-3.bg-light
               .fw-bold = Company::PLAN_LABEL
-              .small.text-muted 全機能利用可能。標準1名まで。追加アカウントはStripe課金ではなく契約変更で対応します。
+              .small.text-muted 全機能利用可能。標準1名まで。追加アカウントは契約変更で対応します。
             = f.hidden_field :plan_name, value: Company::DEFAULT_PLAN_NAME
 
         .card.shadow-sm

@@ -41,7 +41,7 @@
               .text-muted.small 入金済み
               .fs-4.fw-bold = @companies.count(&:billing_paid?)
             .col-md-4
-              .text-muted.small 卸請求合計
+              .text-muted.small 請求合計
               .fs-4.fw-bold = number_to_currency(@companies.sum(&:contract_amount), unit: "¥", precision: 0)
 
   .card.shadow-sm

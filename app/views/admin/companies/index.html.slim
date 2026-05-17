@@ -2,14 +2,14 @@
   .d-flex.justify-content-between.align-items-center.mb-4
     div
       h1.h3.mb-1 契約管理
-      .text-muted 利用会社1社ごとの契約、請求書発行、銀行振込の入金状況を管理します
-    = link_to "新規契約を追加", new_admin_company_path, class: "btn btn-primary"
+      .text-muted 利用会社ごとの申込、請求書発行、銀行振込の入金状況を管理します
+    = link_to "新しい契約を追加", new_admin_company_path, class: "btn btn-primary"
 
   .row.g-3.mb-3
     .col-md-3
       .card.shadow-sm.h-100
         .card-body
-          .text-muted.small 契約候補
+          .text-muted.small 申込受付
           .fs-3.fw-bold = @companies.count(&:pending_review?)
     .col-md-3
       .card.shadow-sm.h-100

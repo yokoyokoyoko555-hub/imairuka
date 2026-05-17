@@ -12,10 +12,6 @@ class StripeWebhooksController < ApplicationController
       handle_checkout_session_completed(event)
     when "checkout.session.expired"
       handle_checkout_session_expired(event)
-    when "customer.subscription.updated"
-      handle_subscription_updated(event)
-    when "customer.subscription.deleted"
-      handle_subscription_deleted(event)
     end
 
     head :ok
@@ -42,11 +38,6 @@ class StripeWebhooksController < ApplicationController
 
   def handle_checkout_session_completed(event)
     session = event.data.object
-    if session.metadata&.purpose == "account_addon"
-      handle_account_addon_completed(event, session)
-      return
-    end
-
     return unless session.metadata&.order_id.present?
 
     order = Order.find_by(id: session.metadata.order_id)
@@ -70,58 +61,8 @@ class StripeWebhooksController < ApplicationController
 
   def handle_checkout_session_expired(event)
     session = event.data.object
-    return if session.metadata&.purpose == "account_addon"
-
     payment = PaymentRecord.find_by(stripe_checkout_session_id: session.id)
     payment&.update!(status: "canceled", stripe_event_id: event.id)
-  end
-
-  def handle_account_addon_completed(event, session)
-    company = Company.find_by(id: session.metadata.company_id)
-    return unless company
-
-    additional_slots = session.metadata.additional_user_slots.to_i
-    additional_slots = 1 if additional_slots < 1
-
-    company.with_lock do
-      company.additional_user_slots = company.additional_user_slots.to_i + additional_slots
-      company.stripe_customer_id ||= stripe_id(session.customer)
-      company.stripe_additional_users_subscription_id = stripe_id(session.subscription)
-      company.stripe_additional_users_subscription_status = "active"
-      company.save!
-    end
-  end
-
-  def handle_subscription_updated(event)
-    subscription = event.data.object
-    return unless subscription.metadata&.purpose == "account_addon"
-
-    company = find_addon_company(subscription)
-    return unless company
-
-    company.update!(
-      stripe_additional_users_subscription_id: stripe_id(subscription),
-      stripe_additional_users_subscription_status: subscription.status
-    )
-  end
-
-  def handle_subscription_deleted(event)
-    subscription = event.data.object
-    return unless subscription.metadata&.purpose == "account_addon"
-
-    company = find_addon_company(subscription)
-    return unless company
-
-    company.with_lock do
-      company.additional_user_slots = [company.additional_user_slots.to_i - 1, 0].max
-      company.stripe_additional_users_subscription_status = subscription.status.presence || "canceled"
-      company.save!
-    end
-  end
-
-  def find_addon_company(subscription)
-    Company.find_by(id: subscription.metadata&.company_id) ||
-      Company.find_by(stripe_additional_users_subscription_id: stripe_id(subscription))
   end
 
   def stripe_id(value)

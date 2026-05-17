@@ -2,22 +2,40 @@
   .d-flex.justify-content-between.align-items-center.mb-4
     div
       h1.h3.mb-1 = @company.name
-      .text-muted 契約企業詳細
+      .text-muted 契約詳細
     = link_to "一覧へ戻る", admin_companies_path, class: "btn btn-outline-secondary"
 
-  - if @company.pending_review?
-    .alert.alert-warning.d-flex.justify-content-between.align-items-center
-      div
-        .fw-bold 請求書発行前の契約候補です
-        .small 内容確認後、請求書を発行し、銀行振込の入金確認後に利用開始します。
-      = button_to "請求書発行済みにする", approve_admin_company_path(@company), method: :patch, class: "btn btn-primary"
-
-  - if @company.billing_invoiced?
-    .alert.alert-info.d-flex.justify-content-between.align-items-center
-      div
-        .fw-bold 銀行振込の入金確認待ちです
-        .small 入金確認後に利用開始し、初期管理者の招待URLを発行します。
-      = button_to "入金済みにして利用開始", mark_paid_admin_company_path(@company), method: :patch, class: "btn btn-success"
+  .card.shadow-sm.mb-3
+    .card-header
+      strong 運用ステップ
+    .card-body
+      .row.g-3.align-items-stretch
+        .col-md-4
+          .border.rounded.p-3.h-100 class=(@company.pending_review? ? "border-warning bg-warning-subtle" : "bg-light")
+            .fw-bold 1. 申込受付
+            .small.text-muted.mb-3 内容を確認し、請求書を発行します。
+            - if @company.pending_review?
+              = button_to "請求書発行済みにする", approve_admin_company_path(@company), method: :patch, class: "btn btn-primary btn-sm"
+            - else
+              span.badge.bg-secondary 完了
+        .col-md-4
+          .border.rounded.p-3.h-100 class=(@company.billing_invoiced? ? "border-info bg-info-subtle" : "bg-light")
+            .fw-bold 2. 入金確認
+            .small.text-muted.mb-3 銀行振込の入金確認後、利用開始します。
+            - if @company.billing_invoiced?
+              = button_to "入金済みにして利用開始", mark_paid_admin_company_path(@company), method: :patch, class: "btn btn-success btn-sm"
+            - elsif @company.billing_paid?
+              span.badge.bg-secondary 完了
+            - else
+              span.badge.bg-secondary 待機中
+        .col-md-4
+          .border.rounded.p-3.h-100 class=(@company.active? ? "border-success bg-success-subtle" : "bg-light")
+            .fw-bold 3. 招待URL発行
+            .small.text-muted.mb-3 入金済みにすると初期管理者の招待URLを発行します。
+            - if @company.active?
+              span.badge.bg-success 利用開始済み
+            - else
+              span.badge.bg-secondary 未開始
 
   - if flash[:invitation_url].present?
     .alert.alert-info
@@ -25,6 +43,7 @@
       .input-group
         input#invitation-url.form-control type="text" readonly="readonly" value=flash[:invitation_url]
         button.btn.btn-outline-primary type="button" onclick="navigator.clipboard.writeText(document.getElementById('invitation-url').value); this.textContent='コピー済み';" コピー
+      .small.text-muted.mt-2 URLはこの画面で控えてください。必要な場合は未承諾の招待から再発行できます。
 
   .row.g-3
     .col-lg-8
@@ -49,7 +68,7 @@
                     | -
                 dt.col-sm-5 請求先
                 dd.col-sm-7 = @company.billing_payer_label
-                dt.col-sm-5 契約内容
+                dt.col-sm-5 プラン
                 dd.col-sm-7
                   .fw-semibold = @company.plan_label
                   .small.text-muted = @company.plan_description
@@ -59,9 +78,9 @@
                 dd.col-sm-7 = @company.contract_amount_label
                 dt.col-sm-5 契約期間
                 dd.col-sm-7 = @company.contract_period_label
-                dt.col-sm-5 契約開始日
+                dt.col-sm-5 開始日
                 dd.col-sm-7 = @company.contract_starts_on || "-"
-                dt.col-sm-5 契約終了日
+                dt.col-sm-5 終了日
                 dd.col-sm-7 = @company.contract_ends_on || "-"
                 dt.col-sm-5 停止日時
                 dd.col-sm-7 = @company.suspended_at ? l(@company.suspended_at, format: :short) : "-"
@@ -83,7 +102,7 @@
             - if @company.pending_review?
               .text-muted.small 請求書発行前の契約候補です。
             - elsif @company.canceled?
-              .text-muted.small 解約済みの契約です。再開が必要な場合は新しい契約として扱う想定です。
+              .text-muted.small 解約済みの契約です。再開が必要な場合は新しい契約として扱います。
 
   .row.g-3.mt-0
     .col-md-6
@@ -96,7 +115,7 @@
             dd.col-sm-7
               span.badge class=@company.billing_status_badge_class
                 = @company.billing_status_label
-            dt.col-sm-5 請求書番号
+            dt.col-sm-5 請求番号
             dd.col-sm-7 = @company.internal_invoice_number.presence || "-"
             dt.col-sm-5 請求書発行日
             dd.col-sm-7 = @company.invoiced_on || "-"
@@ -130,7 +149,7 @@
     .col-md-6
       .card.shadow-sm.h-100
         .card-header
-          strong 利用状況
+          strong 利用状態
         .card-body
           dl.row.mb-0
             dt.col-sm-5 ユーザー枠
