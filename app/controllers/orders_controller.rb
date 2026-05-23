@@ -728,6 +728,17 @@ class OrdersController < ApplicationController
     end
 
     begin
+      existing_payment_link = @order.payment_records.pending
+        .where.not(stripe_checkout_url: [nil, ""])
+        .where("created_at > ?", 23.hours.ago)
+        .order(created_at: :desc)
+        .first
+
+      if existing_payment_link
+        redirect_to show_billing_order_path(@order), notice: "Existing payment link is still available."
+        return
+      end
+
       session = Stripe::Checkout::Session.create(
         payment_method_types: ['card'],
         line_items: [{
