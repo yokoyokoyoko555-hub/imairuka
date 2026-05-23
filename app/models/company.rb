@@ -205,7 +205,7 @@ class Company < ApplicationRecord
   end
 
   def stripe_connected?
-    stripe_account_id.present? && stripe_charges_enabled?
+    stripe_account_id.present? && stripe_charges_enabled? && stripe_payouts_enabled?
   end
 
   def ai_provider_label
@@ -234,7 +234,7 @@ class Company < ApplicationRecord
 
   def stripe_connect_status
     return "未連携" if stripe_account_id.blank?
-    return "利用可能" if stripe_charges_enabled?
+    return "利用可能" if stripe_connected?
     return "審査中" if stripe_details_submitted?
 
     "設定未完了"
