@@ -744,7 +744,7 @@ class OrdersController < ApplicationController
         mode: 'payment',
         success_url: "#{success_url}?session_id={CHECKOUT_SESSION_ID}",
         cancel_url: cancel_url,
-        payment_intent_data: stripe_payment_intent_data(company),
+        payment_intent_data: stripe_payment_intent_data(company, @order),
         metadata: {
           order_id: @order.id,
           company_id: company.id
@@ -802,12 +802,17 @@ class OrdersController < ApplicationController
     redirect_to billing_orders_path
   end
 
-  def stripe_payment_intent_data(company)
+  def stripe_payment_intent_data(company, order)
     return {} if StripeSettings.direct_mode?
 
     {
+      on_behalf_of: company.stripe_account_id,
       transfer_data: {
         destination: company.stripe_account_id
+      },
+      metadata: {
+        order_id: order.id,
+        company_id: company.id
       }
     }
   end
