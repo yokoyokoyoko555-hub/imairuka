@@ -59,6 +59,8 @@ class StripeWebhooksController < ApplicationController
     payment.stripe_payment_intent_id = stripe_id(session.payment_intent)
     payment.stripe_checkout_session_id ||= session.id
     payment.stripe_event_id = event.id
+    return if fully_refunded_payment?(payment)
+
     payment.status = session.payment_status == "paid" ? "paid" : "pending"
     payment.amount = session.amount_total || order.total_amount
     payment.currency = session.currency || "jpy"
@@ -128,6 +130,8 @@ class StripeWebhooksController < ApplicationController
     payment.stripe_account_id ||= connected_account_id(intent, company)
     payment.stripe_charge_id = stripe_id(stripe_value(intent, :latest_charge))
     payment.stripe_event_id = event_id
+    return if fully_refunded_payment?(payment)
+
     payment.status = status
     payment.amount = payment_intent_amount(intent, order)
     payment.currency = stripe_value(intent, :currency).presence || "jpy"
@@ -174,6 +178,14 @@ class StripeWebhooksController < ApplicationController
     return if order.payment_records.paid.exists?
 
     order.update!(payment_date: nil)
+  end
+
+  def fully_refunded_payment?(payment)
+    payment.refunded? || (
+      payment.refunded_at.present? &&
+      payment.refunded_amount.to_i >= payment.amount.to_i &&
+      payment.amount.to_i.positive?
+    )
   end
 
   def order_for_payment_intent(intent)
