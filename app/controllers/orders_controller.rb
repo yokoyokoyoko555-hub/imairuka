@@ -727,6 +727,11 @@ class OrdersController < ApplicationController
       return
     end
 
+    if @order.payment_date.present? || @order.payment_records.paid.exists?
+      redirect_to show_billing_order_path(@order), notice: "This order is already paid."
+      return
+    end
+
     begin
       existing_payment_link = @order.payment_records.pending
         .where.not(stripe_checkout_url: [nil, ""])
