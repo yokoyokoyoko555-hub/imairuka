@@ -5,16 +5,15 @@
         i.bi.bi-receipt.me-2
         | 請求詳細
       .d-flex.justify-content-end
-        = link_to billing_orders_path, class: 'btn btn-outline-secondary me-2' do
+        = link_to billing_orders_path, class: "btn btn-outline-secondary me-2" do
           i.bi.bi-arrow-left.me-1
           | 一覧に戻る
-        = link_to edit_order_path(@order), class: 'btn btn-outline-primary write-action' do
+        = link_to edit_order_path(@order), class: "btn btn-outline-primary write-action" do
           i.bi.bi-pencil.me-1
           | 編集
 
   .row
     .col-lg-8
-      / 基本情報
       .card.shadow.mb-4
         .card-header.py-3
           h6.m-0.font-weight-bold.text-primary
@@ -27,46 +26,38 @@
               p.form-control-plaintext = @order.order_number
             .col-md-6
               label.form-label 注文日
-              p.form-control-plaintext = @order.order_date.strftime('%Y年%m月%d日')
+              p.form-control-plaintext = @order.order_date&.strftime("%Y年%m月%d日") || "未設定"
           .row.mb-3
             .col-md-6
-              label.form-label 顧客
-              p.form-control-plaintext = @order.customer&.name || ""
+              label.form-label 顧客名
+              p.form-control-plaintext = @order.customer&.name || "-"
             .col-md-6
               label.form-label 担当者
-              p.form-control-plaintext = @order.staff_name
-          .row.mb-3
-            .col-md-6
-              label.form-label 納品日
-              p.form-control-plaintext = @order.delivery_date&.strftime('%Y年%m月%d日') || '未設定'
-            .col-md-6
-              label.form-label 納品先
-              p.form-control-plaintext = @order.delivery_address.presence || '未設定'
+              p.form-control-plaintext = @order.staff_name.presence || "-"
           .row.mb-3
             .col-md-6
               label.form-label 支払期限
-              p.form-control-plaintext = @order.payment_due_date&.strftime('%Y年%m月%d日') || '未設定'
+              p.form-control-plaintext = @order.payment_due_date&.strftime("%Y年%m月%d日") || "未設定"
             .col-md-6
               label.form-label 支払方法
-              p.form-control-plaintext = Order.payment_method_text(@order.payment_method).presence || '未設定'
+              p.form-control-plaintext = Order.payment_method_text(@order.payment_method).presence || "未設定"
           .row.mb-3
             .col-md-6
               label.form-label ステータス
-              p.form-control-plaintext = @order.order_status&.name
+              p.form-control-plaintext = @order.order_status&.name || "-"
             .col-md-6
               label.form-label 合計金額
-              p.form-control-plaintext = number_to_currency(@order.total_amount, unit: '¥', precision: 0)
+              p.form-control-plaintext = number_to_currency(@order.total_amount, unit: "¥", precision: 0)
           .row.mb-3
             .col-12
               label.form-label 備考
-              p.form-control-plaintext = @order.notes.presence || 'なし'
+              p.form-control-plaintext = @order.notes.presence || "-"
 
-      / 注文商品
       .card.shadow.mb-4
         .card-header.py-3
           h6.m-0.font-weight-bold.text-primary
             i.bi.bi-cart.me-2
-            | 注文商品
+            | 注文明細
         .card-body
           table.table.table-bordered
             thead.table-light
@@ -79,15 +70,14 @@
               - @order.order_items.each do |item|
                 tr
                   td = item.product.name
-                  td.text-end = number_to_currency(item.unit_price, unit: '¥', precision: 0)
+                  td.text-end = number_to_currency(item.unit_price, unit: "¥", precision: 0)
                   td.text-end = item.quantity
-                  td.text-end = number_to_currency(item.amount, unit: '¥', precision: 0)
+                  td.text-end = number_to_currency(item.amount, unit: "¥", precision: 0)
             tfoot
               tr
                 td.text-end colspan="3" 合計
-                td.text-end = number_to_currency(@order.total_amount, unit: '¥', precision: 0)
+                td.text-end = number_to_currency(@order.total_amount, unit: "¥", precision: 0)
 
-      / 納品情報
       .card.shadow.mb-4
         .card-header.py-3
           h6.m-0.font-weight-bold.text-primary
@@ -97,13 +87,11 @@
           .row.mb-3
             .col-md-6
               label.form-label 納品日
-              p.form-control-plaintext = @order.delivery_date&.strftime('%Y年%m月%d日') || '未設定'
+              p.form-control-plaintext = @order.delivery_date&.strftime("%Y年%m月%d日") || "未設定"
             .col-md-6
               label.form-label 納品先
-              p.form-label 納品先
-              p.form-control-plaintext = @order.delivery_address.presence || '未設定'
+              p.form-control-plaintext = @order.delivery_address.presence || "未設定"
 
-      / 履歴
       .card.shadow.mb-4
         .card-header.py-3
           h6.m-0.font-weight-bold.text-primary
@@ -117,27 +105,42 @@
                 .timeline-content
                   .d-flex.justify-content-between
                     strong = history.description
-                    small.text-muted = history.created_at.strftime('%Y/%m/%d %H:%M')
+                    small.text-muted = history.created_at.strftime("%Y/%m/%d %H:%M")
 
     .col-lg-4
-      / 操作
       .card.shadow.mb-4
         .card-header.py-3
           h6.m-0.font-weight-bold.text-primary
             i.bi.bi-gear.me-2
             | 操作
         .card-body
+          - payment_link = @order.payment_records.pending.where.not(stripe_checkout_url: [nil, ""]).order(created_at: :desc).first
+          - if payment_link
+            .alert.alert-info
+              .fw-semibold.mb-2
+                i.bi.bi-link-45deg.me-1
+                | 顧客送付用 決済リンク
+              .small.text-muted.mb-2
+                | このURLをコピーして、支払者へメールやチャットで送付してください。
+              .input-group.input-group-sm.mb-2
+                input.form-control readonly=true value=payment_link.stripe_checkout_url id="payment-link-url"
+                button.btn.btn-outline-primary type="button" onclick="navigator.clipboard.writeText(document.getElementById('payment-link-url').value)"
+                  i.bi.bi-clipboard.me-1
+                  | コピー
+              = link_to payment_link.stripe_checkout_url, class: "btn btn-sm btn-outline-primary", target: "_blank", rel: "noopener" do
+                i.bi.bi-box-arrow-up-right.me-1
+                | 支払画面を確認
           .d-grid.gap-2
             - if StripeSettings.checkout_available?(@company)
-              = form_tag checkout_order_path(@order), method: :post, class: 'd-grid', data: { turbo: false } do
-                = button_tag type: 'submit', class: 'btn btn-warning text-white' do
-                  i.bi.bi-cash.me-2
-                  | 決済
+              = form_tag checkout_order_path(@order), method: :post, class: "d-grid", data: { turbo: false } do
+                = button_tag type: "submit", class: "btn btn-warning text-white" do
+                  i.bi.bi-link-45deg.me-2
+                  | 決済リンクを作成
             - else
               = link_to settings_path(tab: "stripe"), class: "btn btn-outline-warning" do
                 i.bi.bi-credit-card.me-2
                 | Stripe連携が必要
-            = link_to '#', class: 'btn btn-outline-danger write-action', data: { delete_action: true, confirm: 'この案件を削除してもよろしいですか？\nこの操作は取り消せません。' } do
+            = link_to "#", class: "btn btn-outline-danger write-action", data: { delete_action: true, confirm: "この案件を削除してもよろしいですか？この操作は取り消せません。" } do
               i.bi.bi-trash.me-1
               | 削除
 

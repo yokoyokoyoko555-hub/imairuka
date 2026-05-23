@@ -754,13 +754,14 @@ class OrdersController < ApplicationController
       @order.payment_records.find_or_create_by!(stripe_checkout_session_id: session.id) do |payment|
         payment.company = company
         payment.stripe_account_id = StripeSettings.connect_mode? ? company.stripe_account_id : nil
+        payment.stripe_checkout_url = session.url
         payment.status = "pending"
         payment.amount = @order.total_amount
         payment.currency = "jpy"
         payment.payment_method_type = "card"
       end
 
-      redirect_to session.url, allow_other_host: true
+      redirect_to show_billing_order_path(@order), notice: "顧客送付用の決済リンクを作成しました。"
     rescue => e
       Rails.logger.error("Stripe決済エラー: #{e.message}")
       redirect_to billing_orders_path, alert: '決済処理中にエラーが発生しました。管理者にお問い合わせください。'
