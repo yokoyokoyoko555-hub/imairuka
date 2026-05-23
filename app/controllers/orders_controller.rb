@@ -780,16 +780,20 @@ class OrdersController < ApplicationController
         order = company.orders.find_by(id: session.metadata.order_id)
         if order
           order.update(payment_date: Date.current)
-          order.payment_records.find_or_initialize_by(stripe_checkout_session_id: session.id).tap do |payment|
+          payment = order.payment_records.find_by(stripe_payment_intent_id: session.payment_intent) if session.payment_intent.present?
+          payment ||= order.payment_records.find_or_initialize_by(stripe_checkout_session_id: session.id)
+          payment.tap do |payment|
             payment.company ||= company
             payment.stripe_account_id ||= StripeSettings.connect_mode? ? payment.company&.stripe_account_id : nil
             payment.stripe_payment_intent_id = session.payment_intent
+            payment.stripe_checkout_session_id ||= session.id
             payment.status = "paid"
             payment.amount = session.amount_total || order.total_amount
             payment.currency = session.currency || "jpy"
             payment.payment_method_type ||= "card"
             payment.paid_at ||= Time.current
             payment.save!
+            order.payment_records.pending.where.not(id: payment.id).update_all(status: "canceled", updated_at: Time.current)
           end
         end
       end

@@ -13,6 +13,7 @@ class PaymentRecord < ApplicationRecord
   validates :amount, numericality: { greater_than_or_equal_to: 0 }
   validates :currency, presence: true
   validates :stripe_checkout_session_id, uniqueness: true, allow_blank: true
+  validates :stripe_payment_intent_id, uniqueness: true, allow_blank: true
 
   def self.status_text(status)
     case status.to_s
