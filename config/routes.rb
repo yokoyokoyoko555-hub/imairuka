@@ -193,6 +193,6 @@ Rails.application.routes.draw do
   resources :order_statuses
 
   # Stripe決済関連
-  get '/cancel', to: 'orders#cancel'
-  get '/success', to: 'orders#success'
+  get '/cancel', to: 'public_payments#cancel'
+  get '/success', to: 'public_payments#success'
 end

@@ -100,9 +100,10 @@ class StripeWebhooksController < ApplicationController
     return unless order
 
     company = company_for_payment_intent(intent, order)
-    payment = PaymentRecord.find_or_initialize_by(stripe_payment_intent_id: intent.id)
+    payment = payment_for_payment_intent(order, intent)
     payment.order ||= order
     payment.company ||= company
+    payment.stripe_payment_intent_id ||= intent.id
     payment.stripe_account_id ||= connected_account_id(intent, company)
     payment.stripe_charge_id = stripe_id(stripe_value(intent, :latest_charge))
     payment.stripe_event_id = event_id
@@ -128,6 +129,19 @@ class StripeWebhooksController < ApplicationController
     end
 
     order.payment_records.find_or_initialize_by(stripe_checkout_session_id: session.id)
+  end
+
+  def payment_for_payment_intent(order, intent)
+    existing = PaymentRecord.find_by(stripe_payment_intent_id: intent.id)
+    return existing if existing
+
+    pending_link = order.payment_records.pending
+      .where(stripe_payment_intent_id: [nil, ""])
+      .where.not(stripe_checkout_url: [nil, ""])
+      .order(created_at: :desc)
+      .first
+
+    pending_link || PaymentRecord.new(stripe_payment_intent_id: intent.id)
   end
 
   def finalize_paid_order!(order, payment)
