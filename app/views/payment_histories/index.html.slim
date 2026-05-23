@@ -20,7 +20,7 @@
           = f.text_field :customer_name, class: "form-control", value: params[:customer_name]
         .col-md-2
           = f.label :payment_status, "決済状態", class: "form-label"
-          = f.select :payment_status, [["すべて", ""], ["未入金", "pending"], ["入金済み", "paid"], ["失敗", "failed"], ["キャンセル", "canceled"]], { selected: params[:payment_status] }, class: "form-select"
+          = f.select :payment_status, [["すべて", ""], ["未入金", "pending"], ["入金済み", "paid"], ["返金済み", "refunded"], ["失敗", "failed"], ["キャンセル", "canceled"]], { selected: params[:payment_status] }, class: "form-select"
         .col-md-2
           = f.label :payment_date_from, "入金日 From", class: "form-label"
           = f.date_field :payment_date_from, class: "form-control", value: params[:payment_date_from]
@@ -48,6 +48,7 @@
               th 支払方法
               th 支払期限
               th 入金日
+              th 返金日
               th 決済状態
               th 操作
           tbody
@@ -59,9 +60,12 @@
                 td = payment.payment_method_type.presence || Order.payment_method_text(payment.order.payment_method)
                 td = payment.order.payment_due_date&.strftime("%Y/%m/%d") || "-"
                 td = payment.paid_at&.strftime("%Y/%m/%d") || "-"
+                td = payment.refunded_at&.strftime("%Y/%m/%d") || "-"
                 td
                   - if payment.paid?
                     span.badge.bg-success 入金済み
+                  - elsif payment.refunded?
+                    span.badge.bg-info.text-dark 返金済み
                   - elsif payment.failed?
                     span.badge.bg-danger 失敗
                   - elsif payment.canceled?
@@ -74,8 +78,7 @@
                     | 詳細
             - if @payments.empty?
               tr
-                td.text-center.text-muted colspan="8"
-                  | 決済履歴はまだありません。請求画面からStripe決済を開始すると履歴が作成されます。
-
+                td.text-center.text-muted colspan="9"
+                  | 決済履歴はまだありません。請求詳細画面からStripe決済リンクを作成すると履歴が作成されます。
       .d-flex.justify-content-center.mt-4
         = paginate @payments

@@ -727,8 +727,8 @@ class OrdersController < ApplicationController
       return
     end
 
-    if @order.payment_date.present? || @order.payment_records.paid.exists?
-      redirect_to show_billing_order_path(@order), notice: "This order is already paid."
+    if @order.payment_records.paid.exists?
+      redirect_to show_billing_order_path(@order), notice: "この案件はすでに入金済みです。返金後に再請求する場合は、決済履歴を返金済みに更新してください。"
       return
     end
 

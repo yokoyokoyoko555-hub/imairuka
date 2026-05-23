@@ -17,6 +17,8 @@ class StripeWebhooksController < ApplicationController
       handle_payment_intent_succeeded(event)
     when "payment_intent.payment_failed"
       handle_payment_intent_failed(event)
+    when "charge.refunded"
+      handle_charge_refunded(event)
     when "account.updated"
       handle_account_updated(event)
     end
@@ -74,6 +76,25 @@ class StripeWebhooksController < ApplicationController
 
   def handle_payment_intent_failed(event)
     upsert_payment_intent_record(event.data.object, event.id, "failed")
+  end
+
+  def handle_charge_refunded(event)
+    charge = event.data.object
+    payment = PaymentRecord.find_by(stripe_charge_id: charge.id)
+    payment ||= PaymentRecord.find_by(stripe_payment_intent_id: stripe_id(stripe_value(charge, :payment_intent)))
+    return unless payment
+
+    refunded_amount = stripe_value(charge, :amount_refunded).to_i
+    payment.refunded_amount = refunded_amount
+    payment.stripe_event_id = event.id
+
+    if refunded_amount >= payment.amount.to_i
+      payment.status = "refunded"
+      payment.refunded_at ||= Time.current
+    end
+
+    payment.save!
+    clear_refunded_order!(payment.order) if payment.refunded?
   end
 
   def handle_account_updated(event)
@@ -147,6 +168,12 @@ class StripeWebhooksController < ApplicationController
   def finalize_paid_order!(order, payment)
     order.update!(payment_date: payment.paid_at.to_date) if payment.paid_at.present? && order.payment_date.blank?
     order.payment_records.pending.where.not(id: payment.id).update_all(status: "canceled", updated_at: Time.current)
+  end
+
+  def clear_refunded_order!(order)
+    return if order.payment_records.paid.exists?
+
+    order.update!(payment_date: nil)
   end
 
   def order_for_payment_intent(intent)

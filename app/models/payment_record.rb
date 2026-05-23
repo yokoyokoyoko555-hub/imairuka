@@ -1,5 +1,6 @@
 class PaymentRecord < ApplicationRecord
   include TenantScoped
+
   belongs_to :order
   belongs_to :company, optional: true
 
@@ -7,7 +8,8 @@ class PaymentRecord < ApplicationRecord
     pending: "pending",
     paid: "paid",
     failed: "failed",
-    canceled: "canceled"
+    canceled: "canceled",
+    refunded: "refunded"
   }
 
   validates :amount, numericality: { greater_than_or_equal_to: 0 }
@@ -23,6 +25,8 @@ class PaymentRecord < ApplicationRecord
       "失敗"
     when "canceled"
       "キャンセル"
+    when "refunded"
+      "返金済み"
     else
       "未入金"
     end
