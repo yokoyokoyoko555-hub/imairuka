@@ -1,0 +1,28 @@
+.container-fluid
+  .row.mb-4
+    .col
+      h1.h3.mb-3.text-gray-800
+        i.bi.bi-key.me-2
+        | パスワード変更
+
+  .card.shadow.mb-4
+    .card-header.py-3
+      h6.m-0.font-weight-bold.text-primary
+        i.bi.bi-shield-lock.me-2
+        | ログインパスワード
+    .card-body
+      .alert.alert-info
+        | パスワードは8〜16文字で、小文字・大文字・数字・記号をすべて含めてください。
+      = form_with scope: :user, url: account_password_path, method: :patch, local: true do |f|
+        .mb-3
+          = f.label :current_password, "現在のパスワード", class: "form-label"
+          = f.password_field :current_password, class: "form-control", required: true, autocomplete: "current-password"
+        .mb-3
+          = f.label :password, "新しいパスワード", class: "form-label"
+          = f.password_field :password, class: "form-control", required: true, minlength: 8, maxlength: 16, autocomplete: "new-password"
+        .mb-3
+          = f.label :password_confirmation, "新しいパスワード（確認）", class: "form-label"
+          = f.password_field :password_confirmation, class: "form-control", required: true, minlength: 8, maxlength: 16, autocomplete: "new-password"
+        .d-flex.gap-2
+          = f.submit "変更する", class: "btn btn-primary"
+          = link_to "戻る", settings_path, class: "btn btn-outline-secondary"

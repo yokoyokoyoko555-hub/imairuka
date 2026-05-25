@@ -1,0 +1,16 @@
+= form_with url: verify_login_otp_path, method: :post, local: true do |f|
+  .mb-3
+    p.text-muted.mb-2
+      | 登録メールアドレスに送信された6桁の認証コードを入力してください。
+    - if @pending_otp_user
+      .small.text-muted.mb-3
+        = @pending_otp_user.email
+  .mb-4
+    = f.label :otp_code, "認証コード", class: "form-label"
+    .input-group
+      span.input-group-text
+        i.bi.bi-shield-lock
+      = f.text_field :otp_code, class: "form-control", required: true, minlength: 6, maxlength: 6, inputmode: "numeric", autocomplete: "one-time-code", placeholder: "000000"
+  .d-grid.gap-2
+    = f.submit "ログイン", class: "btn btn-primary btn-lg"
+    = link_to "ログイン画面に戻る", login_path, class: "btn btn-outline-secondary"

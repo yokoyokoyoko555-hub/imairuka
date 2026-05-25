@@ -122,7 +122,12 @@ Rails.application.routes.draw do
   # セッション管理（ログイン）
   get 'login', to: 'sessions#new'
   post 'login', to: 'sessions#create'
+  get 'login/otp', to: 'sessions#otp', as: :login_otp
+  post 'login/otp', to: 'sessions#verify_otp', as: :verify_login_otp
   delete 'logout', to: 'sessions#destroy'
+
+  get 'account/password', to: 'account/passwords#edit', as: :edit_account_password
+  patch 'account/password', to: 'account/passwords#update', as: :account_password
 
   # 文書管理
   resources :quotations do

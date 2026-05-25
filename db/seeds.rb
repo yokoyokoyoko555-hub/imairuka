@@ -422,5 +422,5 @@ puts "請求書のテストデータを投入しました。"
 # 必要に応じてQuotation, DeliveryNote, Receiptの作成ロジックも同様に追加してください。
 
 User.find_or_create_by!(email: "admin@example.com") do |user|
-  user.password = "password1"
+  user.password = "Password1!"
 end

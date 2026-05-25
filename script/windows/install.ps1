@@ -25,4 +25,4 @@ Start-Process "http://localhost:3000"
 Write-Host ""
 Write-Host "Install completed" -ForegroundColor Green
 Write-Host "URL: http://localhost:3000"
-Write-Host "Login: admin@example.com / password1"
+Write-Host "Login: admin@example.com / Password1!"

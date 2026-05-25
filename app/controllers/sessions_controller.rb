@@ -1,6 +1,7 @@
 class SessionsController < ApplicationController
-  skip_before_action :require_login, only: [:new, :create, :destroy]
-  skip_before_action :ensure_current_company_available, only: [:new, :create, :destroy]
+  skip_before_action :require_login, only: [:new, :create, :otp, :verify_otp, :destroy]
+  skip_before_action :ensure_current_company_available, only: [:new, :create, :otp, :verify_otp, :destroy]
+  skip_before_action :prevent_read_only_write, only: [:new, :create, :otp, :verify_otp, :destroy]
 
   layout "auth"
 
@@ -23,40 +24,63 @@ class SessionsController < ApplicationController
         return
       end
 
+      if issue_otp_for(user)
+        redirect_to login_otp_path, notice: "登録メールアドレスへ認証コードを送信しました。"
+      else
+        flash.now[:alert] = "認証メールの送信に失敗しました。時間をおいて再度お試しください。"
+        render :new, status: :service_unavailable
+      end
+    else
+      flash.now[:alert] = "メールアドレスまたはパスワードが正しくありません。"
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def otp
+    redirect_to login_path, alert: "先にメールアドレスとパスワードを入力してください。" unless pending_otp_user
+  end
+
+  def verify_otp
+    user = pending_otp_user
+    unless user
+      redirect_to login_path, alert: "認証コードの確認を最初からやり直してください。"
+      return
+    end
+
+    if user.verify_login_otp(params[:otp_code])
+      session.delete(:otp_user_id)
       session[:user_id] = user.id
       user.update!(last_login_at: Time.current)
-      remember_user(user)
-      redirect_to root_path, notice: "ログインしました"
+      redirect_to root_path, notice: "ログインしました。"
     else
-      flash.now[:alert] = "メールアドレスまたはパスワードが正しくありません"
-      render :new, status: :unprocessable_entity
+      flash.now[:alert] = "認証コードが正しくないか、有効期限が切れています。"
+      render :otp, status: :unprocessable_entity
     end
   end
 
   def destroy
     reset_login_state
-    redirect_to login_path, notice: "ログアウトしました"
+    session.delete(:otp_user_id)
+    redirect_to login_path, notice: "ログアウトしました。"
   end
 
   private
 
-  def remember_user(user)
-    if params[:remember_me] == "1"
-      user.remember
-      cookies.permanent.signed[:user_id] = {
-        value: user.id,
-        secure: Rails.env.production?,
-        same_site: :lax
-      }
-      cookies.permanent[:remember_token] = {
-        value: user.remember_token,
-        secure: Rails.env.production?,
-        same_site: :lax
-      }
-    else
-      user.forget
-      cookies.delete(:user_id)
-      cookies.delete(:remember_token)
-    end
+  def issue_otp_for(user)
+    return false unless UserMailer.otp_delivery_available?
+
+    otp_code = user.generate_login_otp!
+    session[:otp_user_id] = user.id
+    UserMailer.login_otp(user, otp_code).deliver_now
+    true
+  rescue => e
+    Rails.logger.error("Login OTP delivery failed: #{e.class}: #{e.message}")
+    user.clear_login_otp! if user.persisted?
+    session.delete(:otp_user_id)
+    false
+  end
+
+  def pending_otp_user
+    @pending_otp_user ||= User.active.includes(:company).find_by(id: session[:otp_user_id])
   end
 end

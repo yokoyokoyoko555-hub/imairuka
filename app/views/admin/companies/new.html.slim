@@ -104,10 +104,10 @@
                 = owner_fields.email_field :email, class: "form-control", required: true
               .mb-3
                 = owner_fields.label :password, "初期パスワード", class: "form-label"
-                = owner_fields.password_field :password, class: "form-control", required: true, minlength: 6
+                = owner_fields.password_field :password, class: "form-control", required: true, minlength: 8, maxlength: 16
               .mb-3
                 = owner_fields.label :password_confirmation, "初期パスワード確認", class: "form-label"
-                = owner_fields.password_field :password_confirmation, class: "form-control", required: true, minlength: 6
+                = owner_fields.password_field :password_confirmation, class: "form-control", required: true, minlength: 8, maxlength: 16
 
     .mt-4
       = f.submit "契約候補を追加", class: "btn btn-primary"

@@ -70,7 +70,7 @@ Initial login from seed data:
 
 ```text
 admin@example.com
-password1
+Password1!
 ```
 
 ## 3. Load sample data

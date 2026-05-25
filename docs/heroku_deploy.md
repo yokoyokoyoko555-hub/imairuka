@@ -92,4 +92,4 @@ heroku open --app <app-name>
 Initial login from the current seed data:
 
 - Email: `admin@example.com`
-- Password: `password1`
+- Password: `Password1!`

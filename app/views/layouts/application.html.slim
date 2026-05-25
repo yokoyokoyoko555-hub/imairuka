@@ -50,6 +50,10 @@ html data-turbo="false"
                     i.bi.bi-gear.me-1
                     | 設定
                 li
+                  = link_to edit_account_password_path, class: "dropdown-item" do
+                    i.bi.bi-key.me-1
+                    | パスワード変更
+                li
                   hr.dropdown-divider
                 li
                   = button_to logout_path, method: :delete, class: "dropdown-item", form: { style: "display:inline; background:none; border:none; padding:0; margin:0;" } do

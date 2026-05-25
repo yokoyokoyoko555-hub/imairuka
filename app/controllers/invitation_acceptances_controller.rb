@@ -25,10 +25,23 @@ class InvitationAcceptancesController < ApplicationController
       active: true
     ))
 
+    unless UserMailer.otp_delivery_available?
+      redirect_to login_path, alert: "認証メールの送信設定が未設定です。管理者にお問い合わせください。"
+      return
+    end
+
     if @user.save
       @invitation.update!(accepted_at: Time.current)
-      session[:user_id] = @user.id
-      redirect_to root_path, notice: "アカウントを作成しました。"
+      otp_code = @user.generate_login_otp!
+      begin
+        UserMailer.login_otp(@user, otp_code).deliver_now
+        session[:otp_user_id] = @user.id
+        redirect_to login_otp_path, notice: "アカウントを作成しました。登録メールアドレスへ認証コードを送信しました。"
+      rescue => e
+        Rails.logger.error("Invitation OTP delivery failed: #{e.class}: #{e.message}")
+        @user.clear_login_otp!
+        redirect_to login_path, alert: "アカウントは作成されましたが、認証メールの送信に失敗しました。時間をおいてログインをお試しください。"
+      end
     else
       render :show, status: :unprocessable_entity
     end
