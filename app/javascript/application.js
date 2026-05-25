@@ -6,6 +6,8 @@ import "rails-ujs"
 
 // Bootstrapの初期化関数
 function initializeBootstrap() {
+  cleanupOrphanedBackdrops()
+
   // Bootstrapのツールチップを初期化
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
   tooltipTriggerList.forEach(tooltipTriggerEl => {
@@ -25,8 +27,22 @@ function initializeBootstrap() {
   })
 }
 
-// DOMContentLoadedイベントでBootstrapを初期化
-document.addEventListener("DOMContentLoaded", initializeBootstrap)
+function cleanupOrphanedBackdrops() {
+  const activeModal = document.querySelector('.modal.show')
+  const activeOffcanvas = document.querySelector('.offcanvas.show')
+
+  if (activeModal || activeOffcanvas) {
+    return
+  }
+
+  document.querySelectorAll('.modal-backdrop, .offcanvas-backdrop').forEach(backdrop => {
+    backdrop.remove()
+  })
+  document.body.classList.remove('modal-open')
+  document.body.classList.remove('offcanvas-backdrop')
+  document.body.style.removeProperty('overflow')
+  document.body.style.removeProperty('padding-right')
+}
 
 // 即座に実行（既にDOMが読み込まれている場合）
 if (document.readyState === 'loading') {
