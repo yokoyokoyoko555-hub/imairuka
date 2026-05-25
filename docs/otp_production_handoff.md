@@ -6,7 +6,7 @@
 
 Imairuka本番環境に、メールOTPログイン機能を反映する。
 
-現在、OTPログイン機能のコードはリポジトリに反映済みだが、Heroku本番環境には未デプロイ。理由は、OTPメール送信用のSMTP環境変数がHerokuに未設定のため。
+現在、OTPログイン機能のコードはリポジトリに反映済みだが、Heroku本番では後日有効化する。SMTP設定が完了するまでは通常ログインを継続する。
 
 ## 対象リポジトリ
 
@@ -33,10 +33,30 @@ Imairuka本番環境に、メールOTPログイン機能を反映する。
 - Heroku最新リリース: `v70 Deploy 5d312700`
 - Heroku本番にはOTPログイン機能が未反映
 - HerokuのSMTP関連Config Varsは未設定
+- `EMAIL_OTP_LOGIN_ENABLED` は未設定または `false` のままにする
+
+## 現時点の運用方針
+
+SMTP設定が完了するまでは、OTPログインを有効化しない。
+
+`EMAIL_OTP_LOGIN_ENABLED` が未設定または `false` の場合、ログインは従来通りメールアドレスとパスワードのみで完了する。
+
+本番反映時点のテスト用ログイン:
+
+```text
+Email: admin@example.com
+Password: Password1!
+```
 
 ## SMTP環境変数
 
 Heroku本番環境に以下のConfig Varsを設定する。
+
+OTP有効化フラグ:
+
+```text
+EMAIL_OTP_LOGIN_ENABLED=true
+```
 
 必須:
 
@@ -89,7 +109,9 @@ heroku config --app imairuka-order
 
 ## デプロイ手順
 
-SMTP設定後、最新コミットをHerokuへデプロイする。
+SMTP未設定のまま `main` をデプロイする場合は、`EMAIL_OTP_LOGIN_ENABLED` を設定しない。これにより通常ログインのまま本番反映できる。
+
+SMTP設定後にOTPを有効化する場合は、SMTP環境変数と `EMAIL_OTP_LOGIN_ENABLED=true` を設定してからHerokuへデプロイする。
 
 ```bash
 git checkout main
@@ -180,6 +202,6 @@ heroku rollback v70 --app imairuka-order
 ## 未対応事項
 
 - Heroku本番へのSMTP Config Vars設定
-- Heroku本番への `ff129ec` デプロイ
+- Heroku本番での `EMAIL_OTP_LOGIN_ENABLED=true` 設定
 - 本番でのOTPメール到達確認
 - 運営会社用の契約管理ページ確認

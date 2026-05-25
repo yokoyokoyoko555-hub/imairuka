@@ -24,11 +24,13 @@ class SessionsController < ApplicationController
         return
       end
 
-      if issue_otp_for(user)
+      if otp_login_enabled? && issue_otp_for(user)
         redirect_to login_otp_path, notice: "登録メールアドレスへ認証コードを送信しました。"
-      else
+      elsif otp_login_enabled?
         flash.now[:alert] = "認証メールの送信に失敗しました。時間をおいて再度お試しください。"
         render :new, status: :service_unavailable
+      else
+        complete_login_for(user)
       end
     else
       flash.now[:alert] = "メールアドレスまたはパスワードが正しくありません。"
@@ -48,10 +50,7 @@ class SessionsController < ApplicationController
     end
 
     if user.verify_login_otp(params[:otp_code])
-      session.delete(:otp_user_id)
-      session[:user_id] = user.id
-      user.update!(last_login_at: Time.current)
-      redirect_to root_path, notice: "ログインしました。"
+      complete_login_for(user)
     else
       flash.now[:alert] = "認証コードが正しくないか、有効期限が切れています。"
       render :otp, status: :unprocessable_entity
@@ -65,6 +64,17 @@ class SessionsController < ApplicationController
   end
 
   private
+
+  def otp_login_enabled?
+    ActiveModel::Type::Boolean.new.cast(ENV.fetch("EMAIL_OTP_LOGIN_ENABLED", "false"))
+  end
+
+  def complete_login_for(user)
+    session.delete(:otp_user_id)
+    session[:user_id] = user.id
+    user.update!(last_login_at: Time.current)
+    redirect_to root_path, notice: "ログインしました。"
+  end
 
   def issue_otp_for(user)
     return false unless UserMailer.otp_delivery_available?
