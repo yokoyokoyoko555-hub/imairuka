@@ -45,7 +45,7 @@
       .input-group
         input#invitation-url.form-control type="text" readonly="readonly" value=flash[:invitation_url]
         button.btn.btn-outline-primary type="button" onclick="navigator.clipboard.writeText(document.getElementById('invitation-url').value); this.textContent='コピー済み';" コピー
-      .small.text-muted.mt-2 URLはこの画面で控えてください。必要な場合は未承諾の招待から再発行できます。
+      .small.text-muted.mt-2 URLはこの画面で控えてください。必要な場合は未承諾の招待から再発行してください。
 
   .row.g-3
     .col-lg-8
@@ -226,6 +226,7 @@
               th 権限
               th 期限
               th 招待者
+              th 操作
           tbody
             - if @pending_invitations.any?
               - @pending_invitations.each do |invitation|
@@ -235,6 +236,10 @@
                   td = invitation.role_label
                   td = l(invitation.expires_at, format: :short)
                   td = invitation.invited_by&.display_name || "-"
+                  td
+                    .d-flex.gap-2
+                      = button_to "再発行", reissue_admin_company_user_invitation_path(@company, invitation), method: :patch, class: "btn btn-sm btn-outline-primary", form: { data: { turbo: false } }
+                      = button_to "取消", admin_company_user_invitation_path(@company, invitation), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo: false } }
             - else
               tr
-                td.text-muted colspan="5" 未承諾の招待はありません
+                td.text-muted colspan="6" 未承諾の招待はありません

@@ -238,10 +238,21 @@ ActiveRecord::Base.transaction do
       doc_attrs.merge(quotation_date: order_date, valid_until: order_date + 30, quotation_items_attributes: [item_attrs])
     )
     company.invoices.create!(
-      doc_attrs.merge(invoice_date: order_date + 5, payment_due_date: order_date + 45, payment_method: "銀行振込", invoice_items_attributes: [item_attrs])
+      doc_attrs.merge(
+        invoice_date: order_date + 5,
+        transaction_date: order_date,
+        payment_due_date: order_date + 45,
+        payment_method: "銀行振込",
+        invoice_items_attributes: [item_attrs]
+      )
     )
     company.delivery_notes.create!(
-      doc_attrs.merge(delivery_date: order_date + 20, valid_until: order_date + 30, delivery_note_items_attributes: [item_attrs])
+      doc_attrs.merge(
+        delivery_date: order_date + 20,
+        transaction_date: order_date + 20,
+        valid_until: order_date + 30,
+        delivery_note_items_attributes: [item_attrs]
+      )
     )
     company.receipts.create!(
       doc_attrs.merge(issue_date: order_date + 25, valid_until: order_date + 30, status: sample[:payment_status] == :paid ? :paid : :pending, receipt_items_attributes: [item_attrs])

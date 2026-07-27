@@ -78,7 +78,11 @@ Rails.application.routes.draw do
         patch :resume_contract
         patch :cancel_contract
       end
-      resources :user_invitations, path: :invitations, only: [:new, :create]
+      resources :user_invitations, path: :invitations, only: [:new, :create, :destroy] do
+        member do
+          patch :reissue
+        end
+      end
     end
   end
 
