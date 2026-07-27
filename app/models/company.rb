@@ -72,7 +72,7 @@ class Company < ApplicationRecord
   validates :contract_months, numericality: { only_integer: true, greater_than: 0 }
   validates :vendor, presence: true, if: :vendor?
 
-  before_validation :set_tenant_slug, :normalize_postal_code, :normalize_phone, :set_contract_defaults, :set_billing_payer
+  before_validation :set_tenant_slug, :normalize_invoice_number, :normalize_postal_code, :normalize_phone, :set_contract_defaults, :set_billing_payer
   before_save :apply_ai_api_key_change
 
   USER_LIMITS = {
@@ -258,6 +258,15 @@ class Company < ApplicationRecord
 
   def safe_parameterize(value)
     value.to_s.encode("UTF-8", invalid: :replace, undef: :replace, replace: "").parameterize
+  end
+
+  def normalize_invoice_number
+    return if invoice_number.blank?
+
+    normalized = invoice_number.to_s.strip
+    normalized = normalized.tr("０-９Ａ-Ｚａ-ｚ", "0-9A-Za-z")
+    normalized = normalized.gsub(/[\s　\-ー]/, "")
+    self.invoice_number = normalized.upcase
   end
 
   def normalize_postal_code
