@@ -23,6 +23,7 @@ class Invoice < ApplicationRecord
 
   validates :invoice_number, uniqueness: { allow_blank: true }, unless: :draft?
   validates :invoice_date, presence: true, unless: :draft?
+  validates :transaction_date, presence: { message: '取引年月日を入力してください' }, unless: :draft?
   validates :payment_method, length: { maximum: 100, message: '支払方法は100文字以内で入力してください' }, allow_blank: true
   validates :status, inclusion: { in: %w[pending sent waiting_payment paid] }, allow_blank: true
   validates :customer_name, presence: true, length: { maximum: 100, message: '顧客名は100文字以内で入力してください' }, unless: :draft?

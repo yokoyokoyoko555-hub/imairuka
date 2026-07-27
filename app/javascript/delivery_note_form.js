@@ -340,6 +340,7 @@ class DeliveryNoteForm {
     const deliveryNoteData = {
       delivery_number: formData.get('delivery_note[delivery_number]') || '',
       delivery_date: formData.get('delivery_note[delivery_date]') || '',
+      transaction_date: formData.get('delivery_note[transaction_date]') || '',
       customer_name: formData.get('delivery_note[customer_name]') || '',
       customer_address: formData.get('delivery_note[customer_address]') || '',
       subject: subject || '',
@@ -395,6 +396,7 @@ class DeliveryNoteForm {
     const deliveryNoteData = {
       delivery_number: formData.get('delivery_note[delivery_number]') || '',
       delivery_date: formData.get('delivery_note[delivery_date]') || '',
+      transaction_date: formData.get('delivery_note[transaction_date]') || '',
       customer_name: formData.get('delivery_note[customer_name]') || '',
       customer_address: formData.get('delivery_note[customer_address]') || '',
       subject: subject || '',

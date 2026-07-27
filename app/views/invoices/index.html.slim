@@ -49,7 +49,7 @@
         table.table.table-bordered.table-hover.table-stable.document-table
           thead.table-light
             tr
-              th style="width: 118px;" 請求書番号
+              th style="width: 140px;" 請求書番号
               th style="width: 132px;" 作成日
               th style="width: 180px;" 顧客名
               th 案件名
@@ -61,7 +61,7 @@
           tbody
             - @invoices.each do |invoice|
               tr
-                td.text-nowrap-cell = invoice.invoice_number
+                td.text-wrap-cell = invoice.invoice_number
                 td.text-nowrap-cell = format_date(invoice.invoice_date)
                 td.text-wrap-cell = invoice.customer_name
                 td.text-wrap-cell = invoice.subject.presence || "-"

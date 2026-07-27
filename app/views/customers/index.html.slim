@@ -89,7 +89,7 @@
                 td
                   = customer.transaction_count
                   | 回
-                td
+                td.text-nowrap
                   = customer.last_transaction_date&.strftime("%Y/%m/%d") || "-"
                 td style="white-space: nowrap;"
                   .btn-group

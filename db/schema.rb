@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_27_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -78,11 +78,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
     t.integer "additional_user_slots", default: 0, null: false
     t.string "stripe_additional_users_subscription_id"
     t.string "stripe_additional_users_subscription_status"
-    t.index ["stripe_additional_users_subscription_id"], name: "index_companies_on_stripe_additional_users_subscription_id"
+    t.bigint "vendor_id"
+    t.string "sales_channel", default: "direct", null: false
+    t.string "billing_payer_type", default: "company", null: false
+    t.integer "contract_amount", default: 100000, null: false
+    t.integer "contract_months", default: 24, null: false
+    t.date "contract_starts_on"
+    t.date "contract_ends_on"
+    t.string "billing_status", default: "unbilled", null: false
+    t.string "internal_invoice_number"
+    t.date "invoiced_on"
+    t.date "payment_due_on"
+    t.date "paid_on"
+    t.text "contract_notes"
+    t.index ["billing_status"], name: "index_companies_on_billing_status"
+    t.index ["internal_invoice_number"], name: "index_companies_on_internal_invoice_number"
+    t.index ["sales_channel"], name: "index_companies_on_sales_channel"
     t.index ["stripe_account_id"], name: "index_companies_on_stripe_account_id", unique: true
+    t.index ["stripe_additional_users_subscription_id"], name: "index_companies_on_stripe_additional_users_subscription_id"
     t.index ["stripe_customer_id"], name: "index_companies_on_stripe_customer_id"
     t.index ["stripe_subscription_id"], name: "index_companies_on_stripe_subscription_id"
     t.index ["tenant_slug"], name: "index_companies_on_tenant_slug", unique: true
+    t.index ["vendor_id"], name: "index_companies_on_vendor_id"
   end
 
   create_table "customer_attachments", comment: "顧客添付ファイル", force: :cascade do |t|
@@ -193,6 +210,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
     t.string "subject"
     t.boolean "draft", default: false, null: false
     t.bigint "company_id", null: false
+    t.date "transaction_date"
     t.index ["company_id", "delivery_number"], name: "index_delivery_notes_on_company_delivery_number", unique: true, where: "(discarded_at IS NULL)"
     t.index ["company_id"], name: "index_delivery_notes_on_company_id"
     t.index ["discarded_at"], name: "index_delivery_notes_on_discarded_at"
@@ -243,6 +261,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
     t.string "payment_method"
     t.boolean "draft", default: false, null: false
     t.bigint "company_id", null: false
+    t.date "transaction_date"
     t.index ["company_id", "invoice_number"], name: "index_invoices_on_company_invoice_number", unique: true, where: "(discarded_at IS NULL)"
     t.index ["company_id"], name: "index_invoices_on_company_id"
     t.index ["customer_name"], name: "index_invoices_on_customer_name"
@@ -250,6 +269,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
     t.index ["draft"], name: "index_invoices_on_draft"
     t.index ["invoice_date"], name: "index_invoices_on_invoice_date"
     t.index ["status"], name: "index_invoices_on_status"
+  end
+
+  create_table "order_assignments", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "user_id", null: false
+    t.string "role", default: "member", null: false
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_order_assignments_on_company_id"
+    t.index ["order_id", "user_id"], name: "index_order_assignments_on_order_id_and_user_id", unique: true
+    t.index ["order_id"], name: "index_order_assignments_on_order_id"
+    t.index ["user_id"], name: "index_order_assignments_on_user_id"
   end
 
   create_table "order_histories", force: :cascade do |t|
@@ -275,6 +308,47 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
     t.index ["order_id", "product_id"], name: "index_order_items_on_order_id_and_product_id"
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
+  end
+
+  create_table "order_project_issues", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "assignee_id"
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "open", null: false
+    t.string "priority", default: "normal", null: false
+    t.date "due_date"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assignee_id"], name: "index_order_project_issues_on_assignee_id"
+    t.index ["company_id", "order_id"], name: "index_order_project_issues_on_company_id_and_order_id"
+    t.index ["company_id"], name: "index_order_project_issues_on_company_id"
+    t.index ["order_id"], name: "index_order_project_issues_on_order_id"
+  end
+
+  create_table "order_project_tasks", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "assignee_id"
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "not_started", null: false
+    t.string "priority", default: "normal", null: false
+    t.date "start_date"
+    t.date "due_date"
+    t.date "completed_on"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "parent_id"
+    t.index ["assignee_id"], name: "index_order_project_tasks_on_assignee_id"
+    t.index ["company_id", "order_id"], name: "index_order_project_tasks_on_company_id_and_order_id"
+    t.index ["company_id"], name: "index_order_project_tasks_on_company_id"
+    t.index ["order_id", "position"], name: "index_order_project_tasks_on_order_id_and_position"
+    t.index ["order_id"], name: "index_order_project_tasks_on_order_id"
+    t.index ["parent_id"], name: "index_order_project_tasks_on_parent_id"
   end
 
   create_table "order_statuses", force: :cascade do |t|
@@ -324,67 +398,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
     t.index ["order_status_id"], name: "index_orders_on_order_status_id"
   end
 
-  create_table "order_assignments", force: :cascade do |t|
-    t.bigint "company_id", null: false
-    t.bigint "order_id", null: false
-    t.bigint "user_id", null: false
-    t.string "role", default: "member", null: false
-    t.text "note"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["company_id"], name: "index_order_assignments_on_company_id"
-    t.index ["order_id", "user_id"], name: "index_order_assignments_on_order_id_and_user_id", unique: true
-    t.index ["order_id"], name: "index_order_assignments_on_order_id"
-    t.index ["user_id"], name: "index_order_assignments_on_user_id"
-  end
-
-  create_table "order_project_issues", force: :cascade do |t|
-    t.bigint "company_id", null: false
-    t.bigint "order_id", null: false
-    t.bigint "assignee_id"
-    t.string "title", null: false
-    t.text "description"
-    t.string "status", default: "open", null: false
-    t.string "priority", default: "normal", null: false
-    t.date "due_date"
-    t.datetime "resolved_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["assignee_id"], name: "index_order_project_issues_on_assignee_id"
-    t.index ["company_id", "order_id"], name: "index_order_project_issues_on_company_id_and_order_id"
-    t.index ["company_id"], name: "index_order_project_issues_on_company_id"
-    t.index ["order_id"], name: "index_order_project_issues_on_order_id"
-  end
-
-  create_table "order_project_tasks", force: :cascade do |t|
-    t.bigint "company_id", null: false
-    t.bigint "order_id", null: false
-    t.bigint "assignee_id"
-    t.string "title", null: false
-    t.text "description"
-    t.string "status", default: "not_started", null: false
-    t.string "priority", default: "normal", null: false
-    t.date "start_date"
-    t.date "due_date"
-    t.date "completed_on"
-    t.integer "position", default: 0, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "parent_id"
-    t.index ["assignee_id"], name: "index_order_project_tasks_on_assignee_id"
-    t.index ["company_id", "order_id"], name: "index_order_project_tasks_on_company_id_and_order_id"
-    t.index ["company_id"], name: "index_order_project_tasks_on_company_id"
-    t.index ["order_id", "position"], name: "index_order_project_tasks_on_order_id_and_position"
-    t.index ["order_id"], name: "index_order_project_tasks_on_order_id"
-    t.index ["parent_id"], name: "index_order_project_tasks_on_parent_id"
-  end
-
   create_table "payment_records", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "company_id"
     t.string "stripe_account_id"
     t.string "stripe_checkout_session_id"
-    t.text "stripe_checkout_url"
     t.string "stripe_payment_intent_id"
     t.string "stripe_charge_id"
     t.string "stripe_event_id"
@@ -395,9 +413,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
     t.datetime "paid_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "stripe_checkout_url"
+    t.datetime "refunded_at"
+    t.integer "refunded_amount"
     t.index ["company_id"], name: "index_payment_records_on_company_id"
     t.index ["order_id"], name: "index_payment_records_on_order_id"
     t.index ["paid_at"], name: "index_payment_records_on_paid_at"
+    t.index ["refunded_at"], name: "index_payment_records_on_refunded_at"
     t.index ["status"], name: "index_payment_records_on_status"
     t.index ["stripe_checkout_session_id"], name: "index_payment_records_on_stripe_checkout_session_id", unique: true
     t.index ["stripe_event_id"], name: "index_payment_records_on_stripe_event_id"
@@ -558,13 +580,35 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
     t.string "role", default: "owner", null: false
     t.boolean "active", default: true, null: false
     t.datetime "last_login_at"
+    t.string "login_otp_digest"
+    t.datetime "login_otp_sent_at"
+    t.datetime "login_otp_expires_at"
+    t.integer "login_otp_attempts", default: 0, null: false
     t.index ["company_id", "role"], name: "index_users_on_company_id_and_role"
     t.index ["company_id"], name: "index_users_on_company_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["login_otp_expires_at"], name: "index_users_on_login_otp_expires_at"
+  end
+
+  create_table "vendors", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "name", null: false
+    t.string "contact_name"
+    t.string "email"
+    t.string "phone"
+    t.string "postal_code"
+    t.text "address"
+    t.string "status", default: "active", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_vendors_on_code", unique: true
+    t.index ["status"], name: "index_vendors_on_status"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "companies", "vendors"
   add_foreign_key "customer_attachments", "customers"
   add_foreign_key "customer_contacts", "customers"
   add_foreign_key "customer_notes", "customers"
@@ -575,18 +619,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_24_064500) do
   add_foreign_key "invoice_histories", "invoices"
   add_foreign_key "invoice_items", "invoices"
   add_foreign_key "invoices", "companies"
-  add_foreign_key "order_histories", "orders"
-  add_foreign_key "order_items", "orders"
-  add_foreign_key "order_items", "products"
   add_foreign_key "order_assignments", "companies"
   add_foreign_key "order_assignments", "orders"
   add_foreign_key "order_assignments", "users"
+  add_foreign_key "order_histories", "orders"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "products"
   add_foreign_key "order_project_issues", "companies"
   add_foreign_key "order_project_issues", "orders"
   add_foreign_key "order_project_issues", "users", column: "assignee_id"
   add_foreign_key "order_project_tasks", "companies"
-  add_foreign_key "order_project_tasks", "orders"
   add_foreign_key "order_project_tasks", "order_project_tasks", column: "parent_id"
+  add_foreign_key "order_project_tasks", "orders"
   add_foreign_key "order_project_tasks", "users", column: "assignee_id"
   add_foreign_key "order_statuses", "companies"
   add_foreign_key "orders", "companies"

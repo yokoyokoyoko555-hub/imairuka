@@ -4,7 +4,7 @@ class InvitationAcceptancesController < ApplicationController
   skip_before_action :set_current_context
   skip_before_action :set_company_info
 
-  layout "auth"
+  layout "signup"
 
   before_action :set_invitation
   before_action :ensure_available_invitation

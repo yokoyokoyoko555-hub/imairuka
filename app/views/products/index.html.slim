@@ -75,7 +75,7 @@
                   td = product.name
                   td style="max-width: 200px; white-space: normal;"
                     = simple_format(product.description, {}, wrapper_tag: "div")
-                  td.text-end = number_to_currency(product.unit_price, unit: "¥", precision: 0)
+                  td.text-end.text-nowrap = number_to_currency(product.unit_price, unit: "¥", precision: 0)
                   td
                     - if product.draft?
                       span.badge.bg-warning style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
@@ -83,7 +83,7 @@
                     - else
                       span.badge class="bg-#{product.is_active? ? 'success' : 'secondary'}" style="color: #FFFFFF; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;"
                         = product.is_active? ? '販売中' : '販売停止中'
-                  td = product.updated_at.strftime("%Y/%m/%d %H:%M")
+                  td.text-nowrap = product.updated_at.strftime("%Y/%m/%d %H:%M")
                   td style="white-space: nowrap;"
                     .btn-group
                       = link_to product_path(product), class: "btn btn-sm btn-outline-primary" do

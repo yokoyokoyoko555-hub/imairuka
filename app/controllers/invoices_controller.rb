@@ -10,7 +10,7 @@ class InvoicesController < ApplicationController
   end
 
   def new
-    @invoice = Invoice.new(invoice_date: Date.today, status: 'pending')
+    @invoice = Invoice.new(invoice_date: Date.today, transaction_date: Date.today, status: 'pending')
     prefill_from_order(@invoice) if params[:order_id].present?
   end
 
@@ -119,6 +119,7 @@ class InvoicesController < ApplicationController
       @invoice = OpenStruct.new(
         invoice_number: invoice_data['invoice_number'].presence || '',
         invoice_date: invoice_data['invoice_date'].present? ? Date.parse(invoice_data['invoice_date']) : nil,
+        transaction_date: invoice_data['transaction_date'].present? ? Date.parse(invoice_data['transaction_date']) : nil,
         customer_name: invoice_data['customer_name'].presence || '',
         customer_address: invoice_data['customer_address'].presence || '',
         subject: invoice_data['subject'].presence || '',
@@ -145,6 +146,7 @@ class InvoicesController < ApplicationController
       @invoice = OpenStruct.new(
         invoice_number: invoice_data['invoice_number'].presence || '',
         invoice_date: invoice_data['invoice_date'].present? ? Date.parse(invoice_data['invoice_date']) : nil,
+        transaction_date: invoice_data['transaction_date'].present? ? Date.parse(invoice_data['transaction_date']) : nil,
         customer_name: invoice_data['customer_name'].presence || '',
         customer_address: invoice_data['customer_address'].presence || '',
         subject: invoice_data['subject'].presence || '',
@@ -207,6 +209,7 @@ class InvoicesController < ApplicationController
     params.require(:invoice).permit(
       :invoice_number,
       :invoice_date,
+      :transaction_date,
       :customer_name,
       :customer_address,
       :subject,

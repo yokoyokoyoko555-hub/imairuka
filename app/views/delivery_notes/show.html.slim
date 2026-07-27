@@ -29,6 +29,10 @@
               p = format_date(@delivery_note.delivery_date)
           .row.mb-3
             .col-md-6
+              label.form-label.text-muted 取引年月日
+              p = format_date(@delivery_note.transaction_date) || "未設定"
+          .row.mb-3
+            .col-md-6
               label.form-label.text-muted 顧客名
               p = @delivery_note.customer_name
             .col-md-6

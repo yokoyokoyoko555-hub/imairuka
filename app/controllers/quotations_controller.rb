@@ -254,6 +254,7 @@ class QuotationsController < ApplicationController
     # 見積書の情報を基に納品書を作成
     @delivery_note = DeliveryNote.new(
       delivery_date: Date.today,
+      transaction_date: Date.today,
       status: 'pending',
       customer_name: @quotation.customer_name,
       customer_address: @quotation.customer_address,
@@ -293,6 +294,7 @@ class QuotationsController < ApplicationController
     # 見積書の情報を基に請求書を作成
     @invoice = Invoice.new(
       invoice_date: Date.today,
+      transaction_date: Date.today,
       status: 'pending',
       customer_name: @quotation.customer_name,
       customer_address: @quotation.customer_address,

@@ -56,11 +56,11 @@
               tr
                 td = payment.order.order_number
                 td = payment.order.customer&.name || "-"
-                td.text-end = number_to_currency(payment.amount, unit: "¥", precision: 0)
+                td.text-end.text-nowrap = number_to_currency(payment.amount, unit: "¥", precision: 0)
                 td = payment.payment_method_type.presence || Order.payment_method_text(payment.order.payment_method)
-                td = payment.order.payment_due_date&.strftime("%Y/%m/%d") || "-"
-                td = payment.paid_at&.strftime("%Y/%m/%d") || "-"
-                td = payment.refunded_at&.strftime("%Y/%m/%d") || "-"
+                td.text-nowrap = payment.order.payment_due_date&.strftime("%Y/%m/%d") || "-"
+                td.text-nowrap = payment.paid_at&.strftime("%Y/%m/%d") || "-"
+                td.text-nowrap = payment.refunded_at&.strftime("%Y/%m/%d") || "-"
                 td
                   - if payment.paid?
                     span.badge.bg-success 入金済み

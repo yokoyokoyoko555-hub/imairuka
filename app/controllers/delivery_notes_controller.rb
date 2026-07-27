@@ -10,7 +10,7 @@ class DeliveryNotesController < ApplicationController
   end
 
   def new
-    @delivery_note = DeliveryNote.new(delivery_date: Date.today, status: 'pending')
+    @delivery_note = DeliveryNote.new(delivery_date: Date.today, transaction_date: Date.today, status: 'pending')
     prefill_from_order(@delivery_note) if params[:order_id].present?
   end
 
@@ -128,6 +128,7 @@ class DeliveryNotesController < ApplicationController
       @delivery_note = OpenStruct.new(
         delivery_number: delivery_note_data['delivery_number'].presence || '',
         delivery_date: delivery_note_data['delivery_date'].present? ? Date.parse(delivery_note_data['delivery_date']) : nil,
+        transaction_date: delivery_note_data['transaction_date'].present? ? Date.parse(delivery_note_data['transaction_date']) : nil,
         customer_name: delivery_note_data['customer_name'].presence || '',
         customer_address: delivery_note_data['customer_address'].presence || '',
         subject: delivery_note_data['subject'].presence || '',
@@ -157,6 +158,7 @@ class DeliveryNotesController < ApplicationController
       @delivery_note = OpenStruct.new(
         delivery_number: delivery_note_data['delivery_number'].presence || '',
         delivery_date: delivery_note_data['delivery_date'].present? ? Date.parse(delivery_note_data['delivery_date']) : nil,
+        transaction_date: delivery_note_data['transaction_date'].present? ? Date.parse(delivery_note_data['transaction_date']) : nil,
         customer_name: delivery_note_data['customer_name'].presence || '',
         customer_address: delivery_note_data['customer_address'].presence || '',
         subject: delivery_note_data['subject'].presence || '',
@@ -223,7 +225,7 @@ class DeliveryNotesController < ApplicationController
 
   def delivery_note_params
     params.require(:delivery_note).permit(
-      :delivery_number, :delivery_date, :customer_name, :customer_address, :subject, :staff_name, :status, :notes, :valid_until, :draft,
+      :delivery_number, :delivery_date, :transaction_date, :customer_name, :customer_address, :subject, :staff_name, :status, :notes, :valid_until, :draft,
       delivery_note_items_attributes: [
         :id, :product_code, :product_name, :unit_price, :quantity, :amount, :tax_rate, :_destroy
       ]
@@ -236,6 +238,7 @@ class DeliveryNotesController < ApplicationController
 
     delivery_note.assign_attributes(
       delivery_date: order.delivery_date || Date.current,
+      transaction_date: order.delivery_date || Date.current,
       customer_name: order.customer&.name,
       customer_address: order.customer&.address,
       subject: order.project_name.presence || order.display_order_number,

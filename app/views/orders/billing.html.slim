@@ -65,11 +65,11 @@
             - @orders.each do |order|
               tr
                 td = order.order_number
-                td = order.order_date.strftime('%Y/%m/%d')
+                td.text-nowrap = order.order_date.strftime('%Y/%m/%d')
                 td = order.customer&.name || ""
                 td = order.project_name.presence || "-"
-                td.text-end = number_to_currency(order.total_amount, unit: "¥", precision: 0)
-                td = order.payment_due_date&.strftime('%Y/%m/%d') || '未設定'
+                td.text-end.text-nowrap = number_to_currency(order.total_amount, unit: "¥", precision: 0)
+                td.text-nowrap = order.payment_due_date&.strftime('%Y/%m/%d') || '未設定'
                 td = Order.payment_method_text(order.payment_method).presence || '未設定'
                 td
                   - if order.order_status

@@ -28,6 +28,10 @@
                 = f.label :invoice_date, "請求日", class: 'form-label'
                 = f.date_field :invoice_date, class: 'form-control', required: true
             .row.mb-3
+              .col-md-6
+                = f.label :transaction_date, "取引年月日", class: 'form-label'
+                = f.date_field :transaction_date, class: 'form-control', required: true
+            .row.mb-3
               .col-md-12
                 = f.label :subject, "件名", class: 'form-label'
                 = f.text_field :subject, class: 'form-control', required: true, maxlength: 200

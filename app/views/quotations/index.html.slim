@@ -52,7 +52,7 @@
         table.table.table-bordered.table-hover.table-stable.document-table
           thead.table-light
             tr
-              th style="width: 118px;" 見積書番号
+              th style="width: 140px;" 見積書番号
               th style="width: 132px;" 作成日
               th style="width: 180px;" 顧客名
               th 案件名
@@ -64,7 +64,7 @@
           tbody
             - @quotations.each do |quotation|
               tr
-                td.text-nowrap-cell = quotation.quotation_number
+                td.text-wrap-cell = quotation.quotation_number
                 td.text-nowrap-cell = format_date(quotation.quotation_date)
                 td.text-wrap-cell = quotation.customer_name
                 td.text-wrap-cell = quotation.subject.presence || "-"

@@ -16,6 +16,8 @@
           .company-info-block(style="font-size: 10pt; text-align: right; line-height: 1.6;")
             - if @invoice.invoice_date.present?
               div 請求日: #{format_date(@invoice.invoice_date)}
+            - if @invoice.transaction_date.present?
+              div 取引年月日: #{format_date(@invoice.transaction_date)}
             - if @invoice.invoice_number.present?
               div 請求書番号: #{@invoice.invoice_number}
             - if @company.invoice_number.present?
@@ -33,16 +35,23 @@
         .subject-row
           | 件名　#{@invoice.subject.presence || ''}
     - subtotal = 0
-    - tax_total = 0
+    - subtotal_10 = 0
+    - subtotal_8 = 0
+    - subtotal_0 = 0
     - @invoice.invoice_items.each do |item|
       - amount = (item.unit_price || 0) * (item.quantity || 0)
       - subtotal += amount
-      - case item.tax_rate.to_i
-      - when 1
-        - tax_total += (amount * 0.1).round
-      - when 2, 3
-        - tax_total += (amount * 0.08).round
-      end
+      - rate = item.tax_rate.to_i
+      - if rate == 1
+        - subtotal_10 += amount
+      - elsif rate == 2 || rate == 3
+        - subtotal_8 += amount
+      - elsif rate == 4
+        - subtotal_0 += amount
+    / 消費税の端数処理は税率ごとに区分した合計額に対して1回（インボイス制度の要件）
+    - tax_10 = (subtotal_10 * 0.1).round
+    - tax_8 = (subtotal_8 * 0.08).round
+    - tax_total = tax_10 + tax_8
     .row.mt-2
       .col-12
         table.amount-table
@@ -54,6 +63,26 @@
             td = number_to_currency(subtotal, unit: "¥", precision: 0)
             td = number_to_currency(tax_total, unit: "¥", precision: 0)
             td.amount-total = number_to_currency(subtotal + tax_total, unit: "¥", precision: 0)
+    .row.mt-2
+      .col-12
+        table.tax-summary-table
+          tr
+            th 適用税率
+            th 税率ごとの対価の額（税抜）
+            th 消費税額
+          tr
+            td 10%対象
+            td = number_to_currency(subtotal_10, unit: "¥", precision: 0)
+            td = number_to_currency(tax_10, unit: "¥", precision: 0)
+          tr
+            td 8%対象
+            td = number_to_currency(subtotal_8, unit: "¥", precision: 0)
+            td = number_to_currency(tax_8, unit: "¥", precision: 0)
+          - if subtotal_0 > 0
+            tr
+              td 0%対象
+              td = number_to_currency(subtotal_0, unit: "¥", precision: 0)
+              td = number_to_currency(0, unit: "¥", precision: 0)
     .row.mt-4
       .col-12
         table.detail-table
@@ -172,6 +201,21 @@ style
     .amount-total {
       font-size: 15pt;
       font-weight: bold;
+    }
+    .tax-summary-table {
+      width: 60%;
+      border-collapse: collapse;
+      margin-bottom: 0.5em;
+    }
+    .tax-summary-table th, .tax-summary-table td {
+      border: 1.5px solid #222;
+      font-size: 10pt;
+      text-align: center;
+      padding: 0.3em 0.5em;
+    }
+    .tax-summary-table th {
+      background: #fafafa;
+      font-weight: normal;
     }
     .detail-table {
       width: 100%;

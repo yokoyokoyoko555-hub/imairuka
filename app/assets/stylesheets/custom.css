@@ -161,6 +161,11 @@ body.admin-layout .sidebar {
   background-color: #f8f9fa;
 }
 
+/* 長い番号・メールアドレス等がカラムからはみ出さないよう折り返しを許可 */
+.table td {
+  overflow-wrap: anywhere;
+}
+
 .table-stable {
   table-layout: fixed;
   min-width: 980px;
@@ -198,7 +203,7 @@ body.admin-layout .sidebar {
 }
 
 .action-cell {
-  width: 156px;
+  width: 184px;
   white-space: nowrap;
 }
 
@@ -223,7 +228,7 @@ body.admin-layout .sidebar {
 }
 
 .document-table {
-  min-width: 1120px;
+  min-width: 1240px;
 }
 
 .project-table {

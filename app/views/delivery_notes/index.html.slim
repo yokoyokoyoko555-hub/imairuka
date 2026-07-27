@@ -49,7 +49,7 @@
         table.table.table-bordered.table-hover.table-stable.document-table
           thead.table-light
             tr
-              th style="width: 118px;" 納品書番号
+              th style="width: 140px;" 納品書番号
               th style="width: 132px;" 納品日
               th style="width: 180px;" 顧客名
               th 案件名
@@ -60,7 +60,7 @@
           tbody
             - @delivery_notes.each do |delivery_note|
               tr
-                td.text-nowrap-cell = delivery_note.delivery_number
+                td.text-wrap-cell = delivery_note.delivery_number
                 td.text-nowrap-cell = format_date(delivery_note.delivery_date)
                 td.text-wrap-cell = delivery_note.customer_name
                 td.text-wrap-cell = delivery_note.subject.presence || "-"

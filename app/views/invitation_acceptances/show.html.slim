@@ -1,26 +1,34 @@
-.container
-  .row.justify-content-center
-    .col-md-6
-      .card.shadow-sm.mt-5
-        .card-header.bg-primary.text-white
-          strong Imairuka アカウント招待
-        .card-body
-          h1.h4.mb-3 = "#{@invitation.company.name} へ参加"
-          p.text-muted 招待されたメールアドレスをログインIDとしてアカウントを作成します。
-          = render "shared/error_messages", model: @user
+.card.shadow-sm.signup-card
+  .card-header.bg-primary.text-white.text-center.py-3
+    h1.h4.mb-0
+      i.bi.bi-person-plus.me-2
+      | Imairuka アカウント招待
 
-          dl.row
-            dt.col-sm-4 ログインID
-            dd.col-sm-8 = @invitation.email
-            dt.col-sm-4 権限
-            dd.col-sm-8 = @invitation.role_label
+  .card-body
+    .mx-auto style="max-width: 680px;"
+      h2.h5.mb-3 = "#{@invitation.company.name} へ参加"
+      p.text-muted 招待されたメールアドレスをログインIDとしてアカウントを作成します。
+      = render "shared/error_messages", model: @user
 
-          = form_with model: @user, url: accept_invitation_path(@token), local: true do |f|
-            .mb-3
-              = f.label :password, "パスワード", class: "form-label"
-              = f.password_field :password, class: "form-control", required: true, minlength: 8, maxlength: 16, autocomplete: "new-password"
-              .form-text 小文字・大文字・数字・記号をすべて含め、8〜16文字で入力してください。
-            .mb-3
-              = f.label :password_confirmation, "パスワード確認", class: "form-label"
-              = f.password_field :password_confirmation, class: "form-control", required: true, minlength: 8, maxlength: 16, autocomplete: "new-password"
-            = f.submit "参加する", class: "btn btn-primary w-100"
+      .border.rounded.bg-light.p-3.mb-4
+        dl.row.mb-0
+          dt.col-sm-3 ログインID
+          dd.col-sm-9.mb-2 = @invitation.email
+          dt.col-sm-3 権限
+          dd.col-sm-9.mb-0 = @invitation.role_label
+
+      = form_with model: @user, url: accept_invitation_path(@token), local: true do |f|
+        .row.g-3
+          .col-md-6
+            = f.label :password, "パスワード", class: "form-label"
+            = f.password_field :password, class: "form-control", required: true, minlength: 8, maxlength: 16, autocomplete: "new-password"
+          .col-md-6
+            = f.label :password_confirmation, "パスワード確認", class: "form-label"
+            = f.password_field :password_confirmation, class: "form-control", required: true, minlength: 8, maxlength: 16, autocomplete: "new-password"
+        .form-text.mt-2 小文字・大文字・数字・記号をすべて含め、8〜16文字で入力してください。
+        .d-grid.mt-4
+          = f.submit "参加する", class: "btn btn-primary btn-lg"
+
+  .card-footer.text-center.py-3
+    .small.text-muted
+      | © Imairuka 案件管理システム

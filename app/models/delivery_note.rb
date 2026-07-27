@@ -20,6 +20,7 @@ class DeliveryNote < ApplicationRecord
 
   validates :delivery_number, uniqueness: { allow_blank: true }, unless: :draft?
   validates :delivery_date, presence: true, unless: :draft?
+  validates :transaction_date, presence: { message: '取引年月日を入力してください' }, unless: :draft?
   validates :customer_name, presence: true, length: { maximum: 100, message: '顧客名は100文字以内で入力してください' }, unless: :draft?
   validates :staff_name, presence: true, length: { maximum: 50, message: '担当者名は50文字以内で入力してください' }, unless: :draft?
   validates :subject, presence: true, length: { maximum: 200, message: '件名は200文字以内で入力してください' }, unless: :draft?

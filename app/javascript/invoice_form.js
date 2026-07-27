@@ -343,6 +343,7 @@ class InvoiceForm {
     const invoiceData = {
       invoice_number: formData.get('invoice[invoice_number]') || '',
       invoice_date: formData.get('invoice[invoice_date]') || '',
+      transaction_date: formData.get('invoice[transaction_date]') || '',
       customer_name: formData.get('invoice[customer_name]') || '',
       customer_address: formData.get('invoice[customer_address]') || '',
       subject: subject || '',
@@ -401,6 +402,7 @@ class InvoiceForm {
     const invoiceData = {
       invoice_number: formData.get('invoice[invoice_number]') || '',
       invoice_date: formData.get('invoice[invoice_date]') || '',
+      transaction_date: formData.get('invoice[transaction_date]') || '',
       customer_name: formData.get('invoice[customer_name]') || '',
       customer_address: formData.get('invoice[customer_address]') || '',
       subject: formData.get('invoice[subject]') || '',
